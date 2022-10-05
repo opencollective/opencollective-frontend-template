@@ -58,5 +58,5 @@ npm run start
 
 ## Deploy
 
-1. Create a [new project](https://vercel.com/docs/concepts/projects/overview#creating-a-project) on [Vercel](https://vercel.com/new/opencollective)
-2. TODO
+1. Create a [new project](https://vercel.com/docs/concepts/projects/overview#creating-a-project) on [Vercel](https://vercel.com/new/opencollective), pick your forked repository.
+2. On the "Configure Project" step, keep the default settings (NextJS), set any required Environment variables and click "Deploy".
