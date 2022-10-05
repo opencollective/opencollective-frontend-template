@@ -1,7 +1,7 @@
 {
   "extends": ["opencollective", "plugin:styled-components-a11y/recommended"],
   "env": { "jest": true },
-  "plugins": ["graphql", "react-hooks", "simple-import-sort", "formatjs", "styled-components-a11y"],
+  "plugins": ["react-hooks", "simple-import-sort", "formatjs", "styled-components-a11y"],
   "rules": {
     "no-console": "error",
     "require-atomic-updates": "off",
@@ -35,21 +35,6 @@
         "message": "describe.only should only be used for debugging purposes and is not allowed in production code"
       }
     ],
-    // To lint multiple schemas each one needs a different tagName.
-    // https://github.com/apollographql/eslint-plugin-graphql#additional-schemas-or-tags
-    "graphql/template-strings": [
-      "error",
-      { "env": "apollo", "projectName": "opencollective" },
-      { "env": "apollo", "tagName": "gqlV2", "projectName": "opencollective_v2" }
-    ],
-    "graphql/required-fields": [
-      "error",
-      { "env": "apollo", "projectName": "opencollective", "requiredFields": ["id"] },
-      { "env": "apollo", "tagName": "gqlV2", "projectName": "opencollective_v2", "requiredFields": ["id"] }
-    ],
-    "graphql/named-operations": ["error"],
-    "graphql/capitalized-type-name": ["error"],
-    "graphql/no-deprecated-fields": ["warn"],
     "react-hooks/rules-of-hooks": ["error"],
     "react/jsx-fragments": ["error", "element"],
     // We can be stricter with these rules

@@ -16,8 +16,11 @@ To do:
 
 - [React Intl](https://formatjs.io/docs/react-intl/) for internationalization
 - Tools to update GraphQL schemas. Not doing it for the 1st release as the way we do it is going to change with https://github.com/opencollective/opencollective/issues/5710.
+- [ESLint GraphQL plugin](https://github.com/B2o5T/graphql-eslint) - same as above, we want to complete the Typescript migration first.
 - Cypress for end-to-end testing
 - [Jest](https://jestjs.io/) for testing
+- Depcheck
+  Husky pre-commit lint hook
 
 ## Getting Started
 

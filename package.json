@@ -5,6 +5,10 @@
   "bugs": {
     "url": "https://github.com/opencollective/opencollective/issues"
   },
+  "engines": {
+    "node": "16.x",
+    "npm": "8.x"
+  },
   "scripts": {
     "dev": "next",
     "build": "next build",
@@ -21,18 +25,19 @@
     "François Hodierne <francois@opencollective.com>"
   ],
   "dependencies": {
-    "@apollo/client": "^3.6.5",
-    "deepmerge": "^4.2.2",
-    "graphql": "^16.5.0",
-    "graphql-request": "^4.2.0",
-    "lodash": "^4.17.21",
-    "next": "latest",
-    "next-auth": "latest",
-    "nodemailer": "^6",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@apollo/client": "3.6.5",
+    "deepmerge": "4.2.2",
+    "graphql": "16.5.0",
+    "graphql-request": "4.2.0",
+    "lodash": "4.17.21",
+    "next": "12.3.1",
+    "next-auth": "4.12.2",
+    "nodemailer": "6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@graphql-eslint/eslint-plugin": "^3.11.2",
     "@types/node": "^17",
     "@types/react": "^18.0.15",
     "eslint": "^8.8.0",
@@ -41,7 +46,6 @@
     "eslint-plugin-babel": "^5.3.1",
     "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-formatjs": "^4.0.0",
-    "eslint-plugin-graphql": "^4.0.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-react": "^7.28.0",
