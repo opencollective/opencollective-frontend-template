@@ -1,7 +1,9 @@
 {
+  "name": "opencollective-frontend-template",
+  "version": "1.0.0",
+  "description": "Kickstart a new frontend project at Open Collective",
+  "repository": "https://github.com/opencollective/opencollective-frontend-template",
   "private": true,
-  "description": "Kickstart a new frontend project at Open Collective. ",
-  "repository": "https://github.com/opencollective/opencollective-frontend-boilerplate",
   "bugs": {
     "url": "https://github.com/opencollective/opencollective/issues"
   },
@@ -12,13 +14,17 @@
   "scripts": {
     "dev": "next",
     "build": "next build",
-    "start": "next start",
+    "graphql:codegen": "graphql-codegen --config scripts/config/graphql-codegen.ts",
+    "graphql:update": "npm run graphql:get-schema && npm run graphql:codegen",
+    "graphql:get-schema": "ts-node ./scripts/update-gql-schemas.ts http://localhost:3060/graphql/v2 lib/graphql/schemaV2.graphql && prettier lib/graphql/schemaV2.graphql --write",
     "lint": "eslint . --ignore-path .gitignore",
     "lint:fix": "npm run lint -- --fix",
     "lint:quiet": "npm run lint -- --quiet",
     "prettier": "prettier \"*.@(js|ts|jsx|tsx|json|md)\" \"@(components|lib|pages|scripts|server|test|stories)/**/*.@(js|json|md|mdx)\"",
     "prettier:check": "npm run prettier -- --check",
-    "prettier:write": "npm run prettier -- --write"
+    "prettier:write": "npm run prettier -- --write",
+    "start": "next start",
+    "type:check": "tsc"
   },
   "contributors": [
     "Benjamin Piouffle <benjamin@opencollective.com>",
@@ -27,19 +33,29 @@
   "dependencies": {
     "@apollo/client": "3.6.5",
     "deepmerge": "4.2.2",
-    "graphql": "16.5.0",
+    "graphql": "16.6.0",
     "graphql-request": "4.2.0",
     "lodash": "4.17.21",
     "next": "12.3.1",
     "next-auth": "4.12.2",
+    "node-fetch": "2.6.7",
     "nodemailer": "6",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react": "^18.2.0",
+    "react-dom": "18.2.0",
+    "react-intl": "^6.2.1",
+    "styled-components": "5.3.6",
+    "styled-system": "5.1.5"
   },
   "devDependencies": {
-    "@graphql-eslint/eslint-plugin": "^3.11.2",
+    "@graphql-codegen/cli": "^2.13.7",
+    "@graphql-codegen/gql-tag-operations-preset": "^1.6.0",
+    "@graphql-eslint/eslint-plugin": "^3.12.0",
+    "@next/eslint-plugin-next": "^12.3.1",
     "@types/node": "^17",
+    "@types/node-fetch": "^2.6.2",
     "@types/react": "^18.0.15",
+    "@types/styled-components": "^5.1.26",
+    "@typescript-eslint/eslint-plugin": "^5.39.0",
     "eslint": "^8.8.0",
     "eslint-config-next": "^12.0.10",
     "eslint-config-opencollective": "^3.0.3",

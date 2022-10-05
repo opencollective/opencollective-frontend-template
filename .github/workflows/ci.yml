@@ -26,7 +26,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2-beta
-      - uses: ./.github/actions/setup-project
+      - name: Setup project
+        uses: ./.github/actions/setup-project
         with:
           CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
       - run: npm run lint:quiet
@@ -37,7 +38,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2-beta
-      - uses: ./.github/actions/setup-project
+      - name: Setup project
+        uses: ./.github/actions/setup-project
         with:
           CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
       - run: npm run prettier:check
+
+  typescript:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2-beta
+      - name: Setup project
+        uses: ./.github/actions/setup-project
+        with:
+          CACHE_VERSION: ${{ secrets.CACHE_VERSION }}
+      - run: npm run type:check

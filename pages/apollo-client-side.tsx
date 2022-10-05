@@ -1,6 +1,7 @@
-import { gql, useQuery } from "@apollo/client";
+import React from 'react';
+import { gql, useQuery } from '@apollo/client';
 
-import Layout from "../components/layout";
+import Layout from '../components/Layout';
 
 const meQuery = gql`
   {
@@ -14,16 +15,13 @@ const meQuery = gql`
 `;
 
 export default function ApolloClientPage() {
-  const { data, loading, error } = useQuery(meQuery);
+  const { data, loading } = useQuery(meQuery);
 
   return (
     <Layout>
       <h1>Apollo Client Side fetching Example</h1>
 
-      <p>
-        This page demonstrates how to use Apollo to fetch data from the client
-        side.
-      </p>
+      <p>This page demonstrates how to use Apollo to fetch data from the client side.</p>
 
       <h2>Query</h2>
 
