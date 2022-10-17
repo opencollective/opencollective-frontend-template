@@ -2,6 +2,7 @@ import React from 'react';
 import { ApolloProvider } from '@apollo/client';
 import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
+import { IntlProvider } from 'react-intl';
 import { createGlobalStyle } from 'styled-components';
 
 import { useApollo } from '../lib/apollo-client';
@@ -47,10 +48,12 @@ export default function App({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps);
   return (
     <SessionProvider session={pageProps['session']} refetchInterval={0}>
-      <ApolloProvider client={apolloClient}>
-        <GlobalStyles />
-        <Component {...pageProps} />
-      </ApolloProvider>
+      <IntlProvider locale="en">
+        <ApolloProvider client={apolloClient}>
+          <GlobalStyles />
+          <Component {...pageProps} />
+        </ApolloProvider>
+      </IntlProvider>
     </SessionProvider>
   );
 }

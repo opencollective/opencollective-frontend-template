@@ -19,7 +19,6 @@ To do:
 - Depcheck
 - Import frontend's fonts
 - Husky pre-commit lint hook
-- Remove all CSS files in favor of styled-components
 - Replace all `<Link><a>` with our custom link component from frontend
 
 ## Getting Started

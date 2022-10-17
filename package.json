@@ -32,6 +32,9 @@
   ],
   "dependencies": {
     "@apollo/client": "3.6.5",
+    "babel-plugin-formatjs": "^10.3.31",
+    "babel-plugin-react-remove-properties": "^0.3.0",
+    "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "deepmerge": "4.2.2",
     "graphql": "16.6.0",
     "graphql-request": "4.2.0",
@@ -56,6 +59,7 @@
     "@types/react": "^18.0.15",
     "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
+    "babel-plugin-lodash": "^3.3.4",
     "eslint": "^8.8.0",
     "eslint-config-next": "^12.0.10",
     "eslint-config-opencollective": "^3.0.3",
