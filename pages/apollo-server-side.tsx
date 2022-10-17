@@ -1,13 +1,10 @@
-import { getSession } from "next-auth/react";
-import { gql, ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
-import type { NextPageContext } from "next";
+import React from 'react';
+import { gql } from '@apollo/client';
+import type { NextPageContext } from 'next';
 
-import { initializeApollo } from "../lib/apollo-client";
+import { initializeApollo } from '../lib/apollo-client';
 
-import Layout from "../components/layout";
-
-const apiUrl =
-  process.env.OPENCOLLECTIVE_API_URL || "https://api.opencollective.com";
+import Layout from '../components/Layout';
 
 const meQuery = gql`
   {
@@ -37,10 +34,7 @@ export default function ApolloSsrPage({ me = null }) {
     <Layout>
       <h1>Apollo Server Side fetching Example</h1>
 
-      <p>
-        This page demonstrates how to use Apollo to fetch data for server side
-        rendering
-      </p>
+      <p>This page demonstrates how to use Apollo to fetch data for server side rendering</p>
 
       <h2>Query</h2>
 

@@ -1,10 +1,23 @@
 {
-  "extends": ["opencollective", "plugin:styled-components-a11y/recommended"],
+  "extends": ["opencollective", "plugin:styled-components-a11y/recommended", "plugin:import/typescript"],
+  "ignorePatterns": ["./lib/graphql/types/*"],
   "env": { "jest": true },
-  "plugins": ["graphql", "react-hooks", "simple-import-sort", "formatjs", "styled-components-a11y"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint/eslint-plugin",
+    "react-hooks",
+    "simple-import-sort",
+    "formatjs",
+    "styled-components-a11y"
+  ],
   "rules": {
     "no-console": "error",
     "require-atomic-updates": "off",
+    // Typescript
+    "node/no-missing-import": ["error", { "tryExtensions": [".js", ".ts", ".tsx"] }],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
+    // -- End of typescript-specific config
     "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
     "no-restricted-imports": [
       "error",
@@ -14,10 +27,6 @@
             "name": "react-intl",
             "importNames": ["FormattedHTMLMessage"],
             "message": "FormattedHTMLMessage is not allowed, please rely on the standard FormattedMessage."
-          },
-          {
-            "name": "next/link",
-            "message": "Next Link is not supposed to be used direclty. Please use components/Link instead."
           }
         ]
       }
@@ -35,27 +44,12 @@
         "message": "describe.only should only be used for debugging purposes and is not allowed in production code"
       }
     ],
-    // To lint multiple schemas each one needs a different tagName.
-    // https://github.com/apollographql/eslint-plugin-graphql#additional-schemas-or-tags
-    "graphql/template-strings": [
-      "error",
-      { "env": "apollo", "projectName": "opencollective" },
-      { "env": "apollo", "tagName": "gqlV2", "projectName": "opencollective_v2" }
-    ],
-    "graphql/required-fields": [
-      "error",
-      { "env": "apollo", "projectName": "opencollective", "requiredFields": ["id"] },
-      { "env": "apollo", "tagName": "gqlV2", "projectName": "opencollective_v2", "requiredFields": ["id"] }
-    ],
-    "graphql/named-operations": ["error"],
-    "graphql/capitalized-type-name": ["error"],
-    "graphql/no-deprecated-fields": ["warn"],
     "react-hooks/rules-of-hooks": ["error"],
     "react/jsx-fragments": ["error", "element"],
     // We can be stricter with these rules
     // because we don't have any occurences anymore
     "react/react-in-jsx-scope": ["error"],
-    "react/prop-types": ["error"],
+    "react/prop-types": ["off"],
     "react/sort-comp": ["error"],
     "react/no-this-in-sfc": ["error"],
     // simple-import-sort
@@ -99,7 +93,7 @@
     "formatjs/no-multiple-plurals": ["off"],
 
     // styled-components-a11y
-
+    "jsx-a11y/anchor-is-valid": ["off"], // Not playing well with NextJS links
     // This is deprecated and replaced by jsx-a11y/label-has-associated-control;
     // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/master/docs/rules/label-has-for.md
     "jsx-a11y/label-has-for": ["off"],
@@ -115,9 +109,24 @@
   },
   "overrides": [
     {
-      "files": ["scripts/*.js"],
+      "files": ["scripts/*.ts"],
       "rules": {
         "no-console": "off"
+      }
+    },
+    {
+      "files": ["*.ts", "*.tsx"],
+      "processor": "@graphql-eslint/graphql",
+      "parserOptions": {
+        "schema": "./lib/graphql/schemaV2.graphql"
+      }
+    },
+    {
+      "files": ["*.graphql"],
+      "parser": "@graphql-eslint/eslint-plugin",
+      "plugins": ["@graphql-eslint"],
+      "parserOptions": {
+        "schema": "./lib/graphql/schemaV2.graphql"
       }
     }
   ]
