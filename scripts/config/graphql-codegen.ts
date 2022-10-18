@@ -2,7 +2,7 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
-  documents: ['pages/**/*.(ts|tsx)', 'components/**/*.(ts|tsx)', '!src/gql/**/*'],
+  documents: ['(pages|components|lib)/**/*.(ts|tsx|js|jsx)'],
   config: {
     namingConvention: {
       enumValues: 'keep', // Otherwise we end up with duplicate enum value, e.g. in PaymentMethodType where we have "creditcard" (deprecated) and "CREDITCARD"
@@ -15,7 +15,7 @@ const config: CodegenConfig = {
       plugins: [],
       presetConfig: {
         augmentedModuleName: '@apollo/client',
-        gqlTagName: 'gql',
+        gqlTagName: 'useQuery',
       },
     },
   },

@@ -12,7 +12,7 @@
     "npm": "8.x"
   },
   "scripts": {
-    "dev": "next",
+    "dev": "next -p 3004",
     "build": "next build",
     "graphql:codegen": "graphql-codegen --config scripts/config/graphql-codegen.ts",
     "graphql:update": "npm run graphql:get-schema && npm run graphql:codegen",
@@ -37,10 +37,9 @@
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "deepmerge": "4.2.2",
     "graphql": "16.6.0",
-    "graphql-request": "4.2.0",
     "lodash": "4.17.21",
     "next": "12.3.1",
-    "next-auth": "4.12.2",
+    "next-auth": "4.14.0",
     "node-fetch": "2.6.7",
     "nodemailer": "6",
     "react": "^18.2.0",

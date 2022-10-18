@@ -1,26 +1,15 @@
 import React from 'react';
-import { gql } from '@apollo/client';
 import type { NextPageContext } from 'next';
 
-import { initializeApollo } from '../lib/apollo-client';
+import { initializeApollo, queryToString } from '../lib/apollo-client';
+import { loggedInUserQuery } from '../lib/opencollective-oauth-config';
 
 import Layout from '../components/Layout';
-
-const meQuery = gql`
-  {
-    me {
-      id
-      name
-      email
-      imageUrl
-    }
-  }
-`;
 
 export async function getServerSideProps(context: NextPageContext) {
   const client = initializeApollo({ context });
 
-  const { data } = await client.query({ query: meQuery });
+  const { data } = await client.query({ query: loggedInUserQuery });
 
   return {
     props: {
@@ -38,7 +27,7 @@ export default function ApolloSsrPage({ me = null }) {
 
       <h2>Query</h2>
 
-      <pre>{meQuery.loc?.source.body}</pre>
+      <pre>{queryToString(loggedInUserQuery)}</pre>
 
       <h2>Result</h2>
 

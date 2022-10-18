@@ -4,14 +4,11 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import merge from 'deepmerge';
 import isEqual from 'lodash/isEqual';
-import { getSession } from 'next-auth/react';
+import { getSession, GetSessionParams } from 'next-auth/react';
+
+import { PublicEnv } from './env';
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__';
-
-const apiUrl =
-  process.env.NEXT_PUBLIC_OPENCOLLECTIVE_API_URL ||
-  process.env.OPENCOLLECTIVE_API_URL ||
-  'https://api.opencollective.com';
 
 let apolloClient;
 
@@ -29,11 +26,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 const httpLink = new HttpLink({
-  uri: `${apiUrl}/graphql`, // Server URL (must be absolute)
+  uri: `${PublicEnv.OPENCOLLECTIVE_API_URL}/graphql`, // Server URL (must be absolute)
   // credentials: "same-origin", // Additional fetch() options like `credentials` or `headers`
 });
 
-function createApolloClient({ context } = {}) {
+function createApolloClient({ context }: { context?: GetSessionParams } = {}) {
   const authLink = setContext(async (_, { headers }) => {
     const session = await getSession(context);
     return {
@@ -50,7 +47,10 @@ function createApolloClient({ context } = {}) {
   });
 }
 
-export function initializeApollo({ context, initialState = null } = {}) {
+export function initializeApollo({
+  context,
+  initialState = null,
+}: { context?: GetSessionParams; initialState?: Record<string, unknown> } = {}) {
   const _apolloClient = apolloClient ?? createApolloClient({ context });
 
   // If your page has Next.js data fetching methods that use Apollo Client, the initial state
@@ -95,4 +95,8 @@ export function useApollo(pageProps) {
   const state = pageProps[APOLLO_STATE_PROP_NAME];
   const store = useMemo(() => initializeApollo(state), [state]);
   return store;
+}
+
+export function queryToString(query) {
+  return query.loc?.source.body.replace(/\s+/g, ' ').trim();
 }

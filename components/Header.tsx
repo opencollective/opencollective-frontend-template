@@ -1,7 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-import { signIn, signOut, useSession } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
+import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
+
+import { useLoggedInUser } from '../lib/hooks/useLoggedInUser';
+import { OPENCOLLECTIVE_OAUTH_PROVIDER_ID } from '../lib/opencollective-oauth-config';
 
 const StyledHeader = styled.header`
   /* Set min-height to avoid page reflow while session loading */
@@ -102,40 +106,39 @@ const StyledHeader = styled.header`
 // component that works on pages which support both client and server side
 // rendering, and avoids any flash incorrect content on initial page load.
 export default function Header() {
-  const { data: session, status } = useSession();
-  const loading = status === 'loading';
-
+  const { loadingLoggedInUser, LoggedInUser } = useLoggedInUser();
   return (
     <StyledHeader>
       <noscript>
         <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
       </noscript>
       <div className={'signedInStatus'}>
-        <p className={`nojs-show ${!session && loading ? 'loading' : 'loaded'}`}>
-          {!session && (
+        <p className={`nojs-show ${!LoggedInUser && loadingLoggedInUser ? 'loading' : 'loaded'}`}>
+          {!LoggedInUser && (
             <React.Fragment>
-              <span className={'notSignedInText'}>You are not signed in</span>
-              <a
-                href={`/api/auth/signin`}
+              <span className={'notSignedInText'}>
+                <FormattedMessage defaultMessage="You are not signed in" />
+              </span>
+              <button
                 className={'buttonPrimary'}
                 onClick={e => {
                   e.preventDefault();
-                  signIn();
+                  signIn(OPENCOLLECTIVE_OAUTH_PROVIDER_ID);
                 }}
               >
-                Sign in
-              </a>
+                <FormattedMessage defaultMessage="Sign in with Open Collective" />
+              </button>
             </React.Fragment>
           )}
-          {session?.user && (
+          {LoggedInUser && (
             <React.Fragment>
-              {session.user.image && (
-                <span style={{ backgroundImage: `url('${session.user.image}')` }} className={'avatar'} />
+              {LoggedInUser.imageUrl && (
+                <span style={{ backgroundImage: `url('${LoggedInUser.imageUrl}')` }} className={'avatar'} />
               )}
               <span className={'signedInText'}>
                 <small>Signed in as</small>
                 <br />
-                <strong>{session.user.email ?? session.user.name}</strong>
+                <strong>{LoggedInUser.email ?? LoggedInUser.name}</strong>
               </span>
               <a
                 href={`/api/auth/signout`}
@@ -156,11 +159,6 @@ export default function Header() {
           <li className={'navItem'}>
             <Link href="/">
               <a>Home</a>
-            </Link>
-          </li>
-          <li className={'navItem'}>
-            <Link href="/api-fetch">
-              <a>API Fetch</a>
             </Link>
           </li>
           <li className={'navItem'}>

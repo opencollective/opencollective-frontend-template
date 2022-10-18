@@ -13,9 +13,16 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "typeRoots": ["node_modules/@types", "lib/custom_typings"],
+    "typeRoots": ["node_modules/@types", "lib/graphql/types/v2/gql.d.ts", "lib/custom_typings"],
     "incremental": true
   },
-  "include": ["process.d.ts", "next-env.d.ts", "next-auth.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": [
+    "process.d.ts",
+    "next-env.d.ts",
+    "lib/graphql/types/v2/gql.d.ts",
+    "next-auth.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
   "exclude": ["node_modules"]
 }

@@ -31,15 +31,6 @@ const GlobalStyles = createGlobalStyle`
   hr {
     border: 1px solid #ddd;
   }
-
-  iframe {
-    background: #ccc;
-    border: 1px solid #ccc;
-    height: 10rem;
-    width: 100%;
-    border-radius: 0.5rem;
-    filter: invert(1);
-  }
 `;
 
 // Use of the <SessionProvider> is mandatory to allow components that call
