@@ -25,7 +25,7 @@ To do:
 
 ### 1. Fork the repository and install dependencies
 
-Fork the repository, then clone it:
+Click on ["Use this template"](https://github.com/opencollective/opencollective-frontend-template/generate) above (or alternatively, fork the repository) then clone it:
 
 ```
 git clone https://github.com/opencollective/opencollective-frontend-template.git
