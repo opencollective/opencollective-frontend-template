@@ -14,7 +14,6 @@ This project is meant to provide the base layer to kickstart a new frontend proj
 
 To do:
 
-- [React Intl](https://formatjs.io/docs/react-intl/) for internationalization
 - [Jest](https://jestjs.io/) for testing
 - Depcheck
 - Import frontend's fonts
