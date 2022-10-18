@@ -19,6 +19,7 @@ To do:
 - Import frontend's fonts
 - Husky pre-commit lint hook
 - Replace all `<Link><a>` with our custom link component from frontend
+- Invalidate OAuth tokens on logout
 
 ## Getting Started
 
@@ -34,17 +35,17 @@ npm install
 
 ### 2. Configure your local environment
 
-Copy the .env.local.example file in this directory to .env.local (which will be ignored by Git):
+By default, the app will try to connect to the Open Collective staging API & frontend.
 
-```
-cp .env.local.example .env.local
-```
+To run the template against your local frontend/api:
 
-Add details for one or more providers (e.g. Google, Twitter, GitHub, Email, etc).
+1. [Create](https://docs.opencollective.com/help/developers/oauth#creating-an-oauth-app) a new OAuth app
+2. Run `cp .env.local.example .env.local`
+3. Edit `.env.local` and set `OPENCOLLECTIVE_OAUTH_APP_ID` and `OPENCOLLECTIVE_OAUTH_APP_SECRET` to your OAuth app credentials
 
 ### 3. Start the application
 
-To run your site locally, use:
+To run your site locally (default: http://localhost:3004), use:
 
 ```
 npm run dev
@@ -64,4 +65,8 @@ npm run start
 ## Deploy
 
 1. Create a [new project](https://vercel.com/docs/concepts/projects/overview#creating-a-project) on [Vercel](https://vercel.com/new/opencollective), pick your forked repository.
-2. On the "Configure Project" step, keep the default settings (NextJS), set any required Environment variables and click "Deploy".
+2. On the "Configure Project" step, keep the default settings (NextJS), set the required Environment variables and click "Deploy":
+   - `NEXTAUTH_SECRET`: a random string used to encrypt JWTs
+   - `OPENCOLLECTIVE_OAUTH_APP_ID`: the ID of the OAuth app you created on the API
+   - `OPENCOLLECTIVE_OAUTH_APP_SECRET`: the secret of the OAuth app you created on the API
+   - `NEXT_PUBLIC_OPENCOLLECTIVE_OAUTH_SCOPES`: a comma separated list of OAuth scopes you want to request from the API (e.g. `account,transactions`)

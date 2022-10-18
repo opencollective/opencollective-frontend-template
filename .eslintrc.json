@@ -12,6 +12,7 @@
   ],
   "rules": {
     "no-console": "error",
+    "no-process-env": "error",
     "require-atomic-updates": "off",
     // Typescript
     "node/no-missing-import": ["error", { "tryExtensions": [".js", ".ts", ".tsx"] }],
@@ -115,7 +116,7 @@
       }
     },
     {
-      "files": ["*.ts", "*.tsx"],
+      "files": [".jsx", ".jsx", "*.ts", "*.tsx"],
       "processor": "@graphql-eslint/graphql",
       "parserOptions": {
         "schema": "./lib/graphql/schemaV2.graphql"

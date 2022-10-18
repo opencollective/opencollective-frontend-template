@@ -1,21 +1,14 @@
 import React from 'react';
-import { gql, useQuery } from '@apollo/client';
+import { useQuery } from '@apollo/client';
+
+import { queryToString } from '../lib/apollo-client';
+import { OAuthLoggedInUserQuery, OAuthLoggedInUserQueryVariables } from '../lib/graphql/types/v2/graphql';
+import { loggedInUserQuery } from '../lib/opencollective-oauth-config';
 
 import Layout from '../components/Layout';
 
-const meQuery = gql`
-  {
-    me {
-      id
-      name
-      email
-      imageUrl
-    }
-  }
-`;
-
 export default function ApolloClientPage() {
-  const { data, loading } = useQuery(meQuery);
+  const { data, loading } = useQuery<OAuthLoggedInUserQuery, OAuthLoggedInUserQueryVariables>(loggedInUserQuery);
 
   return (
     <Layout>
@@ -25,7 +18,7 @@ export default function ApolloClientPage() {
 
       <h2>Query</h2>
 
-      <pre>{meQuery.loc?.source.body}</pre>
+      <pre>{queryToString(loggedInUserQuery)}</pre>
 
       <h2>Result</h2>
 

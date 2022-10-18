@@ -1,7 +1,6 @@
 # Env file
 .env
-.env.*
-!.env.local.example
+.env.local
 
 # VSCode & VSCode's extensions
 .vscode/*
