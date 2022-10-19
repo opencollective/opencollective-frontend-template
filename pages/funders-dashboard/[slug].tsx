@@ -1,5 +1,6 @@
 import React from 'react';
 import { gql } from '@apollo/client';
+import { uniqBy } from 'lodash';
 import type { NextPageContext } from 'next';
 
 import { initializeApollo } from '../../lib/apollo-client';
@@ -17,15 +18,15 @@ const funderQuery = gql`
             slug
             name
             stats {
-              totalAmountReceived(dateFrom: "2022-01-01T00:00:00Z") {
+              totalAmountReceived(dateFrom: "2022-01-01T00:00:00Z", includeChildren: true) {
                 value
                 currency
               }
-              totalAmountSpent(dateFrom: "2022-01-01T00:00:00Z") {
+              totalAmountSpent(dateFrom: "2022-01-01T00:00:00Z", includeChildren: true) {
                 value
                 currency
               }
-              balance {
+              balance(includeChildren: true) {
                 value
                 currency
               }
@@ -44,7 +45,7 @@ const funderQuery = gql`
 export async function getServerSideProps(context: NextPageContext) {
   const client = initializeApollo({ context });
 
-  const { data } = await client.query({ query: funderQuery, variables: { slug: 'indeed' } });
+  const { data } = await client.query({ query: funderQuery, variables: { slug: context.query.slug } });
 
   return {
     props: {
@@ -58,14 +59,8 @@ export default function ApolloSsrPage({ account = null }) {
     <Layout>
       <h1>Funders Dashboard</h1>
 
-      {/*<h2>Result</h2>*/}
-
-      {/*{account && <pre>{JSON.stringify(account, null, 2)}</pre>}*/}
-
-      {/*{account?.memberOf && <pre>{JSON.stringify(account?.memberOf, null, 2)}</pre>}*/}
-
       <table>
-        <tbody>
+        <thead>
           <tr>
             <th>Collective</th>
             <th>Contributed</th>
@@ -73,9 +68,11 @@ export default function ApolloSsrPage({ account = null }) {
             <th>Spent this Y</th>
             <th>Current Balance</th>
           </tr>
+        </thead>
+        <tbody>
           {account?.memberOf?.nodes &&
-            account?.memberOf.nodes.map(node => (
-              <tr key={node.account.id}>
+            uniqBy(account?.memberOf.nodes, node => node.account.slug).map(node => (
+              <tr key={node.id}>
                 <td>{node.account.name}</td>
                 <td>
                   {node.totalDonations.value} {node.totalDonations.currency}
