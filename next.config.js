@@ -1,6 +1,8 @@
 /* eslint-disable no-process-env */
 
-module.exports = {
+const nextTranspileModules = require('next-transpile-modules');
+
+const config = {
   async headers() {
     return [
       {
@@ -59,3 +61,6 @@ module.exports = {
     ];
   },
 };
+
+const withTm = nextTranspileModules(['@opencollective/frontend-components']);
+module.exports = withTm(config);

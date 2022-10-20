@@ -32,6 +32,8 @@
   ],
   "dependencies": {
     "@apollo/client": "3.6.5",
+    "@opencollective/frontend-components": "0.3.6",
+    "@styled-system/prop-types": "^5.1.5",
     "babel-plugin-formatjs": "^10.3.31",
     "babel-plugin-react-remove-properties": "^0.3.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
@@ -40,13 +42,16 @@
     "lodash": "4.17.21",
     "next": "12.3.1",
     "next-auth": "4.14.0",
+    "next-transpile-modules": "^9.1.0",
     "node-fetch": "2.6.7",
     "nodemailer": "6",
-    "react": "^18.2.0",
-    "react-dom": "18.2.0",
+    "polished": "^4.2.2",
+    "prop-types": "^15.8.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-intl": "^6.2.1",
-    "styled-components": "5.3.6",
-    "styled-system": "5.1.5"
+    "styled-components": "^5.3.6",
+    "styled-system": "^5.1.5"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.13.7",
@@ -59,6 +64,7 @@
     "@types/styled-components": "^5.1.26",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "babel-plugin-lodash": "^3.3.4",
+    "babel-plugin-styled-components": "^2.0.7",
     "eslint": "^8.8.0",
     "eslint-config-next": "^12.0.10",
     "eslint-config-opencollective": "^3.0.3",

@@ -7,6 +7,11 @@ import styled from 'styled-components';
 import { useLoggedInUser } from '../lib/hooks/useLoggedInUser';
 import { OPENCOLLECTIVE_OAUTH_PROVIDER_ID } from '../lib/opencollective-oauth-config';
 
+import Avatar from '@opencollective/frontend-components/components/Avatar';
+import { Flex } from '@opencollective/frontend-components/components/Grid';
+import StyledButton from '@opencollective/frontend-components/components/StyledButton';
+import { Strong } from '@opencollective/frontend-components/components/Text';
+
 const StyledHeader = styled.header`
   /* Set min-height to avoid page reflow while session loading */
   .signedInStatus {
@@ -35,7 +40,6 @@ const StyledHeader = styled.header`
 
   .signedInText,
   .notSignedInText {
-    position: absolute;
     padding-top: 0.8rem;
     left: 1rem;
     right: 6.5rem;
@@ -109,50 +113,45 @@ export default function Header() {
   const { loadingLoggedInUser, LoggedInUser } = useLoggedInUser();
   return (
     <StyledHeader>
-      <noscript>
-        <style>{`.nojs-show { opacity: 1; top: 0; }`}</style>
-      </noscript>
       <div className={'signedInStatus'}>
-        <p className={`nojs-show ${!LoggedInUser && loadingLoggedInUser ? 'loading' : 'loaded'}`}>
+        <div className={`${!LoggedInUser && loadingLoggedInUser ? 'loading' : 'loaded'}`}>
           {!LoggedInUser && (
-            <React.Fragment>
+            <Flex justifyContent="space-between">
               <span className={'notSignedInText'}>
                 <FormattedMessage defaultMessage="You are not signed in" />
               </span>
-              <button
-                className={'buttonPrimary'}
+              <StyledButton
+                buttonStyle="primary"
                 onClick={e => {
                   e.preventDefault();
                   signIn(OPENCOLLECTIVE_OAUTH_PROVIDER_ID);
                 }}
               >
                 <FormattedMessage defaultMessage="Sign in with Open Collective" />
-              </button>
-            </React.Fragment>
+              </StyledButton>
+            </Flex>
           )}
           {LoggedInUser && (
-            <React.Fragment>
-              {LoggedInUser.imageUrl && (
-                <span style={{ backgroundImage: `url('${LoggedInUser.imageUrl}')` }} className={'avatar'} />
-              )}
-              <span className={'signedInText'}>
-                <small>Signed in as</small>
-                <br />
-                <strong>{LoggedInUser.email ?? LoggedInUser.name}</strong>
-              </span>
-              <a
-                href={`/api/auth/signout`}
-                className={'button'}
+            <Flex justifyContent="space-between">
+              <Flex>
+                <Avatar collective={LoggedInUser.collective} radius={42} />
+                <Flex flexDirection="column" ml={2} justifyContent="center">
+                  <small>Signed in as</small>
+                  <br />
+                  <Strong fontSize="14px">{LoggedInUser.email ?? LoggedInUser.collective.name}</Strong>
+                </Flex>
+              </Flex>
+              <StyledButton
                 onClick={e => {
                   e.preventDefault();
                   signOut();
                 }}
               >
-                Sign out
-              </a>
-            </React.Fragment>
+                <FormattedMessage defaultMessage="Sign out" />
+              </StyledButton>
+            </Flex>
           )}
-        </p>
+        </div>
       </div>
       <nav>
         <ul className={'navItems'}>

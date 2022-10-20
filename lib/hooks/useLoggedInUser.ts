@@ -18,8 +18,14 @@ export const useLoggedInUser = () => {
   return {
     loadingLoggedInUser: loading,
     errorLoggedInUser: error,
-    LoggedInUser: data?.me || null,
     refetchLoggedInUser: refetch,
     logout,
+    LoggedInUser: !data?.me
+      ? null
+      : {
+          id: data.me.id,
+          email: data.me.email,
+          collective: data.me,
+        },
   };
 };
