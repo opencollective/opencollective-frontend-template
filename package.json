@@ -37,6 +37,7 @@
     "babel-plugin-formatjs": "^10.3.31",
     "babel-plugin-react-remove-properties": "^0.3.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "dayjs": "^1.11.5",
     "deepmerge": "4.2.2",
     "graphql": "16.6.0",
     "lodash": "4.17.21",
