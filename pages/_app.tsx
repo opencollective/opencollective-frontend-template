@@ -3,9 +3,10 @@ import { ApolloProvider } from '@apollo/client';
 import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
 import { IntlProvider } from 'react-intl';
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 import { useApollo } from '../lib/apollo-client';
+import theme from '@opencollective/frontend-components/lib/theme';
 
 const GlobalStyles = createGlobalStyle`
   body {
@@ -23,7 +24,7 @@ const GlobalStyles = createGlobalStyle`
   p {
     line-height: 1.5rem;
   }
-
+ 
   a {
     font-weight: 500;
   }
@@ -41,8 +42,10 @@ export default function App({ Component, pageProps }: AppProps) {
     <SessionProvider session={pageProps['session']} refetchInterval={0}>
       <IntlProvider locale="en">
         <ApolloProvider client={apolloClient}>
-          <GlobalStyles />
-          <Component {...pageProps} />
+          <ThemeProvider theme={theme}>
+            <GlobalStyles />
+            <Component {...pageProps} />
+          </ThemeProvider>
         </ApolloProvider>
       </IntlProvider>
     </SessionProvider>
