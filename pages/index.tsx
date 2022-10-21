@@ -2,11 +2,12 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import Layout from '../components/Layout';
+import { H1 } from '@opencollective/frontend-components/components/Text';
 
 export default function IndexPage() {
   return (
     <Layout>
-      <h1>Open Collective Frontend template</h1>
+      <H1 fontSize="30px">Open Collective Frontend template</H1>
       <p>
         <FormattedMessage defaultMessage="This is an example site to demonstrate how to use Open Collective OAuth to Sign In. Learn more:" />{' '}
         <a

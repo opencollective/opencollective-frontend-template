@@ -5,6 +5,7 @@ import { initializeApollo, queryToString } from '../lib/apollo-client';
 import { loggedInUserQuery } from '../lib/opencollective-oauth-config';
 
 import Layout from '../components/Layout';
+import { H1, H2 } from '@opencollective/frontend-components/components/Text';
 
 export async function getServerSideProps(context: NextPageContext) {
   const client = initializeApollo({ context });
@@ -21,15 +22,15 @@ export async function getServerSideProps(context: NextPageContext) {
 export default function ApolloSsrPage({ me = null }) {
   return (
     <Layout>
-      <h1>Apollo Server Side fetching Example</h1>
+      <H1 fontSize="30px">Apollo Server Side fetching Example</H1>
 
       <p>This page demonstrates how to use Apollo to fetch data for server side rendering</p>
 
-      <h2>Query</h2>
+      <H2 fontSize="24px">Query</H2>
 
       <pre>{queryToString(loggedInUserQuery)}</pre>
 
-      <h2>Result</h2>
+      <H2 fontSize="24px">Result</H2>
 
       {me && <pre>{JSON.stringify(me, null, 2)}</pre>}
 
