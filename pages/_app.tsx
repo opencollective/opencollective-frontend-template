@@ -2,6 +2,7 @@ import React from 'react';
 import { ApolloProvider } from '@apollo/client';
 import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
+import NextNProgress from 'nextjs-progressbar';
 import { IntlProvider } from 'react-intl';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
@@ -44,6 +45,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <ApolloProvider client={apolloClient}>
           <ThemeProvider theme={theme}>
             <GlobalStyles />
+            <NextNProgress />
             <Component {...pageProps} />
           </ThemeProvider>
         </ApolloProvider>
