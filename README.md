@@ -43,6 +43,8 @@ To run the template against your local frontend/api:
 2. Run `cp .env.local.example .env.local`
 3. Edit `.env.local` and set `OPENCOLLECTIVE_OAUTH_APP_ID` and `OPENCOLLECTIVE_OAUTH_APP_SECRET` to your OAuth app credentials
 
+Learn more about the environment variables in NextJS: https://nextjs.org/docs/basic-features/environment-variables.
+
 ### 3. Start the application
 
 To run your site locally (default: http://localhost:3004), use:
