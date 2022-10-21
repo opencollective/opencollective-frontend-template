@@ -3,6 +3,7 @@
 const nextTranspileModules = require('next-transpile-modules');
 
 const config = {
+  eslint: { ignoreDuringBuilds: true },
   async headers() {
     return [
       {
