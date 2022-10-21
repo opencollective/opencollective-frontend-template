@@ -6,21 +6,22 @@ import { OAuthLoggedInUserQuery, OAuthLoggedInUserQueryVariables } from '../lib/
 import { loggedInUserQuery } from '../lib/opencollective-oauth-config';
 
 import Layout from '../components/Layout';
+import { H1, H2 } from '@opencollective/frontend-components/components/Text';
 
 export default function ApolloClientPage() {
   const { data, loading } = useQuery<OAuthLoggedInUserQuery, OAuthLoggedInUserQueryVariables>(loggedInUserQuery);
 
   return (
     <Layout>
-      <h1>Apollo Client Side fetching Example</h1>
+      <H1 fontSize="30px">Apollo Client Side fetching Example</H1>
 
       <p>This page demonstrates how to use Apollo to fetch data from the client side.</p>
 
-      <h2>Query</h2>
+      <H2 fontSize="24px">Query</H2>
 
       <pre>{queryToString(loggedInUserQuery)}</pre>
 
-      <h2>Result</h2>
+      <H2 fontSize="24px">Result</H2>
 
       {loading && <p>Loading...</p>}
 
