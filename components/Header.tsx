@@ -160,16 +160,6 @@ export default function Header() {
               <a>Home</a>
             </Link>
           </li>
-          <li className={'navItem'}>
-            <Link href="/apollo-server-side">
-              <a>Apollo SSR</a>
-            </Link>
-          </li>
-          <li className={'navItem'}>
-            <Link href="/apollo-client-side">
-              <a>Apollo Client</a>
-            </Link>
-          </li>
         </ul>
       </nav>
     </StyledHeader>

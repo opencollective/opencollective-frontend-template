@@ -3609,10 +3609,35 @@ type AccountStats {
   """
   Total amount spent
   """
-  totalAmountSpent: Amount!
+  totalAmountSpent(
+    """
+    Filter by kind
+    """
+    kind: [TransactionKind]
+
+    """
+    Calculate total amount spent before this date
+    """
+    dateTo: DateTime
+
+    """
+    Calculate total amount spent after this date
+    """
+    dateFrom: DateTime
+
+    """
+    Calculate total amount spent in the last x months. Cannot be used with startDate/endDate
+    """
+    periodInMonths: Int
+
+    """
+    Include money spent in children (Projects and Events)
+    """
+    includeChildren: Boolean = false
+  ): Amount!
 
   """
-  Net amount received
+  Total amount received
   """
   totalAmountReceived(
     """
@@ -3647,7 +3672,7 @@ type AccountStats {
   ): Amount!
 
   """
-  Total of paid expenses, filter per expense type
+  Total of paid expenses to the account, filter per expense type
   """
   totalPaidExpenses(
     """
@@ -3678,6 +3703,13 @@ type AccountStats {
   """
   totalNetAmountReceived: Amount!
   activeRecurringContributions: JSON
+    @deprecated(reason: "2022-10-21: Use activeRecurringContributionsV2 while we migrate to better semantics.")
+  activeRecurringContributionsV2(
+    """
+    The frequency of the recurring contribution (MONTHLY or YEARLY)
+    """
+    frequency: ContributionFrequency! = MONTHLY
+  ): Amount
 
   """
   Returns expense tags for collective sorted by popularity
@@ -8442,10 +8474,19 @@ type VirtualCard {
   privateData: JSONObject
   provider: String
   spendingLimitAmount: Int
-  spendingLimitInterval: String
+  spendingLimitInterval: VirtualCardLimitInterval
   currency: Currency
   createdAt: DateTime
   updatedAt: DateTime
+}
+
+enum VirtualCardLimitInterval {
+  PER_AUTHORIZATION
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  ALL_TIME
 }
 
 """

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import Link from 'next/link';
 
 import Layout from '../components/Layout';
 import { H1 } from '@opencollective/frontend-components/components/Text';
@@ -7,17 +7,22 @@ import { H1 } from '@opencollective/frontend-components/components/Text';
 export default function IndexPage() {
   return (
     <Layout>
-      <H1 fontSize="30px">Open Collective Frontend template</H1>
-      <p>
-        <FormattedMessage defaultMessage="This is an example site to demonstrate how to use Open Collective OAuth to Sign In. Learn more:" />{' '}
-        <a
-          href="https://github.com/opencollective/opencollective-frontend-template"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          https://github.com/opencollective/opencollective-frontend-template
-        </a>
-      </p>
+      <H1 fontSize="30px">Funders Dashboard</H1>
+      <p>Examples:</p>
+      <ul>
+        <li>
+          <Link href="/funders-dashboard/vercel">Vercel</Link>
+        </li>
+        <li>
+          <Link href="/funders-dashboard/airbnb">Airbnb</Link>
+        </li>
+        <li>
+          <Link href="/funders-dashboard/indeed">Indeed</Link>
+        </li>
+        <li>
+          <Link href="/funders-dashboard/fbopensource">FB Open Source</Link>
+        </li>
+      </ul>
     </Layout>
   );
 }
