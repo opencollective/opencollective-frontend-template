@@ -13,6 +13,10 @@ enum TimeScale {
   year = 'year',
 }
 
+const formatAmount = ({ value, currency }) => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
+};
+
 const funderQuery = gql`
   query account(
     $slug: String
@@ -109,7 +113,7 @@ const makeDiff = (afterValue, beforeValue) => {
     return '';
   }
   const sign = Math.abs(afterValue) > Math.abs(beforeValue) ? '+' : '';
-  return `${sign + Math.round(((afterValue - beforeValue) / beforeValue) * 100)} %`;
+  return `${sign + Math.round(((afterValue - beforeValue) / beforeValue) * 100)}%`;
 };
 
 export default function ApolloSsrPage({ account = null, scale }) {
@@ -138,16 +142,12 @@ export default function ApolloSsrPage({ account = null, scale }) {
                 <td>
                   <a href={`https://opencollective.com/${node.account.slug}`}>{node.account.name}</a>
                 </td>
+                <td style={{ textAlign: 'center' }}>{formatAmount(node.totalDonations)}</td>
                 <td style={{ textAlign: 'center' }}>
-                  {node.totalDonations.value} {node.totalDonations.currency}
-                </td>
-                <td style={{ textAlign: 'center' }}>
-                  {node.account.stats.totalAmountReceivedPastMonth.value}{' '}
-                  {node.account.stats.totalAmountReceivedPastMonth.currency}
+                  {formatAmount(node.account.stats.totalAmountReceivedPastMonth)}
                   <br />
                   <small>
-                    (previous: {node.account.stats.totalAmountReceivedPreviousMonth.value}{' '}
-                    {node.account.stats.totalAmountReceivedPreviousMonth.currency}){' '}
+                    (previous: {formatAmount(node.account.stats.totalAmountReceivedPreviousMonth)}){' '}
                     {makeDiff(
                       node.account.stats.totalAmountReceivedPastMonth.value,
                       node.account.stats.totalAmountReceivedPreviousMonth.value,
@@ -155,21 +155,18 @@ export default function ApolloSsrPage({ account = null, scale }) {
                   </small>
                 </td>
                 <td style={{ textAlign: 'center' }}>
-                  {node.account.stats.totalAmountSpentPastMonth.value}{' '}
-                  {node.account.stats.totalAmountSpentPastMonth.currency}
+                  {formatAmount(node.account.stats.totalAmountSpentPastMonth)}
+
                   <br />
                   <small>
-                    (previous: {node.account.stats.totalAmountSpentPreviousMonth.value}{' '}
-                    {node.account.stats.totalAmountSpentPreviousMonth.currency}){' '}
+                    (previous: {formatAmount(node.account.stats.totalAmountSpentPreviousMonth)}){' '}
                     {makeDiff(
                       node.account.stats.totalAmountSpentPastMonth.value,
                       node.account.stats.totalAmountSpentPreviousMonth.value,
                     )}
                   </small>
                 </td>
-                <td style={{ textAlign: 'center' }}>
-                  {node.account.stats.balance.value} {node.account.stats.balance.currency}
-                </td>
+                <td style={{ textAlign: 'center' }}>{formatAmount(node.account.stats.balance)}</td>
               </tr>
             ))}
         </tbody>
