@@ -70,6 +70,14 @@ const funderQuery = gql`
                 value
                 currency
               }
+              activeMonthlyRecurringContributions: activeRecurringContributionsV2(frequency: MONTHLY) {
+                value
+                currency
+              }
+              activeYearlyRecurringContributions: activeRecurringContributionsV2(frequency: YEARLY) {
+                value
+                currency
+              }
             }
           }
           totalDonations {
@@ -116,6 +124,23 @@ const makeDiff = (afterValue, beforeValue) => {
   return `${sign + Math.round(((afterValue - beforeValue) / beforeValue) * 100)}%`;
 };
 
+const calculateRecurring = (node, scale) => {
+  let recurring;
+  if (scale === 'year') {
+    recurring = { ...node.account.stats.activeYearlyRecurringContributions };
+    if (node.account.stats.activeYearlyRecurringContributions) {
+      recurring.value += Math.round(node.account.stats.activeMonthlyRecurringContributions.value * 12);
+    }
+  } else {
+    recurring = { ...node.account.stats.activeMonthlyRecurringContributions };
+    if (node.account.stats.activeYearlyRecurringContributions) {
+      recurring.value += Math.round(node.account.stats.activeYearlyRecurringContributions.value / 12);
+    }
+  }
+
+  return recurring;
+};
+
 export default function ApolloSsrPage({ account = null, scale }) {
   return (
     <Layout>
@@ -132,6 +157,7 @@ export default function ApolloSsrPage({ account = null, scale }) {
             <th>Contributed</th>
             <th>Received past {scale}</th>
             <th>Spent past {scale}</th>
+            <th>Recurring {scale}</th>
             <th>Current Balance</th>
           </tr>
         </thead>
@@ -166,6 +192,7 @@ export default function ApolloSsrPage({ account = null, scale }) {
                     )}
                   </small>
                 </td>
+                <td style={{ textAlign: 'center' }}>{formatAmount(calculateRecurring(node, scale))}</td>
                 <td style={{ textAlign: 'center' }}>{formatAmount(node.account.stats.balance)}</td>
               </tr>
             ))}
