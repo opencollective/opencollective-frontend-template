@@ -25,65 +25,68 @@ const funderQuery = gql`
     $firstDayOfPreviousMonth: DateTime
   ) {
     account(slug: $slug) {
+      id
       slug
       name
-      memberOf(role: BACKER, orderBy: { field: TOTAL_CONTRIBUTED, direction: DESC }) {
-        nodes {
+      type
+    }
+    groupTransactions(account: { slug: $slug }, type: DEBIT, kind: [CONTRIBUTION, EXPENSE, ADDED_FUNDS]) {
+      nodes {
+        account: oppositeAccount {
           id
-          account {
-            slug
-            name
-            stats {
-              totalAmountReceivedPastMonth: totalAmountReceived(
-                dateFrom: $firstDayOfPastMonth
-                dateTo: $firstDayOfMonth
-                includeChildren: true
-              ) {
-                value
-                currency
-              }
-              totalAmountSpentPastMonth: totalAmountSpent(
-                dateFrom: $firstDayOfPastMonth
-                dateTo: $firstDayOfMonth
-                includeChildren: true
-              ) {
-                value
-                currency
-              }
-              totalAmountReceivedPreviousMonth: totalAmountReceived(
-                dateFrom: $firstDayOfPreviousMonth
-                dateTo: $firstDayOfPastMonth
-                includeChildren: true
-              ) {
-                value
-                currency
-              }
-              totalAmountSpentPreviousMonth: totalAmountSpent(
-                dateFrom: $firstDayOfPreviousMonth
-                dateTo: $firstDayOfPastMonth
-                includeChildren: true
-              ) {
-                value
-                currency
-              }
-              balance(includeChildren: true) {
-                value
-                currency
-              }
-              activeMonthlyRecurringContributions: activeRecurringContributionsV2(frequency: MONTHLY) {
-                value
-                currency
-              }
-              activeYearlyRecurringContributions: activeRecurringContributionsV2(frequency: YEARLY) {
-                value
-                currency
-              }
+          slug
+          name
+          type
+          stats {
+            totalAmountReceivedPastMonth: totalAmountReceived(
+              dateFrom: $firstDayOfPastMonth
+              dateTo: $firstDayOfMonth
+              includeChildren: true
+            ) {
+              value
+              currency
+            }
+            totalAmountSpentPastMonth: totalAmountSpent(
+              dateFrom: $firstDayOfPastMonth
+              dateTo: $firstDayOfMonth
+              includeChildren: true
+            ) {
+              value
+              currency
+            }
+            totalAmountReceivedPreviousMonth: totalAmountReceived(
+              dateFrom: $firstDayOfPreviousMonth
+              dateTo: $firstDayOfPastMonth
+              includeChildren: true
+            ) {
+              value
+              currency
+            }
+            totalAmountSpentPreviousMonth: totalAmountSpent(
+              dateFrom: $firstDayOfPreviousMonth
+              dateTo: $firstDayOfPastMonth
+              includeChildren: true
+            ) {
+              value
+              currency
+            }
+            balance(includeChildren: true) {
+              value
+              currency
+            }
+            activeMonthlyRecurringContributions: activeRecurringContributionsV2(frequency: MONTHLY) {
+              value
+              currency
+            }
+            activeYearlyRecurringContributions: activeRecurringContributionsV2(frequency: YEARLY) {
+              value
+              currency
             }
           }
-          totalDonations {
-            value
-            currency
-          }
+        }
+        amount {
+          value
+          currency
         }
       }
     }
@@ -110,7 +113,7 @@ export async function getServerSideProps(context: NextPageContext) {
 
   return {
     props: {
-      account: data.account,
+      data,
       scale,
     },
   };
@@ -141,7 +144,11 @@ const calculateRecurring = (node, scale) => {
   return recurring;
 };
 
-export default function ApolloSsrPage({ account = null, scale }) {
+export default function ApolloSsrPage({ data, scale }) {
+  const { account, groupTransactions } = data;
+
+  const nodes = groupTransactions?.nodes;
+
   return (
     <Layout>
       <p>
@@ -160,13 +167,13 @@ export default function ApolloSsrPage({ account = null, scale }) {
           </tr>
         </thead>
         <tbody>
-          {account?.memberOf?.nodes &&
-            uniqBy(account?.memberOf.nodes, node => node.account.slug).map(node => (
+          {nodes &&
+            uniqBy(nodes, node => node.account.slug).map(node => (
               <tr key={node.id}>
                 <td>
                   <a href={`https://opencollective.com/${node.account.slug}`}>{node.account.name}</a>
                 </td>
-                <td style={{ textAlign: 'center' }}>{formatAmount(node.totalDonations)}</td>
+                <td style={{ textAlign: 'center' }}>{formatAmount(node.amount)}</td>
                 <td style={{ textAlign: 'center' }}>
                   {formatAmount(node.account.stats.totalAmountReceivedPastMonth)}
                   <br />
@@ -197,7 +204,7 @@ export default function ApolloSsrPage({ account = null, scale }) {
         </tbody>
       </table>
 
-      {!account?.memberOf?.nodes && <p>No data.</p>}
+      {!nodes && <p>No data.</p>}
     </Layout>
   );
 }
