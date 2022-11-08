@@ -12,7 +12,7 @@ export default function Layout({ children }: Props) {
     <React.Fragment>
       <Header />
       <main>{children}</main>
-      <Footer />
+      {/* <Footer /> */}
     </React.Fragment>
   );
 }
