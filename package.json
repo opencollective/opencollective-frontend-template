@@ -31,7 +31,7 @@
     "François Hodierne <francois@opencollective.com>"
   ],
   "dependencies": {
-    "@apollo/client": "3.6.5",
+    "@apollo/client": "3.7.1",
     "@opencollective/frontend-components": "0.3.8",
     "@styled-system/prop-types": "^5.1.5",
     "babel-plugin-formatjs": "^10.3.31",
