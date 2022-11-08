@@ -7,7 +7,7 @@ import { H1 } from '@opencollective/frontend-components/components/Text';
 export default function IndexPage() {
   return (
     <Layout>
-      <H1 fontSize="30px">Open Collective Frontend template</H1>
+      <H1 fontSize="30px">Horizons</H1>
       <p>
         <FormattedMessage defaultMessage="This is an example site to demonstrate how to use Open Collective OAuth to Sign In. Learn more:" />{' '}
         <a
