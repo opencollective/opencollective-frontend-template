@@ -84,7 +84,9 @@ export async function getServerSideProps(context: NextPageContext) {
 export default function IndexPage({ totalRaised, collectiveCount, numberOfContributions, category }) {
   return (
     <Layout>
-      <H1 fontSize="30px">Horizons</H1>
+      <H1 fontSize="30px" mt={4}>
+        Horizons
+      </H1>
       <H3>Trends</H3>
       <CategorySelect
         selectedCategory={category ?? 'All trends'}
