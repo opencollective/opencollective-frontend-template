@@ -22,7 +22,7 @@ export async function getServerSideProps(context: NextPageContext) {
 export default function ApolloSsrPage({ me = null }) {
   return (
     <Layout>
-      <H1 fontSize="30px">Apollo Server Side fetching Example</H1>
+      <H1 fontSize="30px">Hello World</H1>
 
       <p>This page demonstrates how to use Apollo to fetch data for server side rendering</p>
 
