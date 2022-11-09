@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import Image from 'next/image';
+
 // import { Avatar } from '@opencollective/frontend-components/components/Avatar';
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 // import Footer from './Footer';

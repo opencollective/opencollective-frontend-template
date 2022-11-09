@@ -10,12 +10,17 @@ const StyledCategoryButton = styled.button<StyledCategoryButtonProps>`
   flex: 1;
   background: white;
   padding: 40px 20px;
-  border: ${({ selected }) => (selected ? 'blue solid 2px' : 'white solid 2px')};
+  border: ${({ selected, color }) => (selected ? `${color} solid 3px` : 'white solid 3px')};
   cursor: pointer;
   font-weight: 500;
   border-radius: 8px;
   font-size: 20px;
   font-weight: 500;
+  white-space: nowrap;
+  :hover {
+    border: ${({ color }) => `${color} solid 3px`};
+  }
+  transition: border 0.2s ease-in-out;
 `;
 
 const StyledCategorySelector = styled.div`
@@ -23,6 +28,7 @@ const StyledCategorySelector = styled.div`
   justify-content: space-between;
   gap: 16px;
   width: 100%;
+  flex-wrap: wrap;
 `;
 
 const CategorySelect = ({ categories, selectedCategory }) => {
@@ -33,9 +39,11 @@ const CategorySelect = ({ categories, selectedCategory }) => {
         <StyledCategoryButton
           key={category.label}
           selected={(!selectedCategory && !category.tag) || category.tag === selectedCategory}
+          color={category.color}
           onClick={() => {
-            router.push(`/${category.tag || ''}`);
-            // router.push({ pathname: '/', ...(category.tag && { query: { tag: category.tag } }) });
+            router.push({ pathname: '/', ...(category.tag && { query: { tag: category.tag } }) }, null, {
+              shallow: true,
+            });
           }}
         >
           {category.label}

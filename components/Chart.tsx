@@ -6,7 +6,7 @@ import { get, max, min } from 'lodash';
 import dynamic from 'next/dynamic';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-// import ApexChart from "react-apexcharts";
+
 dayjs.extend(utc);
 
 export const formatAmountForLegend = (value, currency, locale, isCompactNotation = true) => {
@@ -31,12 +31,23 @@ export const ChartWrapper = styled.div`
   background: white;
   padding: 16px;
   border-radius: 16px;
+  .apexcharts-legend-series {
+    padding: 8px;
+    & > span {
+      vertical-align: middle;
+    }
+  }
+
+  .apexcharts-legend-marker {
+    margin-right: 8px;
+  }
 `;
 
-const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation): ApexOptions => ({
+const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors): ApexOptions => ({
   chart: {
     id: 'chart-total-received',
     toolbar: { show: false },
+    fontFamily: "'Inter', sans-serif",
   },
   stroke: {
     curve: 'straight',
@@ -54,11 +65,19 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation): ApexO
   },
   legend: {
     show: true,
-    horizontalAlign: 'left',
+    showForSingleSeries: false,
+    fontSize: '14px',
+    position: 'top',
+    offsetY: 0,
+    floating: true,
+    horizontalAlign: 'center',
   },
-  colors: ['#29CC75', '#F55882'],
+  colors,
   xaxis: {
     labels: {
+      style: {
+        fontSize: '14px',
+      },
       formatter: function (value) {
         // Show data aggregated yearly
         if (timeUnit === 'YEAR') {
@@ -75,11 +94,17 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation): ApexO
   },
   yaxis: {
     labels: {
+      style: {
+        fontSize: '14px',
+      },
       minWidth: 38,
       formatter: value => formatAmountForLegend(value, hostCurrency, intl.locale, isCompactNotation),
     },
   },
   tooltip: {
+    style: {
+      fontSize: '14px',
+    },
     y: {
       formatter: value => formatAmountForLegend(value, hostCurrency, intl.locale, false), // Never use compact notation in tooltip
     },
@@ -101,47 +126,40 @@ const getSeriesDataFromTotalReceivedNodes = (nodes, startYear) => {
     };
   }
 
-  nodes.forEach(({ date, amount, kind }) => {
-    if (!keyedData[date]) {
-      keyedData[date] = { x: date, y: 0, kinds: {} };
-      console.log('never logs');
-    }
-
+  nodes.forEach(({ date, amount }) => {
     keyedData[date].y += amount.value;
-    keyedData[date]['kinds'][kind] = amount.value;
   });
 
   return Object.values(keyedData);
 };
 
-const getSeriesFromData = (intl, timeSeries, startYear) => {
-  const totalReceivedNodes = get(timeSeries, 'nodes', []);
-  const totalReceivedData = getSeriesDataFromTotalReceivedNodes(totalReceivedNodes, startYear);
+const getSeriesFromData = (intl, timeSeriesArray, startYear) => {
+  const series = timeSeriesArray?.map(timeSeries => {
+    const totalReceivedNodes = get(timeSeries, 'nodes', []);
+    const totalReceivedData = getSeriesDataFromTotalReceivedNodes(totalReceivedNodes, startYear);
 
-  return [
-    {
-      name: intl.formatMessage({ defaultMessage: 'Total Contributions' }),
+    return {
+      name: timeSeries.label,
       data: totalReceivedData,
-    },
-  ];
+    };
+  });
+
+  return series;
 };
 
-export default function Chart({ timeSeries }) {
+export default function Chart({ timeSeriesArray, startYear, currentTag }) {
   const currency = 'USD';
   const intl = useIntl();
 
-  const startYear = 2015;
-  const series = useMemo(() => getSeriesFromData(intl, timeSeries, startYear), [timeSeries]);
+  const series = useMemo(() => getSeriesFromData(intl, timeSeriesArray, startYear), [currentTag]);
 
   const isCompactNotation = getMinMaxDifference(series[0].data) >= 10000;
-  const chartOptions = useMemo(
-    () => getChartOptions(intl, timeSeries.timeUnit, currency, isCompactNotation),
-    [timeSeries.timeUnit],
-  );
+  const colors = timeSeriesArray.map(s => s.color);
+  const chartOptions = useMemo(() => getChartOptions(intl, 'YEAR', currency, isCompactNotation, colors), [currentTag]);
 
   return (
     <ChartWrapper>
-      <ApexChart type="area" width="100%" height="250px" options={chartOptions} series={series} />
+      <ApexChart type="area" width="100%" height="300px" options={chartOptions} series={series} />
     </ChartWrapper>
   );
 }
