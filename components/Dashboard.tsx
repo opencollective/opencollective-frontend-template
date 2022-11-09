@@ -7,6 +7,7 @@ import { formatCurrency } from '@opencollective/frontend-components/lib/currency
 import CategorySelect from '../components/CategorySelect';
 import Chart from '../components/Chart';
 import Collectives from '../components/Collectives';
+import Story from '../components/Story';
 import { H1, H4 } from '@opencollective/frontend-components/components/Text';
 
 const Grid = styled.div`
@@ -79,6 +80,8 @@ export default function Dashboard({ categories, startYear, locale }) {
           <p>{numberOfContributions.toLocaleString(locale)}</p> <span>contributions</span>
         </div>
       </Grid>
+
+      <Story stories={currentCategory.stories} />
       <H4 px={'24px'} fontWeight="300" mt={4} mb={2}>
         Chart
       </H4>
