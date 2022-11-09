@@ -9,7 +9,7 @@ import { initializeApollo } from '../lib/apollo-client';
 import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
-import categoriesDataDump from '../categoriesDataDump.json';
+// import categoriesDataDump from '../categoriesDataDump.json';
 
 export const accountsQuery = gql`
   query SearchAccounts($tag: [String]) {
@@ -161,20 +161,15 @@ export const getStaticProps: GetStaticProps = async () => {
   const startYear = 2018;
   const apollo = initializeApollo();
 
-  let categoriesWithData;
-
   // Use a data dump in development, to not overload the API with expensive queries
-  // eslint-disable-next-line no-process-env
-  if (process.env.NODE_ENV === 'development') {
-    categoriesWithData = categoriesDataDump;
-  } else {
-    categoriesWithData = await Promise.all(
-      categories.map(async category => ({
-        ...category,
-        data: await getDataForTag({ apollo, hostSlug, tag: category.tag, startYear }),
-      })),
-    );
-  }
+  // const categoriesWithData = categoriesDataDump;
+
+  const categoriesWithData = await Promise.all(
+    categories.map(async category => ({
+      ...category,
+      data: await getDataForTag({ apollo, hostSlug, tag: category.tag, startYear }),
+    })),
+  );
 
   // use this line to write a new data dump, if the query changes
   // fs.writeFile('categoriesDataDump.json', JSON.stringify(categoriesWithData), error => {
