@@ -127,16 +127,16 @@ const GlobalStyles = createGlobalStyle`
 export default function App({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps);
   return (
-    <SessionProvider session={pageProps['session']} refetchInterval={0}>
-      <IntlProvider locale="en">
-        <ApolloProvider client={apolloClient}>
-          <ThemeProvider theme={theme}>
-            <GlobalStyles />
-            <NextNProgress />
-            <Component {...pageProps} />
-          </ThemeProvider>
-        </ApolloProvider>
-      </IntlProvider>
-    </SessionProvider>
+    // <SessionProvider session={pageProps['session']} refetchInterval={0}>
+    <IntlProvider locale="en">
+      <ApolloProvider client={apolloClient}>
+        <ThemeProvider theme={theme}>
+          <GlobalStyles />
+          <NextNProgress />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </ApolloProvider>
+    </IntlProvider>
+    // </SessionProvider>
   );
 }

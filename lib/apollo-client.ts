@@ -32,11 +32,11 @@ const httpLink = new HttpLink({
 
 function createApolloClient({ context }: { context?: GetSessionParams } = {}) {
   const authLink = setContext(async (_, { headers }) => {
-    const session = await getSession(context);
+    //const session = await getSession(context);
     return {
       headers: {
         ...headers,
-        authorization: session?.accessToken ? `Bearer ${session?.accessToken}` : '',
+        // authorization: session?.accessToken ? `Bearer ${session?.accessToken}` : '',
       },
     };
   });
