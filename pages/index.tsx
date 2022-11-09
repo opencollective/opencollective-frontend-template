@@ -10,7 +10,7 @@ import { initializeApollo } from '../lib/apollo-client';
 import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
-import categoriesDataDump from '../categoriesDataDump.json';
+// import categoriesDataDump from '../categoriesDataDump.json';
 
 export const accountsQuery = gql`
   query SearchAccounts($tag: [String]) {
