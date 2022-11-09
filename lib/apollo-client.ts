@@ -37,6 +37,7 @@ function createApolloClient({ context }: { context?: GetSessionParams } = {}) {
       headers: {
         ...headers,
         // authorization: session?.accessToken ? `Bearer ${session?.accessToken}` : '',
+        ...(process.env.OPENCOLLECTIVE_API_KEY && { 'Api-Key': process.env.OPENCOLLECTIVE_API_KEY }),
       },
     };
   });
