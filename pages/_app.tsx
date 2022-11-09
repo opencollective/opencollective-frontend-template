@@ -110,10 +110,15 @@ const GlobalStyles = createGlobalStyle`
   body {
     font-family: 'Inter', sans-serif;
     padding: 0 1rem 1rem 1rem;
-    max-width: 680px;
+    max-width: 1200px;
     margin: 0 auto;
-    background: #fff;
+    background: #f9fafb;
     color: #333;
+  }
+
+  * {
+    font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
   }
 `;
 
