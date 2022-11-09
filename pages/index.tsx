@@ -3,13 +3,14 @@
 import React from 'react';
 import { gql } from '@apollo/client';
 import type { GetStaticProps } from 'next';
+import Head from 'next/head';
 
 import { initializeApollo } from '../lib/apollo-client';
 
 import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
-// import categoriesDataDump from '../categoriesDataDump.json';
+import categoriesDataDump from '../categoriesDataDump.json';
 
 export const accountsQuery = gql`
   query SearchAccounts($tag: [String]) {
@@ -190,6 +191,9 @@ export default function Page({ categories, startYear }) {
 
   return (
     <Layout>
+      <Head>
+        <title>Horizons</title>
+      </Head>
       <Dashboard categories={categories} startYear={startYear} locale={locale} />
     </Layout>
   );

@@ -30,7 +30,16 @@ export const ChartWrapper = styled.div`
   position: relative;
   background: white;
   padding: 16px;
+  height: 332px;
   border-radius: 16px;
+  .loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    color: #888;
+    -webkit-user-select: none;
+    user-select: none;
+  }
   .apexcharts-legend-series {
     padding: 8px;
     & > span {
@@ -48,6 +57,7 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
     id: 'chart-total-received',
     toolbar: { show: false },
     fontFamily: "'Inter', sans-serif",
+    background: '#FFFFFF',
   },
   stroke: {
     curve: 'straight',
@@ -159,6 +169,7 @@ export default function Chart({ timeSeriesArray, startYear, currentTag }) {
 
   return (
     <ChartWrapper>
+      <div className="loading">Loading...</div>
       <ApexChart type="area" width="100%" height="300px" options={chartOptions} series={series} />
     </ChartWrapper>
   );

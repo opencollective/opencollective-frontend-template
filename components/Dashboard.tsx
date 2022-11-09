@@ -60,7 +60,7 @@ export default function Dashboard({ categories, startYear, locale }) {
       <H4 px={'24px'} fontWeight="300" mb={2}>
         Trends
       </H4>
-      <CategorySelect selectedCategory={router?.query?.tag} categories={categories} />
+      <CategorySelect selectedTag={currentTag} categories={categories} />
       <H4 px={'24px'} fontWeight="300" mt={4} mb={2}>
         Stats
       </H4>
