@@ -36,7 +36,7 @@ const config = {
               ? `
                 block-all-mixed-content;
                 default-src 'self';
-                img-src 'self' opencollective-production.s3.us-west-1.amazonaws.com opencollective-production.s3-us-west-1.amazonaws.com opencollective.com images.opencollective.com images-staging.opencollective.com blog.opencollective.com;
+                img-src 'self' data: opencollective-production.s3.us-west-1.amazonaws.com opencollective-production.s3-us-west-1.amazonaws.com opencollective.com images.opencollective.com images-staging.opencollective.com blog.opencollective.com;
                 worker-src 'none';
                 style-src 'self' 'unsafe-inline';
                 connect-src 'self' opencollective.com api.opencollective.com api-staging.opencollective.com;
@@ -46,7 +46,7 @@ const config = {
               : `
                 block-all-mixed-content;
                 default-src 'self';
-                img-src 'self' opencollective-production.s3.us-west-1.amazonaws.com opencollective-production.s3-us-west-1.amazonaws.com opencollective.com images.opencollective.com images-staging.opencollective.com blog.opencollective.com;
+                img-src 'self' data: opencollective-production.s3.us-west-1.amazonaws.com opencollective-production.s3-us-west-1.amazonaws.com opencollective.com images.opencollective.com images-staging.opencollective.com blog.opencollective.com;
                 worker-src 'none';
                 style-src 'self' 'unsafe-inline';
                 connect-src 'self' opencollective.com api.opencollective.com api-staging.opencollective.com;

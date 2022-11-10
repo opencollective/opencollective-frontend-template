@@ -28,7 +28,7 @@ export default function ApolloSsrPage({ me = null }) {
 
       <H2 fontSize="24px">Query</H2>
 
-      <pre>{queryToString(loggedInUserQuery)}</pre>
+      <code>{queryToString(loggedInUserQuery)}</code>
 
       <H2 fontSize="24px">Result</H2>
 

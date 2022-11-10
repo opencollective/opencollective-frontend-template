@@ -109,12 +109,18 @@ const GlobalStyles = createGlobalStyle`
 
   body {
     font-family: 'Inter', sans-serif;
-    padding: 0 1rem 1rem 1rem;
-    max-width: 680px;
-    margin: 0 auto;
     background: #fff;
     color: #333;
+    margin: 0;
   }
+
+  a:link { text-decoration: none; }
+
+  a:visited { text-decoration: none; }
+
+  a:hover { text-decoration: none; }
+
+  a:active { text-decoration: none; }
 `;
 
 // Use of the <SessionProvider> is mandatory to allow components that call

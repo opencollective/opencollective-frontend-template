@@ -20,7 +20,7 @@
     "lint": "eslint . --ignore-path .gitignore",
     "lint:fix": "npm run lint -- --fix",
     "lint:quiet": "npm run lint -- --quiet",
-    "prettier": "prettier \"*.@(js|ts|jsx|tsx|json|md)\" \"@(components|lib|pages|scripts|server|test|stories)/**/*.@(js|json|md|mdx)\"",
+    "prettier": "prettier \"*.@(js|ts|jsx|tsx|json|md)\" \"@(components|lib|pages|scripts|server|test|stories)/**/*.@(js|jsx|ts|tsx|json|md|mdx)\"",
     "prettier:check": "npm run prettier -- --check",
     "prettier:write": "npm run prettier -- --write",
     "start": "next start",

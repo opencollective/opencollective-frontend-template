@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { signIn, signOut } from 'next-auth/react';
 import { FormattedMessage } from 'react-intl';
@@ -8,170 +9,80 @@ import { useLoggedInUser } from '../lib/hooks/useLoggedInUser';
 import { OPENCOLLECTIVE_OAUTH_PROVIDER_ID } from '../lib/opencollective-oauth-config';
 
 import Avatar from '@opencollective/frontend-components/components/Avatar';
-import { Flex } from '@opencollective/frontend-components/components/Grid';
+import { Box, Flex } from '@opencollective/frontend-components/components/Grid';
 import StyledButton from '@opencollective/frontend-components/components/StyledButton';
-import { Strong } from '@opencollective/frontend-components/components/Text';
+import { H1, Span } from '@opencollective/frontend-components/components/Text';
 
 const StyledHeader = styled.header`
-  /* Set min-height to avoid page reflow while session loading */
-  .signedInStatus {
-    display: block;
-    min-height: 4rem;
-    width: 100%;
-  }
-
-  .loading,
-  .loaded {
-    position: relative;
-    top: 0;
-    opacity: 1;
-    overflow: hidden;
-    border-radius: 0 0 0.6rem 0.6rem;
-    padding: 0.6rem 1rem;
-    margin: 0;
-    background-color: rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease-in;
-  }
-
-  .loading {
-    top: -2rem;
-    opacity: 0;
-  }
-
-  .signedInText,
-  .notSignedInText {
-    padding-top: 0.8rem;
-    left: 1rem;
-    right: 6.5rem;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    display: inherit;
-    z-index: 1;
-    line-height: 1.3rem;
-  }
-
-  .signedInText {
-    padding-top: 0rem;
-    left: 4.6rem;
-  }
-
-  .avatar {
-    border-radius: 2rem;
-    float: left;
-    height: 2.8rem;
-    width: 2.8rem;
-    background-color: white;
-    background-size: cover;
-    background-repeat: no-repeat;
-  }
-
-  .button,
-  .buttonPrimary {
-    float: right;
-    margin-right: -0.4rem;
-    font-weight: 500;
-    border-radius: 0.3rem;
-    cursor: pointer;
-    font-size: 1rem;
-    line-height: 1.4rem;
-    padding: 0.7rem 0.8rem;
-    position: relative;
-    z-index: 10;
-    background-color: transparent;
-    color: #555;
-  }
-
-  .buttonPrimary {
-    background-color: #346df1;
-    border-color: #346df1;
-    color: #fff;
-    text-decoration: none;
-    padding: 0.7rem 1.4rem;
-  }
-
-  .buttonPrimary:hover {
-    box-shadow: inset 0 0 5rem rgba(0, 0, 0, 0.2);
-  }
-
-  .navItems {
-    margin-bottom: 2rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .navItem {
-    display: inline-block;
-    margin-right: 1rem;
-  }
+  padding: 56px 40px 24px 40px;
+  max-width: 1280px;
+  margin: 0 auto;
 `;
 
 // The approach used in this component shows how to build a sign in and sign out
 // component that works on pages which support both client and server side
 // rendering, and avoids any flash incorrect content on initial page load.
 export default function Header() {
-  const { loadingLoggedInUser, LoggedInUser } = useLoggedInUser();
+  const { LoggedInUser } = useLoggedInUser();
   return (
     <StyledHeader>
-      <div className={'signedInStatus'}>
-        <div className={`${!LoggedInUser && loadingLoggedInUser ? 'loading' : 'loaded'}`}>
-          {!LoggedInUser && (
-            <Flex justifyContent="space-between">
-              <span className={'notSignedInText'}>
-                <FormattedMessage defaultMessage="You are not signed in" />
-              </span>
-              <StyledButton
-                buttonStyle="primary"
-                onClick={e => {
-                  e.preventDefault();
-                  signIn(OPENCOLLECTIVE_OAUTH_PROVIDER_ID);
-                }}
-              >
-                <FormattedMessage defaultMessage="Sign in with Open Collective" />
-              </StyledButton>
+      <Link href="/">
+        <a>
+          <H1 fontSize="52px" mb="48px" color="black.800" css={{ textDecoration: 'none' }}>
+            <Flex alignItems="flex-end" flexWrap="wrap">
+              <Span mr="12px">
+                <FormattedMessage defaultMessage="Frontend Template project" />
+              </Span>
+              <Box width={197} height={40}>
+                <Image
+                  src="/images/by-open-collective.png"
+                  alt="by Open Collective"
+                  width="197"
+                  height="40"
+                  layout="fixed"
+                />
+              </Box>
             </Flex>
-          )}
-          {LoggedInUser && (
-            <Flex justifyContent="space-between">
-              <Flex>
-                <Avatar collective={LoggedInUser.collective} radius={42} />
-                <Flex flexDirection="column" ml={2} justifyContent="center">
-                  <small>Signed in as</small>
-                  <br />
-                  <Strong fontSize="14px">{LoggedInUser.email ?? LoggedInUser.collective.name}</Strong>
-                </Flex>
+          </H1>
+        </a>
+      </Link>
+      <Box>
+        {!LoggedInUser ? (
+          <div>
+            <StyledButton
+              buttonStyle="primary"
+              onClick={e => {
+                e.preventDefault();
+                signIn(OPENCOLLECTIVE_OAUTH_PROVIDER_ID);
+              }}
+            >
+              <FormattedMessage defaultMessage="Sign in with Open Collective" />
+            </StyledButton>
+          </div>
+        ) : (
+          <Flex justifyContent="space-between" alignItems="center">
+            <Flex>
+              <Avatar collective={LoggedInUser.collective} radius={56} />
+              <Flex flexDirection="column" ml={2} justifyContent="center">
+                <Span fontSize="18px" color="black.700" mb={1}>
+                  {LoggedInUser.collective.name}
+                </Span>
+                <Span fontSize="12px" color="black.600">
+                  {LoggedInUser.email}
+                </Span>
               </Flex>
-              <StyledButton
-                onClick={e => {
-                  e.preventDefault();
-                  signOut();
-                }}
-              >
-                <FormattedMessage defaultMessage="Sign out" />
-              </StyledButton>
             </Flex>
-          )}
-        </div>
-      </div>
-      <nav>
-        <ul className={'navItems'}>
-          <li className={'navItem'}>
-            <Link href="/">
-              <a>Home</a>
-            </Link>
-          </li>
-          <li className={'navItem'}>
-            <Link href="/apollo-server-side">
-              <a>Apollo SSR</a>
-            </Link>
-          </li>
-          <li className={'navItem'}>
-            <Link href="/apollo-client-side">
-              <a>Apollo Client</a>
-            </Link>
-          </li>
-        </ul>
-      </nav>
+            <StyledButton
+              onClick={e => {
+                e.preventDefault();
+                signOut();
+              }}
+            >
+              <FormattedMessage defaultMessage="Sign out" />
+            </StyledButton>
+          </Flex>
+        )}
+      </Box>
     </StyledHeader>
   );
 }
