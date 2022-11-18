@@ -19,7 +19,7 @@ export default function Footer() {
   return (
     <StyledFooter>
       <P fontSize="18px" fontWeight="800">
-        <FormattedMessage defaultMessage="Contributor's dashboard" />
+        <FormattedMessage defaultMessage="Frontend Template project" />
       </P>
       <Container
         display="flex"
@@ -30,7 +30,7 @@ export default function Footer() {
         alignItems="center"
       >
         <Container mb="13px">
-          <FormattedMessage defaultMessage="Contributors dashboard is an initiative by" />
+          <FormattedMessage defaultMessage="Frontend Template project is an initiative by" />
         </Container>
         <a href="https://opencollective.com" target="_blank" rel="noopener noreferrer">
           <Image src="/images/logo-greyscale.png" alt="by Open Collective" width="151" height="29" />
