@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { signIn, signOut } from 'next-auth/react';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
@@ -153,7 +153,7 @@ export default function Header() {
           )}
         </div>
       </div>
-      <nav>
+      {/* <nav>
         <ul className={'navItems'}>
           <li className={'navItem'}>
             <Link href="/">
@@ -171,7 +171,7 @@ export default function Header() {
             </Link>
           </li>
         </ul>
-      </nav>
+      </nav> */}
     </StyledHeader>
   );
 }

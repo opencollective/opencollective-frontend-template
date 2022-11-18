@@ -39,9 +39,9 @@ const config = {
                 img-src 'self' opencollective-production.s3.us-west-1.amazonaws.com opencollective-production.s3-us-west-1.amazonaws.com opencollective.com images.opencollective.com images-staging.opencollective.com blog.opencollective.com;
                 worker-src 'none';
                 style-src 'self' 'unsafe-inline';
-                connect-src 'self' opencollective.com api.opencollective.com api-staging.opencollective.com;
+                connect-src 'self' localhost:3060 opencollective.com api.opencollective.com api-staging.opencollective.com;
                 script-src 'self' 'unsafe-eval' 'unsafe-inline';
-                frame-src 'none';
+                frame-src youtube.com www.youtube.com;
               `
               : `
                 block-all-mixed-content;
@@ -51,7 +51,7 @@ const config = {
                 style-src 'self' 'unsafe-inline';
                 connect-src 'self' opencollective.com api.opencollective.com api-staging.opencollective.com;
                 script-src 'self';
-                frame-src 'none';
+                frame-src youtube.com www.youtube.com;
               `
             )
               .replace(/\s{2,}/g, ' ')

@@ -4,7 +4,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import merge from 'deepmerge';
 import isEqual from 'lodash/isEqual';
-import { getSession, GetSessionParams } from 'next-auth/react';
+import { GetSessionParams } from 'next-auth/react';
 
 import { PublicEnv } from './env';
 
@@ -30,13 +30,15 @@ const httpLink = new HttpLink({
   // credentials: "same-origin", // Additional fetch() options like `credentials` or `headers`
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function createApolloClient({ context }: { context?: GetSessionParams } = {}) {
   const authLink = setContext(async (_, { headers }) => {
-    const session = await getSession(context);
     return {
       headers: {
         ...headers,
-        authorization: session?.accessToken ? `Bearer ${session?.accessToken}` : '',
+        // authorization: session?.accessToken ? `Bearer ${session?.accessToken}` : '',
+        // eslint-disable-next-line no-process-env
+        ...(process.env.OPENCOLLECTIVE_API_KEY && { 'Api-Key': process.env.OPENCOLLECTIVE_API_KEY }),
       },
     };
   });

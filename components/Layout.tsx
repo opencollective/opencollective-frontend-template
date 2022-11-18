@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Footer from './Footer';
-import Header from './Header';
+// import Footer from './Footer';
+// import Header from './Header';
 
 interface Props {
   children: React.ReactNode;
@@ -10,9 +10,9 @@ interface Props {
 export default function Layout({ children }: Props) {
   return (
     <React.Fragment>
-      <Header />
+      {/* <Header /> */}
       <main>{children}</main>
-      <Footer />
+      {/* <Footer /> */}
     </React.Fragment>
   );
 }
