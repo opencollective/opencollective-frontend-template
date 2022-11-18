@@ -39,9 +39,9 @@ const config = {
                 img-src 'self' data: opencollective-production.s3.us-west-1.amazonaws.com opencollective-production.s3-us-west-1.amazonaws.com opencollective.com images.opencollective.com images-staging.opencollective.com blog.opencollective.com;
                 worker-src 'none';
                 style-src 'self' 'unsafe-inline';
-                connect-src 'self' opencollective.com api.opencollective.com api-staging.opencollective.com;
-                script-src 'self' 'unsafe-eval' 'unsafe-inline';
-                frame-src 'none';
+                connect-src 'self' api.stripe.com opencollective.com api.opencollective.com api-staging.opencollective.com;
+                script-src 'self' 'unsafe-eval' 'unsafe-inline' js.stripe.com;
+                frame-src js.stripe.com hooks.stripe.com;
               `
               : `
                 block-all-mixed-content;
@@ -49,9 +49,9 @@ const config = {
                 img-src 'self' data: opencollective-production.s3.us-west-1.amazonaws.com opencollective-production.s3-us-west-1.amazonaws.com opencollective.com images.opencollective.com images-staging.opencollective.com blog.opencollective.com;
                 worker-src 'none';
                 style-src 'self' 'unsafe-inline';
-                connect-src 'self' opencollective.com api.opencollective.com api-staging.opencollective.com;
-                script-src 'self';
-                frame-src 'none';
+                connect-src 'self' api.stripe.com opencollective.com api.opencollective.com api-staging.opencollective.com;
+                script-src 'self' js.stripe.com;
+                frame-src js.stripe.com hooks.stripe.com;
               `
             )
               .replace(/\s{2,}/g, ' ')

@@ -33,6 +33,8 @@
   "dependencies": {
     "@apollo/client": "3.7.1",
     "@opencollective/frontend-components": "0.3.8",
+    "@stripe/react-stripe-js": "^1.15.0",
+    "@stripe/stripe-js": "^1.44.1",
     "@styled-system/prop-types": "^5.1.5",
     "babel-plugin-formatjs": "^10.3.31",
     "babel-plugin-react-remove-properties": "^0.3.0",
