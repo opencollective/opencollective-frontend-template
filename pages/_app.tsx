@@ -1,5 +1,7 @@
 import React from 'react';
 import { ApolloProvider } from '@apollo/client';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
 import NextNProgress from 'nextjs-progressbar';
@@ -8,6 +10,8 @@ import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 import { useApollo } from '../lib/apollo-client';
 import theme from '@opencollective/frontend-components/lib/theme';
+
+const stripePromise = loadStripe('pk_test_VgSB4VSg2wb5LdAkz7p38Gw8');
 
 const GlobalStyles = createGlobalStyle`
   @font-face {
@@ -128,16 +132,18 @@ const GlobalStyles = createGlobalStyle`
 export default function App({ Component, pageProps }: AppProps) {
   const apolloClient = useApollo(pageProps);
   return (
-    <SessionProvider session={pageProps['session']} refetchInterval={0}>
-      <IntlProvider locale="en">
-        <ApolloProvider client={apolloClient}>
-          <ThemeProvider theme={theme}>
-            <GlobalStyles />
-            <NextNProgress />
-            <Component {...pageProps} />
-          </ThemeProvider>
-        </ApolloProvider>
-      </IntlProvider>
-    </SessionProvider>
+    <Elements stripe={stripePromise}>
+      <SessionProvider session={pageProps['session']} refetchInterval={0}>
+        <IntlProvider locale="en">
+          <ApolloProvider client={apolloClient}>
+            <ThemeProvider theme={theme}>
+              <GlobalStyles />
+              <NextNProgress />
+              <Component {...pageProps} />
+            </ThemeProvider>
+          </ApolloProvider>
+        </IntlProvider>
+      </SessionProvider>
+    </Elements>
   );
 }
