@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-key */
 import React, { useEffect } from 'react';
+import { ChevronLeft } from '@styled-icons/fa-solid/ChevronLeft';
+import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
 import { Sort } from '@styled-icons/fa-solid/Sort';
 import { SortDown } from '@styled-icons/fa-solid/SortDown';
 import { FormattedDate } from 'react-intl';
-import { useSortBy, useTable, usePagination } from 'react-table';
+import { usePagination, useSortBy, useTable } from 'react-table';
 import styled from 'styled-components';
-import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
-import { ChevronLeft } from '@styled-icons/fa-solid/ChevronLeft';
 
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
@@ -162,14 +162,13 @@ export default function Collectives({
         className: 'center',
       },
       {
-        Header: 'T. disbursed',
-        accessor: 'totalDisbursed',
+        Header: '% disbursed',
+        accessor: 'percentDisbursed',
         sortDescFirst: true,
-        Cell: tableProps =>
-          formatCurrency(tableProps.row.original.totalDisbursed, tableProps.row.original.currency, {
-            locale: 'en-US',
-            precision: 0,
-          }),
+        Cell: ({ row }) => {
+          const percentDisbursed = parseFloat(row.original.percentDisbursed);
+          return isNaN(percentDisbursed) ? 'n/a' : `${percentDisbursed.toFixed(1)}%`;
+        },
         className: 'right',
       },
       {

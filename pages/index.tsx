@@ -175,22 +175,29 @@ const getDataForTagAndPeriod = async ({ apollo, hostSlug, category, period }) =>
     contributionsCountTimeSeries: data.accounts.stats.transactionsTimeSeries,
     dateFrom,
     dateTo,
-    collectives: data.accounts.nodes.map(collective => ({
-      id: collective.id,
-      name: collective.name,
-      slug: collective.slug,
-      description: collective.description,
-      imageUrl: collective.imageUrl.replace('-staging', ''),
-      totalRaised: collective.stats.totalNetAmountReceived.valueInCents,
-      totalDisbursed: collective.stats.totalNetAmountReceived.valueInCents - collective.stats.balance.valueInCents,
-      currency: collective.stats.totalNetAmountReceived.currency,
-      subCollectivesCount: collective.childrenAccounts.totalCount,
-      adminCount: collective.admins.totalCount,
-      contributorsCount: collective.contributors.totalCount,
-      expensesCount: collective.expenses.totalCount,
-      createdAt: collective.createdAt,
-      tags: collective.tags,
-    })),
+    collectives: data.accounts.nodes.map(collective => {
+      const totalDisbursed =
+        collective.stats.totalNetAmountReceived.valueInCents - collective.stats.balance.valueInCents;
+      const percentDisbursed = (totalDisbursed / collective.stats.totalNetAmountReceived.valueInCents) * 100;
+
+      return {
+        id: collective.id,
+        name: collective.name,
+        slug: collective.slug,
+        description: collective.description,
+        imageUrl: collective.imageUrl.replace('-staging', ''),
+        totalRaised: collective.stats.totalNetAmountReceived.valueInCents,
+        totalDisbursed,
+        percentDisbursed,
+        currency: collective.stats.totalNetAmountReceived.currency,
+        subCollectivesCount: collective.childrenAccounts.totalCount,
+        adminCount: collective.admins.totalCount,
+        contributorsCount: collective.contributors.totalCount,
+        expensesCount: collective.expenses.totalCount,
+        createdAt: collective.createdAt,
+        tags: collective.tags,
+      };
+    }),
   };
 };
 
