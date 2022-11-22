@@ -5,12 +5,23 @@ import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
 import { Sort } from '@styled-icons/fa-solid/Sort';
 import { SortDown } from '@styled-icons/fa-solid/SortDown';
 import { FormattedDate } from 'react-intl';
-import { usePagination, useSortBy, useTable } from 'react-table';
+import { usePagination, useSortBy, useTable, useFilters } from 'react-table';
 import styled from 'styled-components';
 
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
 import CollectiveModal from './CollectiveModal';
+
+const LocationPin = () => (
+  <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M8.51945 15.1569C9.2455 14.5788 9.97134 13.9255 10.6506 13.2085C12.6317 11.1173 13.8333 8.91439 13.8333 6.66666C13.8333 2.98476 10.8486 0 7.16667 0C3.48477 0 0.5 2.98476 0.5 6.66666C0.5 8.91439 1.7016 11.1173 3.6827 13.2085C4.362 13.9255 5.08783 14.5788 5.81388 15.1569C6.0684 15.3596 6.30522 15.5387 6.51853 15.6928C6.64852 15.7867 6.74324 15.8523 6.79687 15.888C7.0208 16.0373 7.31253 16.0373 7.53647 15.888C7.5901 15.8523 7.68482 15.7867 7.81481 15.6928C8.02812 15.5387 8.26493 15.3596 8.51945 15.1569ZM9.6827 12.2915C9.0495 12.9599 8.36908 13.5722 7.68888 14.1139C7.50322 14.2617 7.32821 14.3957 7.16667 14.5151C7.00513 14.3957 6.83011 14.2617 6.64445 14.1139C5.96425 13.5722 5.28383 12.9599 4.65063 12.2915C2.88173 10.4243 1.83333 8.50225 1.83333 6.66666C1.83333 3.72114 4.22115 1.33333 7.16667 1.33333C10.1122 1.33333 12.5 3.72114 12.5 6.66666C12.5 8.50225 11.4516 10.4243 9.6827 12.2915ZM7.16667 9.33332C5.69391 9.33332 4.5 8.13942 4.5 6.66666C4.5 5.1939 5.69391 3.99999 7.16667 3.99999C8.63943 3.99999 9.83333 5.1939 9.83333 6.66666C9.83333 8.13942 8.63943 9.33332 7.16667 9.33332ZM8.5 6.66666C8.5 7.40304 7.90305 7.99999 7.16667 7.99999C6.43029 7.99999 5.83333 7.40304 5.83333 6.66666C5.83333 5.93028 6.43029 5.33333 7.16667 5.33333C7.90305 5.33333 8.5 5.93028 8.5 6.66666Z"
+      fill="#4D4F51"
+    />
+  </svg>
+);
 
 const Table = styled.table`
   padding: 0;
@@ -87,6 +98,50 @@ export const Avatar = styled.img`
   width: 40px;
 `;
 
+function LocationFilter({ column: { filterValue, setFilter, preFilteredRows, id } }) {
+  const options = React.useMemo(() => {
+    const regions = [];
+
+    preFilteredRows.forEach(row => {
+      if (!regions.includes(row.values.location.region) && row.values.location.region) {
+        regions.push(row.values.location.region);
+      }
+    });
+
+    return regions.map(region => ({ label: region, type: 'region' })).sort((a, b) => a.label.localeCompare(b.label));
+  }, [id, preFilteredRows]);
+
+  return (
+    <select
+      value={filterValue}
+      onChange={e => {
+        setFilter(e.target.value || undefined);
+      }}
+    >
+      <option value="">All</option>
+      {options.map((option, i) => (
+        <option key={i} value={JSON.stringify(option)}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function filterLocation(rows, id, filterValue) {
+  return rows.filter(row => {
+    const filter = JSON.parse(filterValue);
+    const { region, isOnline, isGlobal } = row.original.location;
+    if (filter.type === 'region') {
+      return region === filter.label;
+    } else if (filter.type === 'online') {
+      return isOnline;
+    } else if (filter.type === 'global') {
+      return isGlobal;
+    }
+  });
+}
+
 interface Props {
   collectives: [any];
   collectivesData: object;
@@ -119,26 +174,35 @@ export default function Collectives({
           </div>
         ),
         Header: 'Name',
-        // Header: () => (
-        //   <H4 px={''} fontWeight="500" mt={0} mb={0}>
-        //     {data.length.toLocaleString(locale)} collectives
-        //   </H4>
-        // ),
         sortDescFirst: true,
-
         disableSortBy: false,
         className: 'left first',
+        disableFilters: true,
       },
-      // {
-      //   Header: 'Description',
-      //   accessor: 'description',
-      // },
+      {
+        accessor: 'location',
+        Cell: ({ row }) =>
+          row.original.location.label && (
+            <div className="flex justify-start">
+              <span className="text-sm bg-gray-50 rounded-full py-1 px-2 whitespace-nowrap border flex items-center gap-1">
+                <LocationPin />
+                {row.original.location.label}
+              </span>
+            </div>
+          ),
+        Header: 'Location',
+        Filter: LocationFilter,
+        filter: filterLocation,
+        disableSortBy: true,
+        className: 'left',
+      },
       {
         Header: 'Created',
         accessor: 'createdAt',
         sortDescFirst: true,
-        Cell: ({ row }) => <FormattedDate dateStyle={'medium'} value={row.original.createdAt} />,
+        Cell: ({ row }) => new Date(row.original.createdAt).getUTCFullYear(),
         className: 'center',
+        disableFilters: true,
       },
       {
         Header: 'Contributors',
@@ -146,20 +210,7 @@ export default function Collectives({
         sortDescFirst: true,
         Cell: tableProps => tableProps.row.original.contributorsCount.toLocaleString(locale),
         className: 'center',
-      },
-      {
-        Header: 'Admins',
-        accessor: 'adminCount',
-        sortDescFirst: true,
-        // Cell: tableProps => tableProps.row.original.expensesCount.toLocaleString(locale),
-        className: 'center',
-      },
-      {
-        Header: 'Expenses',
-        accessor: 'expensesCount',
-        sortDescFirst: true,
-        Cell: tableProps => tableProps.row.original.expensesCount.toLocaleString(locale),
-        className: 'center',
+        disableFilters: true,
       },
       {
         Header: '% disbursed',
@@ -170,6 +221,7 @@ export default function Collectives({
           return isNaN(percentDisbursed) ? 'n/a' : `${percentDisbursed.toFixed(1)}%`;
         },
         className: 'right',
+        disableFilters: true,
       },
       {
         Header: 'T. raised',
@@ -184,6 +236,7 @@ export default function Collectives({
         ),
         sortDescFirst: true,
         className: 'right last',
+        disableFilters: true,
       },
     ],
     [currentTag, currentTimePeriod],
@@ -192,19 +245,16 @@ export default function Collectives({
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    rows,
     prepareRow,
     toggleSortBy,
     page,
     canPreviousPage,
     canNextPage,
     pageOptions,
-    pageCount,
     gotoPage,
     nextPage,
     previousPage,
-    setPageSize,
-    state: { pageIndex, pageSize },
+    state: { pageIndex },
   } = useTable(
     {
       columns,
@@ -219,6 +269,7 @@ export default function Collectives({
         ],
       },
     },
+    useFilters,
     useSortBy,
     usePagination,
   );
@@ -244,23 +295,26 @@ export default function Collectives({
                     cursor: 'pointer',
                   }}
                 >
-                  {column.render('Header')}
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      verticalAlign: 'top',
-                      marginLeft: '4px',
-                      opacity: column.isSorted ? '100%' : '25%',
-                    }}
-                  >
-                    {column.isSortedDesc ? (
-                      <SortDown size="16" />
-                    ) : column.isSorted ? (
-                      <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
-                    ) : (
-                      <Sort size="16" />
-                    )}
-                  </span>
+                  {column.render('Header')}{' '}
+                  {column.canSort && (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        verticalAlign: 'top',
+                        marginLeft: '4px',
+                        opacity: column.isSorted ? '100%' : '25%',
+                      }}
+                    >
+                      {column.isSortedDesc ? (
+                        <SortDown size="16" />
+                      ) : column.isSorted ? (
+                        <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
+                      ) : (
+                        <Sort size="16" />
+                      )}
+                    </span>
+                  )}
+                  <div>{column.canFilter ? column.render('Filter') : null}</div>
                 </th>
               ))}
             </tr>

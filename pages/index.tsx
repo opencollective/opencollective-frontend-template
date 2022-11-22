@@ -12,7 +12,9 @@ import { getDumpByTagAndPeriod } from '../lib/getDataDump';
 import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
+import getLocation from '../lib/location/getLocation';
 import { getAllPosts, markdownToHtml } from '../lib/markdown';
+import locationTags from '../locationTags.json';
 
 export const accountsQuery = gql`
   query SearchAccounts($hostSlug: String, $tag: [String], $dateFrom: DateTime, $dateTo: DateTime, $timeUnit: TimeUnit) {
@@ -186,6 +188,8 @@ const getDataForTagAndPeriod = async ({ apollo, hostSlug, category, period }) =>
         slug: collective.slug,
         description: collective.description,
         imageUrl: collective.imageUrl.replace('-staging', ''),
+        locationTags: collective.tags?.filter(tag => locationTags.includes(tag)) ?? null,
+        location: getLocation(collective),
         totalRaised: collective.stats.totalNetAmountReceived.valueInCents,
         totalDisbursed,
         percentDisbursed,

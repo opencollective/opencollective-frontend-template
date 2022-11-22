@@ -7,7 +7,6 @@ import { formatCurrency } from '@opencollective/frontend-components/lib/currency
 import CategorySelect from '../components/CategorySelect';
 import Chart from '../components/Chart';
 import Collectives from '../components/Collectives';
-import Story from '../components/Story';
 
 import DropdownSelector from './Dropdown';
 
