@@ -4,12 +4,10 @@ import styled from 'styled-components';
 
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
-import CategorySelect from '../components/CategorySelect';
-import Chart from '../components/Chart';
-import Collectives from '../components/Collectives';
-import Story from '../components/Story';
-
+import CategorySelect from './CategorySelect';
+import Chart from './Chart';
 import DropdownSelector from './Dropdown';
+import Table from './Table';
 
 const Metric = styled.div`
   text-align: center;
@@ -210,7 +208,7 @@ export default function Dashboard({ categories, collectivesData, locale }) {
                   }))}
               />
             </div>
-            <Collectives
+            <Table
               collectives={collectives}
               currentMetric={currentMetric}
               currentTimePeriod={currentTimePeriod}

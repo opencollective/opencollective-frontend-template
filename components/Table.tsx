@@ -1,16 +1,16 @@
-/* eslint-disable react/jsx-key */
 import React, { useEffect } from 'react';
 import { ChevronLeft } from '@styled-icons/fa-solid/ChevronLeft';
 import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
 import { Sort } from '@styled-icons/fa-solid/Sort';
 import { SortDown } from '@styled-icons/fa-solid/SortDown';
-import { FormattedDate } from 'react-intl';
-import { usePagination, useSortBy, useTable } from 'react-table';
+import { useFilters, usePagination, useSortBy, useTable } from 'react-table';
 import styled from 'styled-components';
 
+import getFilterOptions from '../lib/location/getFilterOptions';
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
 import CollectiveModal from './CollectiveModal';
+import LocationTag from './LocationTag';
 
 const Table = styled.table`
   padding: 0;
@@ -87,6 +87,42 @@ export const Avatar = styled.img`
   width: 40px;
 `;
 
+function LocationFilter({ column: { filterValue, setFilter, preFilteredRows } }) {
+  const options = React.useMemo(() => getFilterOptions(preFilteredRows), [preFilteredRows]);
+
+  return (
+    <select
+      value={filterValue}
+      className="p-1 bg-gray-50 mt-1"
+      onChange={e => {
+        setFilter(e.target.value || undefined);
+      }}
+    >
+      <option value="">All</option>
+      {options.map(option => (
+        <option key={option.label} value={JSON.stringify(option)}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function filterLocation(rows, id, filterValue) {
+  return rows.filter(row => {
+    const filter = JSON.parse(filterValue);
+    const { region, domesticRegion, countryCode } = row.original.location;
+
+    if (filter.type === 'region') {
+      return region === filter.value;
+    } else if (filter.type === 'domesticRegion') {
+      return domesticRegion === filter.value;
+    } else if (filter.type === 'countryCode') {
+      return countryCode === filter.value;
+    }
+  });
+}
+
 interface Props {
   collectives: [any];
   collectivesData: object;
@@ -119,26 +155,32 @@ export default function Collectives({
           </div>
         ),
         Header: 'Name',
-        // Header: () => (
-        //   <H4 px={''} fontWeight="500" mt={0} mb={0}>
-        //     {data.length.toLocaleString(locale)} collectives
-        //   </H4>
-        // ),
         sortDescFirst: true,
-
-        disableSortBy: false,
+        disableSortBy: true,
         className: 'left first',
+        disableFilters: true,
       },
-      // {
-      //   Header: 'Description',
-      //   accessor: 'description',
-      // },
+      {
+        accessor: 'location',
+        Cell: ({ row }) =>
+          row.original.location.label && (
+            <div className="flex justify-start">
+              <LocationTag>{row.original.location.label}</LocationTag>
+            </div>
+          ),
+        Header: 'Location',
+        Filter: LocationFilter,
+        filter: filterLocation,
+        disableSortBy: true,
+        className: 'left',
+      },
       {
         Header: 'Created',
         accessor: 'createdAt',
         sortDescFirst: true,
-        Cell: ({ row }) => <FormattedDate dateStyle={'medium'} value={row.original.createdAt} />,
+        Cell: ({ row }) => new Date(row.original.createdAt).getUTCFullYear(),
         className: 'center',
+        disableFilters: true,
       },
       {
         Header: 'Contributors',
@@ -146,20 +188,7 @@ export default function Collectives({
         sortDescFirst: true,
         Cell: tableProps => tableProps.row.original.contributorsCount.toLocaleString(locale),
         className: 'center',
-      },
-      {
-        Header: 'Admins',
-        accessor: 'adminCount',
-        sortDescFirst: true,
-        // Cell: tableProps => tableProps.row.original.expensesCount.toLocaleString(locale),
-        className: 'center',
-      },
-      {
-        Header: 'Expenses',
-        accessor: 'expensesCount',
-        sortDescFirst: true,
-        Cell: tableProps => tableProps.row.original.expensesCount.toLocaleString(locale),
-        className: 'center',
+        disableFilters: true,
       },
       {
         Header: '% disbursed',
@@ -170,6 +199,7 @@ export default function Collectives({
           return isNaN(percentDisbursed) ? 'n/a' : `${percentDisbursed.toFixed(1)}%`;
         },
         className: 'right',
+        disableFilters: true,
       },
       {
         Header: 'T. raised',
@@ -184,6 +214,7 @@ export default function Collectives({
         ),
         sortDescFirst: true,
         className: 'right last',
+        disableFilters: true,
       },
     ],
     [currentTag, currentTimePeriod],
@@ -192,19 +223,16 @@ export default function Collectives({
     getTableProps,
     getTableBodyProps,
     headerGroups,
-    rows,
     prepareRow,
     toggleSortBy,
     page,
     canPreviousPage,
     canNextPage,
     pageOptions,
-    pageCount,
     gotoPage,
     nextPage,
     previousPage,
-    setPageSize,
-    state: { pageIndex, pageSize },
+    state: { pageIndex },
   } = useTable(
     {
       columns,
@@ -219,6 +247,7 @@ export default function Collectives({
         ],
       },
     },
+    useFilters,
     useSortBy,
     usePagination,
   );
@@ -234,52 +263,71 @@ export default function Collectives({
       <CollectiveModal isOpen={isModalOpen} collective={collectiveInModal} onClose={() => setIsModalOpen(false)} />
       <Table {...getTableProps()} className="">
         <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th
-                  {...column.getHeaderProps([{ className: column.className }, column.getSortByToggleProps()])}
-                  style={{
-                    color: column.isSorted ? 'black' : '#374151',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {column.render('Header')}
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      verticalAlign: 'top',
-                      marginLeft: '4px',
-                      opacity: column.isSorted ? '100%' : '25%',
-                    }}
-                  >
-                    {column.isSortedDesc ? (
-                      <SortDown size="16" />
-                    ) : column.isSorted ? (
-                      <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
-                    ) : (
-                      <Sort size="16" />
-                    )}
-                  </span>
-                </th>
-              ))}
-            </tr>
-          ))}
+          {headerGroups.map(headerGroup => {
+            const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
+            return (
+              <tr key={key} {...restHeaderGroupProps}>
+                {headerGroup.headers.map(column => {
+                  const { key, ...restColumn } = column.getHeaderProps([
+                    { className: column.className },
+                    column.getSortByToggleProps(),
+                  ]);
+                  return (
+                    <th
+                      key={key}
+                      {...restColumn}
+                      style={{
+                        color: column.isSorted ? 'black' : '#374151',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {column.render('Header')}{' '}
+                      {column.canSort && (
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            verticalAlign: 'top',
+                            marginLeft: '4px',
+                            opacity: column.isSorted ? '100%' : '25%',
+                          }}
+                        >
+                          {column.isSortedDesc ? (
+                            <SortDown size="16" />
+                          ) : column.isSorted ? (
+                            <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
+                          ) : (
+                            <Sort size="16" />
+                          )}
+                        </span>
+                      )}
+                      <div>{column.canFilter ? column.render('Filter') : null}</div>
+                    </th>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {page.map((row, i) => {
+          {page.map(row => {
             prepareRow(row);
+            const { key, ...restRowProps } = row.getRowProps();
             return (
               <tr
-                key={row.original.id}
-                {...row.getRowProps()}
+                key={key}
+                {...restRowProps}
                 onClick={() => {
                   setCollectiveInModal(collectivesData[row.original.id]);
                   setIsModalOpen(true);
                 }}
               >
                 {row.cells.map(cell => {
-                  return <td {...cell.getCellProps([{ className: cell.column.className }])}>{cell.render('Cell')}</td>;
+                  const { key, ...restCellProps } = cell.getCellProps([{ className: cell.column.className }]);
+                  return (
+                    <td key={key} {...restCellProps}>
+                      {cell.render('Cell')}
+                    </td>
+                  );
                 })}
               </tr>
             );

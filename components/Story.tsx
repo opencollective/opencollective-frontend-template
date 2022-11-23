@@ -1,8 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { H4 } from '@opencollective/frontend-components/components/Text';
-
 const StoryWrapper = styled.div`
   margin-top: 32px;
   .video {
@@ -82,7 +80,9 @@ const Video = ({ src, title }) => {
 };
 export default function Stories({ stories }) {
   const story = stories && stories[0];
-  if (!story) return null;
+  if (!story) {
+    return null;
+  }
   return (
     <React.Fragment>
       <StoryWrapper>

@@ -8,7 +8,8 @@ import sanitizeHtml from 'sanitize-html';
 
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
-import { Avatar } from './Collectives';
+import LocationTag from './LocationTag';
+import { Avatar } from './Table';
 
 export const collectiveQuery = gql`
   query Account($slug: String!) {
@@ -90,8 +91,9 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                   <div className="mt-3">
                     <p className="text-base text-gray-500">{collective?.description}</p>
                   </div>
-                  {collective.tags?.length > 0 && (
+                  {(collective.tags?.length > 0 || collective.location?.label) && (
                     <div className="flex flex-wrap gap-2 mt-4">
+                      {collective.location?.label && <LocationTag>{collective.location.label}</LocationTag>}
                       {collective?.tags?.map(tag => (
                         <span key={tag} className="bg-gray-100 rounded-full px-2 py-1 text-sm text-gray-700">
                           {tag}
