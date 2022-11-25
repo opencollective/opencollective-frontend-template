@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
+import AnimateHeight from 'react-animate-height';
 
 import getFilterOptions from '../lib/location/getFilterOptions';
 
@@ -16,6 +17,13 @@ const DateIcon = () => (
   </svg>
 );
 
+// function that removes slug from query object
+const removeSlug = query => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { slug: _, ...rest } = query;
+  return rest;
+};
+
 export default function FilterArea({
   currentTimePeriod,
   currentTag,
@@ -23,6 +31,7 @@ export default function FilterArea({
   collectives,
   currentLocationFilter,
   setCurrentLocationFilter,
+  hideFilters,
 }) {
   const router = useRouter();
   const locationOptions = React.useMemo(() => getFilterOptions(collectives.map(c => ({ values: c }))), [collectives]);
@@ -34,47 +43,57 @@ export default function FilterArea({
         selectedTag={currentTag}
         categories={categories}
         onSelect={category => {
-          router.push({ pathname: '/foundation', query: { ...router.query, ...{ tag: category.tag } } }, null, {
-            shallow: true,
-          });
+          router.push(
+            { pathname: '/foundation', query: { ...removeSlug(router.query), ...{ tag: category.tag } } },
+            null,
+            {
+              shallow: true,
+            },
+          );
         }}
       />
-      <div className="mt-4 border-t pt-4">
-        <div className="space-y-2">
-          <Dropdown
-            fieldLabel={
-              <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
-                <DateIcon />
-                <span className="text-gray-900">Date range</span>
-              </div>
-            }
-            options={[
-              { value: 'ALL', label: 'All time' },
-              { value: 'PAST_YEAR', label: 'Past 12 months' },
-              { value: 'PAST_QUARTER', label: 'Past 3 months' },
-            ]}
-            value={currentTimePeriod}
-            onChange={option => {
-              router.push({ pathname: '/foundation', query: { ...router.query, ...{ time: option.value } } }, null, {
-                shallow: true,
-              });
-            }}
-          />
-          <Dropdown
-            fieldLabel={
-              <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
-                <LocationPin />
-                <span className="text-gray-900">Location</span>
-              </div>
-            }
-            options={[{ value: '', label: 'All locations' }, ...locationOptions]}
-            value={JSON.parse(currentLocationFilter).value}
-            onChange={value => {
-              setCurrentLocationFilter(JSON.stringify(value));
-            }}
-          />
+      <AnimateHeight id="example-panel" duration={500} height={hideFilters ? 0 : 'auto'}>
+        <div className="mt-4 border-t pt-4">
+          <div className="space-y-2">
+            <Dropdown
+              fieldLabel={
+                <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
+                  <DateIcon />
+                  <span className="text-gray-900">Date range</span>
+                </div>
+              }
+              options={[
+                { value: 'ALL', label: 'All time' },
+                { value: 'PAST_YEAR', label: 'Past 12 months' },
+                { value: 'PAST_QUARTER', label: 'Past 3 months' },
+              ]}
+              value={currentTimePeriod}
+              onChange={option => {
+                router.push(
+                  { pathname: '/foundation', query: { ...removeSlug(router.query), ...{ time: option.value } } },
+                  null,
+                  {
+                    shallow: true,
+                  },
+                );
+              }}
+            />
+            <Dropdown
+              fieldLabel={
+                <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
+                  <LocationPin />
+                  <span className="text-gray-900">Location</span>
+                </div>
+              }
+              options={[{ value: '', label: 'All locations' }, ...locationOptions]}
+              value={JSON.parse(currentLocationFilter).value}
+              onChange={value => {
+                setCurrentLocationFilter(JSON.stringify(value));
+              }}
+            />
+          </div>
         </div>
-      </div>
+      </AnimateHeight>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef,useState } from 'react';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 
@@ -44,6 +44,23 @@ export default function Dashboard({ categories, collectivesData, stories, locale
     setCollectiveInModal(collectivesData[slug]);
     setIsModalOpen(true);
   };
+  const collectivesDataContainer = useRef(null);
+  const [hideFilters, setHideFilters] = useState(false);
+
+  const handleScroll = () => {
+    const { bottom } = collectivesDataContainer.current.getBoundingClientRect();
+    // hide extra filters only related to collectives data
+    if (bottom < 400) {
+      setHideFilters(true);
+    } else {
+      setHideFilters(false);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const currentCategory = categories.find(category => (currentTag ? category.tag === currentTag : !category.tag));
   const { collectiveCount, totalRaised, numberOfContributions, collectives } =
@@ -90,10 +107,11 @@ export default function Dashboard({ categories, collectivesData, stories, locale
             collectives={collectives}
             currentLocationFilter={currentLocationFilter}
             setCurrentLocationFilter={setCurrentLocationFilter}
+            hideFilters={hideFilters}
           />
         </div>
         <div className="col-span-3 space-y-12">
-          <div className="space-y-5 rounded-lg bg-white py-8">
+          <div className="space-y-5 rounded-lg bg-white py-8" ref={collectivesDataContainer}>
             <div className="-mb-2 grid grid-cols-3 px-8">
               <Metric>
                 <p>{collectiveCount.toLocaleString(locale)}</p>
