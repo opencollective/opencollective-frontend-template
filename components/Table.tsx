@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { ChevronLeft } from '@styled-icons/fa-solid/ChevronLeft';
 import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
-import { Sort } from '@styled-icons/fa-solid/Sort';
 import { SortDown } from '@styled-icons/fa-solid/SortDown';
 import { useFilters, usePagination, useSortBy, useTable } from 'react-table';
 import styled from 'styled-components';
@@ -9,7 +8,6 @@ import styled from 'styled-components';
 import getFilterOptions from '../lib/location/getFilterOptions';
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
-import CollectiveModal from './CollectiveModal';
 import LocationTag from './LocationTag';
 
 const Table = styled.table`
@@ -64,10 +62,10 @@ const Table = styled.table`
     }
   }
   .last {
-    padding-right: 20px;
+    padding-right: 32px;
   }
   .first {
-    padding-left: 16px;
+    padding-left: 32px;
   }
   .center {
     text-align: center;
@@ -93,7 +91,7 @@ function LocationFilter({ column: { filterValue, setFilter, preFilteredRows } })
   return (
     <select
       value={filterValue}
-      className="p-1 bg-gray-50 mt-1"
+      className="mt-1 bg-gray-50 p-1"
       onChange={e => {
         setFilter(e.target.value || undefined);
       }}
@@ -109,8 +107,11 @@ function LocationFilter({ column: { filterValue, setFilter, preFilteredRows } })
 }
 
 function filterLocation(rows, id, filterValue) {
+  const filter = JSON.parse(filterValue);
+  if (filter.value === '') {
+    return rows;
+  }
   return rows.filter(row => {
-    const filter = JSON.parse(filterValue);
     const { region, domesticRegion, countryCode } = row.original.location;
 
     if (filter.type === 'region') {
@@ -125,23 +126,21 @@ function filterLocation(rows, id, filterValue) {
 
 interface Props {
   collectives: [any];
-  collectivesData: object;
-  currentMetric: string;
   currentTimePeriod: string;
   currentTag: string;
+  currentLocationFilter: string;
   locale: string;
+  openCollectiveModal: (slug: string) => void;
 }
 
 export default function Collectives({
   collectives,
-  collectivesData,
-  currentMetric,
   currentTimePeriod,
   currentTag,
   locale,
+  currentLocationFilter,
+  openCollectiveModal,
 }: Props) {
-  const [collectiveInModal, setCollectiveInModal] = React.useState(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const data = React.useMemo(() => collectives, [currentTag, currentTimePeriod]);
 
   const columns = React.useMemo(
@@ -154,7 +153,7 @@ export default function Collectives({
             <span>{row.original.name}</span>
           </div>
         ),
-        Header: 'Name',
+        Header: 'Collective',
         sortDescFirst: true,
         disableSortBy: true,
         className: 'left first',
@@ -172,16 +171,16 @@ export default function Collectives({
         Filter: LocationFilter,
         filter: filterLocation,
         disableSortBy: true,
-        className: 'left',
+        className: 'left  max-w-[200px] overflow-hidden',
       },
-      {
-        Header: 'Created',
-        accessor: 'createdAt',
-        sortDescFirst: true,
-        Cell: ({ row }) => new Date(row.original.createdAt).getUTCFullYear(),
-        className: 'center',
-        disableFilters: true,
-      },
+      // {
+      //   Header: 'Created',
+      //   accessor: 'createdAt',
+      //   sortDescFirst: true,
+      //   Cell: ({ row }) => new Date(row.original.createdAt).getUTCFullYear(),
+      //   className: 'center',
+      //   disableFilters: true,
+      // },
       {
         Header: 'Contributors',
         accessor: 'contributorsCount',
@@ -224,7 +223,6 @@ export default function Collectives({
     getTableBodyProps,
     headerGroups,
     prepareRow,
-    toggleSortBy,
     page,
     canPreviousPage,
     canNextPage,
@@ -232,6 +230,7 @@ export default function Collectives({
     gotoPage,
     nextPage,
     previousPage,
+    setFilter,
     state: { pageIndex },
   } = useTable(
     {
@@ -252,15 +251,20 @@ export default function Collectives({
     usePagination,
   );
 
+  // useEffect(() => {
+  //   if (currentMetric === 'TOTAL_RAISED') {
+  //     toggleSortBy('totalRaised', true, false);
+  //   }
+  // }, [currentMetric, currentTimePeriod, currentTag]);
+
+  // Listen for input changes outside
   useEffect(() => {
-    if (currentMetric === 'TOTAL_RAISED') {
-      toggleSortBy('totalRaised', true, false);
-    }
-  }, [currentMetric, currentTimePeriod, currentTag]);
+    // This will now use our custom filter for age
+    setFilter('location', currentLocationFilter);
+  }, [currentLocationFilter]);
 
   return (
     <React.Fragment>
-      <CollectiveModal isOpen={isModalOpen} collective={collectiveInModal} onClose={() => setIsModalOpen(false)} />
       <Table {...getTableProps()} className="">
         <thead>
           {headerGroups.map(headerGroup => {
@@ -278,7 +282,8 @@ export default function Collectives({
                       {...restColumn}
                       style={{
                         color: column.isSorted ? 'black' : '#374151',
-                        cursor: 'pointer',
+                        cursor: column.canSort ? 'pointer' : 'default',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {column.render('Header')}{' '}
@@ -291,16 +296,16 @@ export default function Collectives({
                             opacity: column.isSorted ? '100%' : '25%',
                           }}
                         >
-                          {column.isSortedDesc ? (
-                            <SortDown size="16" />
-                          ) : column.isSorted ? (
-                            <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
-                          ) : (
-                            <Sort size="16" />
-                          )}
+                          {
+                            column.isSortedDesc ? (
+                              <SortDown size="16" />
+                            ) : column.isSorted ? (
+                              <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
+                            ) : null
+                            // <Sort size="16" />
+                          }
                         </span>
                       )}
-                      <div>{column.canFilter ? column.render('Filter') : null}</div>
                     </th>
                   );
                 })}
@@ -317,8 +322,7 @@ export default function Collectives({
                 key={key}
                 {...restRowProps}
                 onClick={() => {
-                  setCollectiveInModal(collectivesData[row.original.id]);
-                  setIsModalOpen(true);
+                  openCollectiveModal(row.original.slug);
                 }}
               >
                 {row.cells.map(cell => {
@@ -334,12 +338,12 @@ export default function Collectives({
           })}
         </tbody>
       </Table>
-      <div className="px-6 pt-4 pb-4 flex items-center gap-4 text-sm text-gray-700">
+      <div className="flex items-center gap-4 px-10 text-sm text-gray-700">
         <span>
           Page{' '}
           <input
             type="number"
-            className="border rounded w-10 inline-block text-center"
+            className="inline-block w-10 rounded border text-center"
             value={pageIndex + 1}
             onChange={e => {
               const page = e.target.value ? Number(e.target.value) - 1 : 0;
@@ -353,14 +357,14 @@ export default function Collectives({
           <button
             onClick={() => previousPage()}
             disabled={!canPreviousPage}
-            className="hover:text-black p-2 hover:bg-gray-100 rounded-full w-10 h-10"
+            className="h-10 w-10 rounded-full p-2 hover:bg-gray-100 hover:text-black"
           >
             <ChevronLeft size="12" />
           </button>{' '}
           <button
             onClick={() => nextPage()}
             disabled={!canNextPage}
-            className="hover:text-black p-2 hover:bg-gray-100 rounded-full w-10 h-10"
+            className="h-10 w-10 rounded-full p-2 hover:bg-gray-100 hover:text-black"
           >
             <ChevronRight size="12" />
           </button>

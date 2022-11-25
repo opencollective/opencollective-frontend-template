@@ -5,4 +5,10 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  safelist: [
+    {
+      pattern: /(border|bg|text|decoration)-(indigo|pink|orange|green|cyan|teal|blue|purple|rose|amber)/,
+      variants: ['lg', 'hover', 'focus', 'lg:hover'],
+    },
+  ],
 };

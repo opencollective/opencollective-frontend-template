@@ -110,3 +110,22 @@
     font-family: 'Inter', sans-serif;
     box-sizing: border-box;
   }
+
+  @keyframes fadeIn {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes fadeOut {
+    0% { opacity: 1}
+    100% { opacity: 0; }
+  }
+  
+  .fadeIn {
+    animation: fadeIn .35s forwards;
+    animation-timing-function: cubic-bezier(0.39, 0.575, 0.565, 1);
+  }
+  .fadeOut {
+    animation: fadeOut .3s forwards;
+    animation-timing-function: cubic-bezier(0.47, 0, 0.745, 0.715);
+  }

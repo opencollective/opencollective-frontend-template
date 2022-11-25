@@ -25,7 +25,7 @@ export const getMinMaxDifference = data => {
 
 export const ChartWrapper = styled.div`
   position: relative;
-  height: 300px;
+  height: 270px;
   z-index: 1;
   .loading {
     position: absolute;
@@ -182,7 +182,7 @@ export default function Chart({ timeSeriesArray, startYear, currentTag, type, cu
   return (
     <ChartWrapper>
       <div className="loading">Loading...</div>
-      <ApexChart type="area" width="100%" height="300px" options={chartOptions} series={series} />
+      <ApexChart type="area" width="100%" height="270px" options={chartOptions} series={series} />
     </ChartWrapper>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 
-// import Footer from './Footer';
+import Footer from './Footer';
 // import Header from './Header';
 
 interface Props {
@@ -9,10 +9,10 @@ interface Props {
 
 export default function Layout({ children }: Props) {
   return (
-    <React.Fragment>
+    <div className="flex min-h-screen flex-col justify-between">
       {/* <Header /> */}
       <main>{children}</main>
-      {/* <Footer /> */}
-    </React.Fragment>
+      <Footer />
+    </div>
   );
 }

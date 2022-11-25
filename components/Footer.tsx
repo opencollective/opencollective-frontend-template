@@ -1,44 +1,21 @@
 import React from 'react';
-import styled from 'styled-components';
-
-import packageJSON from '../package.json';
-
-const StyledFooter = styled.footer`
-  margin-top: 2rem;
-  font-size: 13px;
-
-  ul {
-    margin-bottom: 1rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  li {
-    margin-right: 1rem;
-    display: inline-block;
-  }
-`;
 
 export default function Footer() {
   return (
-    <StyledFooter>
-      <hr />
-      <ul>
-        <li>
-          <em>
-            <strong>
-              {packageJSON.name}@{packageJSON.version}
-            </strong>
-          </em>
-        </li>
-        <li>
-          <em>
-            <strong>
-              opencollective/frontend-components@{packageJSON.dependencies['@opencollective/frontend-components']}
-            </strong>
-          </em>
-        </li>
-      </ul>
-    </StyledFooter>
+    <footer className="flex justify-center border-t bg-white p-12">
+      <div className="flex w-full max-w-7xl items-center justify-between">
+        <h1 className=" text-3xl font-bold text-gray-900">Discover</h1>
+        <div className="flex flex-col items-center space-y-2">
+          <p className="text-sm text-gray-600">powered by</p>
+          <a href="https://opencollective.com">
+            <img
+              src="/oc-logo.svg"
+              alt="Open Collective"
+              className="h-8 grayscale transition-all duration-300 hover:grayscale-0"
+            />
+          </a>
+        </div>
+      </div>
+    </footer>
   );
 }

@@ -40,6 +40,7 @@
     "babel-plugin-formatjs": "^10.3.31",
     "babel-plugin-react-remove-properties": "^0.3.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
+    "class-variance-authority": "^0.3.0",
     "dayjs": "^1.11.6",
     "deepmerge": "4.2.2",
     "graphql": "16.6.0",
@@ -57,11 +58,12 @@
     "react-animate-height": "^3.0.5",
     "react-apexcharts": "^1.4.0",
     "react-dom": "^17.0.2",
+    "react-flip-toolkit": "^7.0.17",
     "react-intl": "^6.2.1",
     "react-table": "^7.8.0",
-    "sanitize-html": "^2.7.3",
     "remark": "^14.0.2",
     "remark-html": "^15.0.1",
+    "sanitize-html": "^2.7.3",
     "styled-components": "^5.3.6",
     "styled-system": "^5.1.5"
   },
@@ -93,6 +95,7 @@
     "eslint-plugin-styled-components-a11y": "1.0.0",
     "postcss": "^8.4.19",
     "prettier": "^2.6.2",
+    "prettier-plugin-tailwindcss": "^0.1.13",
     "tailwindcss": "^3.2.4",
     "typescript": "^4"
   }

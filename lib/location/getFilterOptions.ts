@@ -26,14 +26,14 @@ export default function getFilterOptions(preFilteredRows) {
   // for each region
   sortedRegions.forEach(region => {
     // add the region to the options
-    options.push({ type: 'region', label: `${region}`, value: region });
+    options.push({ type: 'region', label: region, value: region });
     // add the countries in that region to the options
     countries
       .filter(country => country.region === region)
       .map(country => country.countryCode)
       .sort()
       .forEach(country => {
-        options.push({ type: 'countryCode', label: `- ${country}`, value: country });
+        options.push({ type: 'countryCode', label: country, value: country });
 
         // add the domestic regions in that country to the options
         domesticRegions
@@ -41,7 +41,7 @@ export default function getFilterOptions(preFilteredRows) {
           .map(state => state.domesticRegion)
           .sort()
           .forEach(domesticRegion => {
-            options.push({ type: 'domesticRegion', label: `-- ${domesticRegion}`, value: domesticRegion });
+            options.push({ type: 'domesticRegion', label: domesticRegion, value: domesticRegion });
           });
       });
   });
