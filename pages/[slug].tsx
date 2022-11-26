@@ -16,7 +16,7 @@ import Layout from '../components/Layout';
 
 export const accountsQuery = gql`
   query SearchAccounts($hostSlug: String, $tag: [String], $dateFrom: DateTime, $dateTo: DateTime, $timeUnit: TimeUnit) {
-    accounts(type: [COLLECTIVE], tag: $tag, limit: 500, host: { slug: $hostSlug }) {
+    accounts(type: [COLLECTIVE, FUND], tag: $tag, tagSearchOperator: OR, limit: 4000, host: { slug: $hostSlug }) {
       totalCount
       nodes {
         id
@@ -58,6 +58,7 @@ export const accountsQuery = gql`
           timeUnit: $timeUnit
           type: CREDIT
           kind: [CONTRIBUTION, ADDED_FUNDS]
+          includeChildren: true
         ) {
           timeUnit
           nodes {
