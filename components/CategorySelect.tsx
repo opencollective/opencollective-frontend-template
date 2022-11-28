@@ -10,7 +10,7 @@ const CategorySelect = ({ categories, selectedTag, onSelect, currentTimePeriod }
           key={category.label}
           className={cva(
             [
-              `flex w-full items-center justify-between rounded-lg border-2 px-4 py-3 transition-colors hover:bg-[#FFFEFC]`,
+              `flex w-full items-center justify-between rounded-lg border-2 px-4 py-2 transition-colors hover:bg-[#FFFEFC]`,
             ],
             {
               variants: {
