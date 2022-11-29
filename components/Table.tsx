@@ -20,7 +20,6 @@ const Table = styled.table`
       th {
         font-weight: 700;
         color: #374151;
-        padding: 16px 8px;
         height: 60px;
         text-transform: uppercase;
         font-size: 12px;
@@ -42,9 +41,6 @@ const Table = styled.table`
       :hover {
         background: #fbfcfd;
       }
-      td {
-        padding: 16px;
-      }
     }
   }
   .collective {
@@ -60,21 +56,6 @@ const Table = styled.table`
       overflow: hidden;
       text-overflow: ellipsis;
     }
-  }
-  .last {
-    padding-right: 32px;
-  }
-  .first {
-    padding-left: 32px;
-  }
-  .center {
-    text-align: center;
-  }
-  .right {
-    text-align: right;
-  }
-  .left {
-    text-align: left;
   }
 `;
 
@@ -156,7 +137,7 @@ export default function Collectives({
         Header: 'Collective',
         sortDescFirst: true,
         disableSortBy: true,
-        className: 'left first',
+        className: 'max-w-[220px] text-left pl-4 lg:pl-8 pr-2 py-4',
         disableFilters: true,
       },
       {
@@ -171,7 +152,7 @@ export default function Collectives({
         Filter: LocationFilter,
         filter: filterLocation,
         disableSortBy: true,
-        className: 'left  max-w-[200px] overflow-hidden',
+        className: 'max-w-[150px] text-left overflow-hidden px-2 py-4',
       },
       // {
       //   Header: 'Created',
@@ -186,7 +167,7 @@ export default function Collectives({
         accessor: 'contributorsCount',
         sortDescFirst: true,
         Cell: tableProps => tableProps.row.original.contributorsCount.toLocaleString(locale),
-        className: 'center',
+        className: 'text-center px-2 py-4',
         disableFilters: true,
       },
       {
@@ -197,7 +178,7 @@ export default function Collectives({
           const percentDisbursed = parseFloat(row.original.percentDisbursed);
           return isNaN(percentDisbursed) ? 'n/a' : `${percentDisbursed.toFixed(1)}%`;
         },
-        className: 'right',
+        className: 'text-center px-2 py-4',
         disableFilters: true,
       },
       {
@@ -212,7 +193,7 @@ export default function Collectives({
           </div>
         ),
         sortDescFirst: true,
-        className: 'right last',
+        className: 'text-right pr-4 lg:pr-8 pl-2 py-4',
         disableFilters: true,
       },
     ],
@@ -265,79 +246,78 @@ export default function Collectives({
 
   return (
     <React.Fragment>
-      <Table {...getTableProps()} className="">
-        <thead>
-          {headerGroups.map(headerGroup => {
-            const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
-            return (
-              <tr key={key} {...restHeaderGroupProps}>
-                {headerGroup.headers.map(column => {
-                  const { key, ...restColumn } = column.getHeaderProps([
-                    { className: column.className },
-                    column.getSortByToggleProps(),
-                  ]);
-                  return (
-                    <th
-                      key={key}
-                      {...restColumn}
-                      style={{
-                        color: column.isSorted ? 'black' : '#374151',
-                        cursor: column.canSort ? 'pointer' : 'default',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {column.render('Header')}{' '}
-                      {column.canSort && (
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            verticalAlign: 'top',
-                            marginLeft: '4px',
-                            opacity: column.isSorted ? '100%' : '25%',
-                          }}
-                        >
-                          {
-                            column.isSortedDesc ? (
+      <div className="overflow-auto">
+        <Table {...getTableProps()} className="">
+          <thead>
+            {headerGroups.map(headerGroup => {
+              const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
+              return (
+                <tr key={key} {...restHeaderGroupProps}>
+                  {headerGroup.headers.map(column => {
+                    const { key, ...restColumn } = column.getHeaderProps([
+                      { className: column.className },
+                      column.getSortByToggleProps(),
+                    ]);
+                    return (
+                      <th
+                        key={key}
+                        {...restColumn}
+                        style={{
+                          color: column.isSorted ? 'black' : '#374151',
+                          cursor: column.canSort ? 'pointer' : 'default',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {column.render('Header')}{' '}
+                        {column.canSort && column.isSorted && (
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              verticalAlign: 'top',
+                              marginLeft: '4px',
+                              opacity: column.isSorted ? '100%' : '25%',
+                            }}
+                          >
+                            {column.isSortedDesc ? (
                               <SortDown size="16" />
-                            ) : column.isSorted ? (
+                            ) : (
                               <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
-                            ) : null
-                            // <Sort size="16" />
-                          }
-                        </span>
-                      )}
-                    </th>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {page.map(row => {
-            prepareRow(row);
-            const { key, ...restRowProps } = row.getRowProps();
-            return (
-              <tr
-                key={key}
-                {...restRowProps}
-                onClick={() => {
-                  openCollectiveModal(row.original.slug);
-                }}
-              >
-                {row.cells.map(cell => {
-                  const { key, ...restCellProps } = cell.getCellProps([{ className: cell.column.className }]);
-                  return (
-                    <td key={key} {...restCellProps}>
-                      {cell.render('Cell')}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
+                            )}
+                          </span>
+                        )}
+                      </th>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </thead>
+          <tbody {...getTableBodyProps()}>
+            {page.map(row => {
+              prepareRow(row);
+              const { key, ...restRowProps } = row.getRowProps();
+              return (
+                <tr
+                  key={key}
+                  {...restRowProps}
+                  onClick={() => {
+                    openCollectiveModal(row.original.slug);
+                  }}
+                >
+                  {row.cells.map(cell => {
+                    const { key, ...restCellProps } = cell.getCellProps([{ className: cell.column.className }]);
+                    return (
+                      <td key={key} {...restCellProps}>
+                        {cell.render('Cell')}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </Table>
+      </div>
       <div className="flex items-center gap-4 px-10 text-sm text-gray-700">
         <span>
           Page{' '}

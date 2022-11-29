@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { useRouter } from 'next/router';
 import AnimateHeight from 'react-animate-height';
 
@@ -17,6 +17,24 @@ const DateIcon = () => (
   </svg>
 );
 
+const FilterIcon = () => (
+  <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M10.125 10C10.7466 10 11.25 10.4475 11.25 11C11.25 11.5525 10.7466 12 10.125 12H7.875C7.25344 12 6.75 11.5525 6.75 11C6.75 10.4475 7.25344 10 7.875 10H10.125ZM13.5 5C14.1216 5 14.625 5.4475 14.625 6C14.625 6.5525 14.1216 7 13.5 7H4.5C3.87844 7 3.375 6.5525 3.375 6C3.375 5.4475 3.87844 5 4.5 5H13.5ZM16.875 0C17.4966 0 18 0.447504 18 1C18 1.5525 17.4966 2 16.875 2H1.125C0.503442 2 0 1.5525 0 1C0 0.447504 0.503442 0 1.125 0H16.875Z"
+      fill="#4D4F51"
+    />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M1.21175 1.43745L1.31632 1.31632C1.69975 0.932901 2.29974 0.898044 2.72254 1.21175L2.84368 1.31632L10 8.47216L17.1563 1.31632C17.5397 0.932901 18.1397 0.898044 18.5625 1.21175L18.6837 1.31632C19.0671 1.69975 19.102 2.29974 18.7882 2.72254L18.6837 2.84368L11.5278 10L18.6837 17.1563C19.0671 17.5397 19.102 18.1397 18.7882 18.5625L18.6837 18.6837C18.3003 19.0671 17.7003 19.102 17.2775 18.7882L17.1563 18.6837L10 11.5278L2.84368 18.6837C2.46025 19.0671 1.86026 19.102 1.43745 18.7882L1.31632 18.6837C0.932901 18.3003 0.898044 17.7003 1.21175 17.2775L1.31632 17.1563L8.47216 10L1.31632 2.84368C0.932901 2.46025 0.898044 1.86026 1.21175 1.43745L1.31632 1.31632L1.21175 1.43745Z"
+      fill="#4D4F51"
+    />
+  </svg>
+);
+
 // function that removes slug from query object
 const removeSlug = query => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -24,25 +42,26 @@ const removeSlug = query => {
   return rest;
 };
 
-export default function FilterArea({
+export const Filters = ({
   currentTimePeriod,
   currentTag,
   categories,
   collectives,
   currentLocationFilter,
   setCurrentLocationFilter,
-  hideFilters,
-}) {
+  hideLocationAndTimeFilters,
+  collapseFilterArea,
+}) => {
   const router = useRouter();
   const locationOptions = React.useMemo(() => getFilterOptions(collectives.map(c => ({ values: c }))), [collectives]);
-
   return (
-    <div className="sticky top-10 rounded-lg bg-white p-4">
+    <div className="relative z-50 translate-x-0 bg-white">
       <CategoryFilter
         currentTimePeriod={currentTimePeriod}
         selectedTag={currentTag}
         categories={categories}
         onSelect={category => {
+          collapseFilterArea?.();
           router.push(
             { pathname: '/foundation', query: { ...removeSlug(router.query), ...{ tag: category.tag } } },
             null,
@@ -52,7 +71,7 @@ export default function FilterArea({
           );
         }}
       />
-      <AnimateHeight id="example-panel" duration={500} height={hideFilters ? 0 : 'auto'}>
+      <AnimateHeight id="example-panel" duration={500} height={hideLocationAndTimeFilters ? 0 : 'auto'}>
         <div className="mt-4 border-t pt-4">
           <div className="space-y-2">
             <Dropdown
@@ -69,6 +88,7 @@ export default function FilterArea({
               ]}
               value={currentTimePeriod}
               onChange={option => {
+                collapseFilterArea?.();
                 router.push(
                   { pathname: '/foundation', query: { ...removeSlug(router.query), ...{ time: option.value } } },
                   null,
@@ -88,6 +108,7 @@ export default function FilterArea({
               options={[{ value: '', label: 'All locations' }, ...locationOptions]}
               value={JSON.parse(currentLocationFilter).value}
               onChange={value => {
+                collapseFilterArea?.();
                 setCurrentLocationFilter(JSON.stringify(value));
               }}
             />
@@ -95,5 +116,61 @@ export default function FilterArea({
         </div>
       </AnimateHeight>
     </div>
+  );
+};
+
+export default function FilterArea({
+  currentTimePeriod,
+  currentTag,
+  categories,
+  collectives,
+  currentLocationFilter,
+  setCurrentLocationFilter,
+  hideFilters,
+}) {
+  const [filtersExpanded, setFiltersExpanded] = React.useState(false);
+  return (
+    <Fragment>
+      <div className="hidden lg:block">
+        <div className="rounded-lg bg-white p-4">
+          <Filters
+            currentTimePeriod={currentTimePeriod}
+            currentTag={currentTag}
+            categories={categories}
+            collectives={collectives}
+            currentLocationFilter={currentLocationFilter}
+            setCurrentLocationFilter={setCurrentLocationFilter}
+            hideLocationAndTimeFilters={hideFilters}
+            collapseFilterArea={() => setFiltersExpanded(false)}
+          />
+        </div>
+      </div>
+      <div className="block lg:hidden">
+        <div className="relative h-14">
+          <div className="absolute top-0 right-0 left-0 rounded-2xl bg-white shadow">
+            <button
+              className="flex w-full  items-center justify-between rounded-2xl px-8 py-4 font-medium text-gray-800"
+              onClick={() => setFiltersExpanded(!filtersExpanded)}
+            >
+              <span>Filters</span> {filtersExpanded ? <CloseIcon /> : <FilterIcon />}
+            </button>
+            {filtersExpanded && (
+              <div className="p-4 pt-3">
+                <Filters
+                  currentTimePeriod={currentTimePeriod}
+                  currentTag={currentTag}
+                  categories={categories}
+                  collectives={collectives}
+                  currentLocationFilter={currentLocationFilter}
+                  setCurrentLocationFilter={setCurrentLocationFilter}
+                  hideLocationAndTimeFilters={hideFilters}
+                  collapseFilterArea={() => setFiltersExpanded(false)}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </Fragment>
   );
 }

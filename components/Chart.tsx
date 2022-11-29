@@ -71,21 +71,21 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
   },
   legend: {
     show: false,
-    showForSingleSeries: false,
-    fontSize: '14px',
-    position: 'top',
-    offsetY: 10,
-    floating: true,
-    horizontalAlign: 'center',
-    onItemClick: {
-      toggleDataSeries: true,
-    },
+    // showForSingleSeries: false,
+    // fontSize: '14px',
+    // position: 'top',
+    // offsetY: 10,
+    // floating: true,
+    // horizontalAlign: 'center',
+    // onItemClick: {
+    //   toggleDataSeries: true,
+    // },
   },
   colors,
   xaxis: {
     labels: {
       style: {
-        fontSize: '14px',
+        fontSize: '12px',
       },
       formatter: function (value) {
         if (timeUnit === 'YEAR') {
@@ -106,7 +106,7 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
   yaxis: {
     labels: {
       style: {
-        fontSize: '14px',
+        fontSize: '12px',
       },
       minWidth: 38,
       formatter: value => formatAmountForLegend(value, type, hostCurrency, intl.locale, isCompactNotation),
@@ -114,7 +114,7 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
   },
   tooltip: {
     style: {
-      fontSize: '14px',
+      fontSize: '12px',
     },
     y: {
       formatter: value => formatAmountForLegend(value, type, hostCurrency, intl.locale, false),

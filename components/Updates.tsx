@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flipped,Flipper } from 'react-flip-toolkit';
+import { Flipped, Flipper } from 'react-flip-toolkit';
 import { FormattedDate } from 'react-intl';
 import sanitizeHtml from 'sanitize-html';
 
@@ -419,31 +419,31 @@ export default function Updates({ currentTag, openCollectiveModal }) {
   }, []);
   return (
     <div>
-      <h1 className="mb-6 text-4xl font-bold text-gray-500">Updates from collectives</h1>
+      <h1 className="mb-6  text-xl font-bold text-gray-600 lg:text-4xl">Updates from collectives</h1>
       <Flipper flipKey={currentTag}>
-        <div className="min-h-[560px] space-y-4">
+        <div className="min-h-[440px] space-y-4 lg:min-h-[560px]">
           {sortedUpdates
             .filter(update => currentTag === 'ALL' || update.account.tags.includes(currentTag))
             .slice(0, 3)
             .map(update => {
               return (
                 <Flipped flipId={update.createdAt} key={update.createdAt}>
-                  <div className="fadeIn flex flex-col gap-1 rounded-lg bg-white px-4 py-4">
+                  <div className="fadeIn flex flex-col gap-1 rounded-lg bg-white p-2 lg:p-4">
                     <a
-                      className=" relative mb-0  block space-y-2 overflow-hidden rounded-lg p-4 transition-colors duration-100 hover:bg-gray-50 "
+                      className=" relative mb-0  block space-y-2 overflow-hidden rounded-lg p-2 transition-colors duration-100 hover:bg-gray-50 lg:p-4 "
                       href={`https://opencollective.com/${update.account.slug}/updates/${update.slug}`}
                       target="_blank"
                       rel="noreferrer"
                     >
                       <div className="flex items-center justify-between gap-6">
-                        <h4 className="flex-shrink overflow-hidden text-ellipsis whitespace-nowrap text-xl font-medium text-gray-900 group-hover:underline">
+                        <h4 className="flex-shrink overflow-hidden text-ellipsis whitespace-nowrap  text-base font-medium text-gray-900 group-hover:underline lg:text-xl">
                           {update.title}
                         </h4>
-                        <p className="flex-shrink-0  text-gray-600">
+                        <p className="hidden  flex-shrink-0 text-gray-600 lg:block">
                           <FormattedDate dateStyle={'medium'} value={update.createdAt} />
                         </p>
                       </div>
-                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-base text-gray-500">
+                      <p className="overflow-hidden text-ellipsis whitespace-nowrap text-sm text-gray-500 lg:text-base">
                         {sanitizeHtml(update.summary, { allowedTags: [], allowedAttributes: {} })}
                       </p>
                     </a>
@@ -451,7 +451,7 @@ export default function Updates({ currentTag, openCollectiveModal }) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
                         <button
-                          className=" flex items-center gap-2 rounded-md px-4 py-2 hover:bg-gray-50"
+                          className=" flex items-center gap-2 rounded-md px-2 py-2 hover:bg-gray-50 lg:px-4"
                           type="button"
                           onClick={() => openCollectiveModal(update.account.slug)}
                         >
@@ -462,14 +462,18 @@ export default function Updates({ currentTag, openCollectiveModal }) {
                           />
                           <span className="font-medium">{update.account.name}</span>
                         </button>
-                        ·
-                        <img
-                          src={update.fromAccount.imageUrl.replace('-staging', '')}
-                          alt={update.fromAccount.name}
-                          className="h-6 w-6 rounded-full object-cover"
-                        />
-                        <span className="text-sm font-medium">{update.fromAccount.name}</span>
+                        <span className="align-items hidden gap-2 lg:flex">
+                          <img
+                            src={update.fromAccount.imageUrl.replace('-staging', '')}
+                            alt={update.fromAccount.name}
+                            className="h-4 w-4 rounded-full object-cover lg:h-6 lg:w-6"
+                          />
+                          <span className="text-sm font-medium">{update.fromAccount.name}</span>
+                        </span>
                       </div>
+                      <p className="block flex-shrink-0  text-sm text-gray-600 lg:hidden">
+                        <FormattedDate dateStyle={'short'} value={update.createdAt} />
+                      </p>
                     </div>
                   </div>
                 </Flipped>

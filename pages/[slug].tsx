@@ -79,8 +79,8 @@ export const accountsQuery = gql`
 export const categories = [
   { label: 'All', tag: 'ALL', color: '#14B8A6', tc: 'teal' },
   { label: 'Mutual aid', tag: 'mutual aid', color: '#3B82F6', tc: 'blue' },
-  { label: 'Civic tech', tag: 'civic tech', color: '#A855F7', tc: 'purple' },
-  { label: 'Arts & culture', tag: 'arts and culture', color: '#F43F5E', tc: 'rose' },
+  { label: 'Civic Tech', tag: 'civic tech', color: '#A855F7', tc: 'purple' },
+  { label: 'Arts & Culture', tag: 'arts and culture', color: '#F43F5E', tc: 'rose' },
   { label: 'Climate', tag: 'climate', extraTags: ['climate change', 'climate justice'], color: '#F59E0B', tc: 'amber' },
 ];
 

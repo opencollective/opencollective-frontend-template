@@ -17,7 +17,7 @@ export default function DropdownSelector({ options, fieldLabel, value, onChange 
         <Listbox.Options className="absolute right-0 z-10 mt-2 mb-10 rounded-lg bg-white p-2 shadow">
           {options.map(option => (
             <Listbox.Option
-              key={option.tag}
+              key={option.value}
               value={option}
               className={({ active }) =>
                 `cursor-pointer select-none rounded-lg px-2 py-1 ${active ? 'bg-gray-50 ' : ''}`

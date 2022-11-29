@@ -12,7 +12,8 @@ import { ThemeProvider } from 'styled-components';
 import { useApollo } from '../lib/apollo-client';
 import theme from '@opencollective/frontend-components/lib/theme';
 
-import '../globals.css';
+import '../styles/globals.css';
+import '../styles/swiper.css';
 
 dayjs.extend(utc);
 dayjs.extend(weekOfYear);

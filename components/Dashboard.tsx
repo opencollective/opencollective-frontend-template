@@ -1,33 +1,13 @@
-import React, { useEffect, useRef,useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
-import styled from 'styled-components';
-
-import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
 import Chart from './Chart';
 import CollectiveModal from './CollectiveModal';
 import FilterArea from './FilterArea';
+import Stats from './Stats';
 import Stories from './Stories';
 import Table from './Table';
 import Updates from './Updates';
-
-const Metric = styled.div`
-  text-align: center;
-  &:not(:last-child) {
-    border-right: 1px solid #e6e8eb;
-  }
-  p {
-    font-weight: 500;
-    font-size: 28px;
-    margin: 0 0 2px 0;
-  }
-  span {
-    font-size: 18px;
-    color: #374151;
-    margin: 0;
-    display: block;
-  }
-`;
 
 const getParam = param => (Array.isArray(param) ? param[0] : param);
 
@@ -67,10 +47,10 @@ export default function Dashboard({ categories, collectivesData, stories, locale
     currentCategory?.data[currentTimePeriod] || {};
   const totalCollectiveCount = categories[0].data.ALL.collectiveCount;
   return (
-    <div className="mx-auto mt-4 flex max-w-[1400px] flex-col space-y-10 p-10">
-      <div className="grid grid-cols-4 gap-10">
-        <div className="col-span-3 w-full rounded-lg bg-white p-12">
-          <h1 className=" text-[40px] font-bold leading-tight text-[#111827]">
+    <div className="mx-auto mt-4 flex max-w-[1400px] flex-col space-y-10 p-4 lg:p-10">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-4">
+        <div className="w-full rounded-lg bg-white p-6 lg:col-span-3 lg:p-12">
+          <h1 className="text-[28px] font-bold leading-tight text-[#111827] lg:text-[40px]">
             Discover {totalCollectiveCount.toLocaleString(locale)} collectives making an impact in{' '}
             {categories
               .filter(c => c.tag !== 'ALL')
@@ -82,10 +62,10 @@ export default function Dashboard({ categories, collectivesData, stories, locale
                   {arr.length - 1 === i ? '' : ', '}
                 </React.Fragment>
               ))}{' '}
-            and more
+            and more.
           </h1>
         </div>
-        <div className="flex flex-col items-center justify-center rounded-lg  bg-[#F7FEFF] p-12">
+        <div className="flex flex-col items-center justify-center bg-[#F7FEFF]  p-12 lg:rounded-lg">
           <img src="/ocf-logo.svg" alt="OCF Logotype" className="h-10" />
           <a
             href="https://opencollective.com/solidarity-economy-fund"
@@ -98,8 +78,8 @@ export default function Dashboard({ categories, collectivesData, stories, locale
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-10">
-        <div>
+      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-4">
+        <div className="sticky top-4 z-20 lg:top-10">
           <FilterArea
             currentTimePeriod={currentTimePeriod}
             currentTag={currentTag}
@@ -110,23 +90,15 @@ export default function Dashboard({ categories, collectivesData, stories, locale
             hideFilters={hideFilters}
           />
         </div>
-        <div className="col-span-3 space-y-12">
-          <div className="space-y-5 rounded-lg bg-white py-8" ref={collectivesDataContainer}>
-            <div className="-mb-2 grid grid-cols-3 px-8">
-              <Metric>
-                <p>{collectiveCount.toLocaleString(locale)}</p>
-                <span>Collectives</span>
-              </Metric>
-              <Metric>
-                <p>{formatCurrency(totalRaised.valueInCents, totalRaised.currency, { locale, precision: 0 })}</p>
-                <span>Total raised</span>
-              </Metric>
-              <Metric>
-                <p>{numberOfContributions.toLocaleString(locale)}</p>
-                <span>Contributions</span>
-              </Metric>
-            </div>
-            <div className="px-8">
+        <div className="space-y-12 lg:col-span-3">
+          <div className="-mx-4 space-y-5 rounded-lg bg-white py-4 lg:mx-0 lg:py-8" ref={collectivesDataContainer}>
+            <Stats
+              totalRaised={totalRaised}
+              collectiveCount={collectiveCount}
+              numberOfContributions={numberOfContributions}
+              locale={locale}
+            />
+            <div className="lg:px-4">
               <Chart
                 startYear={2018}
                 currentTag={currentTag}
@@ -155,19 +127,19 @@ export default function Dashboard({ categories, collectivesData, stories, locale
         </div>
       </div>
       <div>
-        <div className="my-12 grid grid-cols-4 gap-12 rounded-lg border-2 border-teal-500 bg-[#F7FEFF]">
-          <div className="flex flex-col justify-center p-10 pr-4">
+        <div className="order my-12 grid grid-cols-1 rounded-lg border-2 border-teal-500 bg-[#F7FEFF] lg:grid-cols-4 lg:gap-12">
+          <div className="flex flex-col justify-center p-6 pt-0 lg:p-10 lg:pt-10 lg:pr-4 ">
             <a
               href="https://opencollective.com/solidarity-economy-fund"
               target="_blank"
               rel="noopener noreferrer"
-              className=" block rounded-full bg-[#044F54] px-3 py-4 text-center text-xl font-medium text-white"
+              className=" block rounded-full bg-[#044F54] px-3 py-3 text-center text-lg font-medium text-white lg:py-4 lg:text-xl"
             >
               Contribute
             </a>
           </div>
-          <div className="col-span-3 p-10 pl-0">
-            <h3 className="text-3xl font-bold text-teal-800">
+          <div className="order-first p-6 lg:order-last lg:col-span-3 lg:p-10 lg:pl-0">
+            <h3 className="text-2xl font-bold text-teal-800 lg:text-3xl">
               Contribute to a pooled fund to benefit multiple collectives within Open Collective Foundation
             </h3>{' '}
             <div className="flex justify-end"> </div>

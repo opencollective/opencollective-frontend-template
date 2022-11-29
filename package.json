@@ -65,7 +65,8 @@
     "remark-html": "^15.0.1",
     "sanitize-html": "^2.7.3",
     "styled-components": "^5.3.6",
-    "styled-system": "^5.1.5"
+    "styled-system": "^5.1.5",
+    "swiper": "^8.4.5"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.13.7",
