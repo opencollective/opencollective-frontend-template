@@ -33,7 +33,7 @@ export const collectiveQuery = gql`
     }
   }
 `;
-export default function CollectiveModal({ isOpen, onClose, collective, locale = 'en' }) {
+export default function CollectiveModal({ isOpen, onClose, collective, locale = 'en', setLocationFilter }) {
   const { data } = useQuery(collectiveQuery, {
     variables: { slug: collective?.slug },
     skip: !collective,
@@ -93,7 +93,9 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                   </div>
                   {(collective.tags?.length > 0 || collective.location?.label) && (
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {collective.location?.label && <LocationTag>{collective.location.label}</LocationTag>}
+                      {collective.location && (
+                        <LocationTag setLocationFilter={setLocationFilter} location={collective.location} />
+                      )}
                       {collective?.tags?.map(tag => (
                         <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700">
                           {tag}
@@ -105,23 +107,25 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                   <div className="mt-4 grid grid-cols-4 gap-1 rounded bg-gray-50 p-4 text-sm text-gray-600">
                     <div className="text-black">Total disbursed</div>
                     <div>
-                      {formatCurrency(collective.totalDisbursed, collective.currency, {
+                      {formatCurrency(collective.stats.ALL.totalSpent.valueInCents, collective.currency, {
                         locale,
                         precision: 0,
                       })}
                     </div>
                     <div className="text-black">Total raised</div>
                     <div>
-                      {formatCurrency(collective.totalRaised, collective.currency, {
+                      {formatCurrency(collective.stats.ALL.totalNetRaised.valueInCents, collective.currency, {
                         locale,
                         precision: 0,
                       })}
                     </div>
-                    <div className="text-black">Expenses</div>{' '}
-                    <div>{collective.expensesCount.toLocaleString(locale)}</div>
-                    <div className="text-black">Admins</div> <div>{collective.adminCount.toLocaleString(locale)}</div>
+                    {/* <div className="text-black">Expenses</div>{' '}
+                    <div>{collective.expensesCount.toLocaleString(locale)}</div> */}
+                    {/* <div className="text-black">Admins</div> <div>{collective.adminCount.toLocaleString(locale)}</div> */}
                     <div className="text-black">Contributors</div>{' '}
-                    <div>{collective.contributorsCount.toLocaleString(locale)}</div>
+                    <div>{collective.stats.ALL.contributors.toLocaleString(locale)}</div>
+                    <div className="text-black">Contributions</div>{' '}
+                    <div>{collective.stats.ALL.contributions.toLocaleString(locale)}</div>
                     <div className="text-black">Created</div>
                     <div>
                       <FormattedDate dateStyle={'medium'} value={collective.createdAt} />

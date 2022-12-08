@@ -7,7 +7,7 @@ import type { GetStaticProps } from 'next';
 import Head from 'next/head';
 
 import { initializeApollo } from '../lib/apollo-client';
-import { getDumpByTagAndPeriod } from '../lib/getDataDump';
+import { getDump } from '../lib/getDataDump';
 import getLocation from '../lib/location/getLocation';
 import { getAllPosts, markdownToHtml } from '../lib/markdown';
 
@@ -15,8 +15,8 @@ import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
 export const accountsQuery = gql`
-  query SearchAccounts($hostSlug: String, $tag: [String], $dateFrom: DateTime, $dateTo: DateTime, $timeUnit: TimeUnit) {
-    accounts(type: [COLLECTIVE, FUND], tag: $tag, tagSearchOperator: OR, limit: 4000, host: { slug: $hostSlug }) {
+  query SearchAccounts($hostSlug: String, $quarterAgo: DateTime, $yearAgo: DateTime, $currency: Currency) {
+    accounts(type: [COLLECTIVE, FUND], limit: 5000, host: { slug: $hostSlug }) {
       totalCount
       nodes {
         id
@@ -26,48 +26,75 @@ export const accountsQuery = gql`
         description
         imageUrl(height: 100, format: png)
         tags
-        childrenAccounts {
-          totalCount
-        }
-        admins: members(role: ADMIN) {
-          totalCount
-        }
-        contributors: members(role: BACKER) {
-          totalCount
-        }
-        expenses: transactions(limit: 0, type: DEBIT, dateFrom: $dateFrom, dateTo: $dateTo, hasExpense: true) {
-          totalCount
-        }
-        stats {
-          id
 
-          balance(dateFrom: $dateFrom, dateTo: $dateTo) {
+        ALL_stats: stats {
+          contributorsCount(includeChildren: true)
+          contributionsCount(includeChildren: true)
+
+          totalAmountSpent(includeChildren: true, currency: $currency) {
             valueInCents
             currency
           }
-          totalNetAmountReceived(dateFrom: $dateFrom, dateTo: $dateTo) {
-            valueInCents
-            currency
+
+          totalNetAmountReceivedTimeSeries(timeUnit: YEAR, includeChildren: true, currency: $currency) {
+            timeUnit
+            nodes {
+              date
+              amount {
+                valueInCents
+                currency
+              }
+            }
           }
         }
-      }
-      stats {
-        transactionsTimeSeries(
-          dateFrom: $dateFrom
-          dateTo: $dateTo
-          timeUnit: $timeUnit
-          type: CREDIT
-          kind: [CONTRIBUTION, ADDED_FUNDS]
-          includeChildren: true
-        ) {
-          timeUnit
-          nodes {
-            date
-            count
-            amount {
-              value
-              valueInCents
-              currency
+
+        PAST_YEAR_stats: stats {
+          contributorsCount(includeChildren: true, dateFrom: $yearAgo)
+          contributionsCount(includeChildren: true, dateFrom: $yearAgo)
+
+          totalAmountSpent(includeChildren: true, dateFrom: $yearAgo, currency: $currency) {
+            valueInCents
+            currency
+          }
+          totalNetAmountReceivedTimeSeries(
+            dateFrom: $yearAgo
+            timeUnit: MONTH
+            includeChildren: true
+            currency: $currency
+          ) {
+            timeUnit
+            nodes {
+              date
+              amount {
+                valueInCents
+                currency
+              }
+            }
+          }
+        }
+
+        PAST_QUARTER_stats: stats {
+          contributorsCount(includeChildren: true, dateFrom: $quarterAgo)
+          contributionsCount(includeChildren: true, dateFrom: $quarterAgo)
+
+          totalAmountSpent(includeChildren: true, dateFrom: $quarterAgo, currency: $currency) {
+            valueInCents
+            currency
+          }
+
+          totalNetAmountReceivedTimeSeries(
+            dateFrom: $quarterAgo
+            timeUnit: WEEK
+            includeChildren: true
+            currency: $currency
+          ) {
+            timeUnit
+            nodes {
+              date
+              amount {
+                valueInCents
+                currency
+              }
             }
           }
         }
@@ -84,66 +111,49 @@ export const categories = [
   { label: 'Climate', tag: 'climate', extraTags: ['climate change', 'climate justice'], color: '#F59E0B', tc: 'amber' },
 ];
 
-export const simpleDateToISOString = (date, isEndOfDay, timezoneType) => {
-  if (!date) {
-    return null;
-  } else {
-    const isUTC = timezoneType === 'UTC';
-    const dayjsTimeMethod = isEndOfDay ? 'endOf' : 'startOf';
-    const result = isUTC ? dayjs.utc(date) : dayjs(date);
-    return result[dayjsTimeMethod]('day').toISOString();
-  }
+const getTotalStats = stats => {
+  const totalNetAmountReceived = stats.totalNetAmountReceivedTimeSeries.nodes.reduce(
+    (acc, node) => {
+      return {
+        valueInCents: acc.valueInCents + node.amount.valueInCents,
+        currency: node.amount.currency,
+      };
+    },
+    { valueInCents: 0 },
+  );
+  const totalSpent = {
+    valueInCents: Math.abs(stats.totalAmountSpent.valueInCents),
+    currency: stats.totalAmountSpent.currency,
+  };
+  const percentDisbursed = (totalSpent.valueInCents / totalNetAmountReceived.valueInCents) * 100;
+
+  return {
+    contributors: stats.contributorsCount,
+    contributions: stats.contributionsCount,
+    totalSpent,
+    totalNetRaised: totalNetAmountReceived,
+    percentDisbursed,
+    totalNetRaisedTimeSeries: stats.totalNetAmountReceivedTimeSeries.nodes,
+  };
 };
 
-const getTimeVariables = (
-  period: 'ALL' | 'PAST_YEAR' | 'PAST_QUARTER',
-): { dateTo: string; dateFrom: string; timeUnit: 'WEEK' | 'MONTH' | 'YEAR' } => {
-  switch (period) {
-    case 'PAST_QUARTER':
-      return {
-        // 12 weeks ago
-        dateFrom: dayjs.utc().subtract(12, 'week').startOf('week').toISOString(),
-        // today
-        dateTo: dayjs.utc().toISOString(),
-        timeUnit: 'WEEK',
-      };
-    case 'PAST_YEAR':
-      return {
-        // 12 months ago
-        dateFrom: dayjs.utc().subtract(12, 'month').startOf('month').toISOString(),
-        // today
-        dateTo: dayjs.utc().toISOString(),
-        timeUnit: 'MONTH',
-      };
-    case 'ALL':
-      return {
-        dateFrom: dayjs.utc(`2018-01-01`).startOf('year').toISOString(),
-        dateTo: dayjs.utc().endOf('year').toISOString(),
-        timeUnit: 'YEAR',
-      };
-  }
-};
-
-const getDataForTagAndPeriod = async ({ apollo, hostSlug, category, period }) => {
-  const { dateFrom, dateTo, timeUnit } = getTimeVariables(period);
-  const { tag, extraTags = [] } = category;
-  let data = getDumpByTagAndPeriod(tag, period);
+const getDataForHost = async ({ apollo, hostSlug, currency }) => {
+  let data = getDump(hostSlug);
 
   if (!data) {
     ({ data } = await apollo.query({
       query: accountsQuery,
       variables: {
         hostSlug,
-        dateFrom,
-        dateTo,
-        timeUnit,
-        ...(tag !== 'ALL' && { tag: [tag, ...extraTags] }),
+        quarterAgo: dayjs.utc().subtract(12, 'week').startOf('isoWeek').toISOString(),
+        yearAgo: dayjs.utc().subtract(12, 'month').startOf('month').toISOString(),
+        currency,
       },
     }));
 
     // eslint-disable-next-line no-process-env
     if (data && process.env.NODE_ENV === 'development') {
-      fs.writeFile(`_dump/${tag}-${period}.json`, JSON.stringify(data), error => {
+      fs.writeFile(`_dump/${hostSlug}.json`, JSON.stringify(data), error => {
         if (error) {
           throw error;
         }
@@ -151,75 +161,36 @@ const getDataForTagAndPeriod = async ({ apollo, hostSlug, category, period }) =>
     }
   }
 
-  const totalRaisedAmount = data.accounts.stats.transactionsTimeSeries.nodes.reduce(
-    (acc, node) => {
-      if (acc.currency && acc.currency !== node.amount.currency) {
-        throw new Error('Mismatch in currency!');
-      }
-      return {
-        valueInCents: acc.valueInCents + node.amount.valueInCents,
-        currency: node.amount.currency,
-      };
-    },
-    { valueInCents: 0, currency: null },
-  );
-
-  const totalContributionsCount = data.accounts.stats.transactionsTimeSeries.nodes.reduce((acc, node) => {
-    return acc + node.count;
-  }, 0);
+  const collectives = data.accounts.nodes.map(collective => {
+    return {
+      id: collective.id,
+      name: collective.name,
+      slug: collective.slug,
+      description: collective.description,
+      imageUrl: collective.imageUrl.replace('-staging', ''),
+      location: getLocation(collective),
+      tags: collective.tags,
+      createdAt: collective.createdAt,
+      stats: {
+        ALL: getTotalStats(collective.ALL_stats),
+        PAST_YEAR: getTotalStats(collective.PAST_YEAR_stats),
+        PAST_QUARTER: getTotalStats(collective.PAST_QUARTER_stats),
+      },
+    };
+  });
 
   return {
-    collectiveCount: data.accounts.totalCount,
-    totalRaised: totalRaisedAmount,
-    numberOfContributions: totalContributionsCount,
-    totalReceivedTimeSeries: data.accounts.stats.transactionsTimeSeries,
-    contributionsCountTimeSeries: data.accounts.stats.transactionsTimeSeries,
-    dateFrom,
-    dateTo,
-    collectives: data.accounts.nodes.map(collective => {
-      const totalDisbursed =
-        collective.stats.totalNetAmountReceived.valueInCents - collective.stats.balance.valueInCents;
-      const percentDisbursed = (totalDisbursed / collective.stats.totalNetAmountReceived.valueInCents) * 100;
-      return {
-        id: collective.id,
-        name: collective.name,
-        slug: collective.slug,
-        description: collective.description,
-        imageUrl: collective.imageUrl.replace('-staging', ''),
-        location: getLocation(collective),
-        totalRaised: collective.stats.totalNetAmountReceived.valueInCents,
-        totalDisbursed,
-        percentDisbursed,
-        currency: collective.stats.totalNetAmountReceived.currency,
-        subCollectivesCount: collective.childrenAccounts.totalCount,
-        adminCount: collective.admins.totalCount,
-        contributorsCount: collective.contributors.totalCount,
-        expensesCount: collective.expenses.totalCount,
-        createdAt: collective.createdAt,
-        tags: collective.tags,
-      };
-    }),
+    collectives,
   };
 };
 
 export const getStaticProps: GetStaticProps = async () => {
   const hostSlug = 'foundation';
+  const currency = 'USD';
+  const startYear = 2018;
   const apollo = initializeApollo();
-
-  const categoriesWithData = await Promise.all(
-    categories.map(async category => ({
-      ...category,
-      data: {
-        ALL: await getDataForTagAndPeriod({ apollo, hostSlug, category, period: 'ALL' }),
-        PAST_YEAR: await getDataForTagAndPeriod({ apollo, hostSlug, category, period: 'PAST_YEAR' }),
-        PAST_QUARTER: await getDataForTagAndPeriod({ apollo, hostSlug, category, period: 'PAST_QUARTER' }),
-      },
-    })),
-  );
-
-  const collectivesAllData = categoriesWithData.find(c => c.tag === 'ALL').data.ALL.collectives;
-
-  const collectivesData = collectivesAllData.reduce((acc, collective) => {
+  const { collectives } = await getDataForHost({ apollo, hostSlug, currency });
+  const collectivesData = collectives.reduce((acc, collective) => {
     acc[collective.slug] = collective;
     return acc;
   }, {});
@@ -239,9 +210,12 @@ export const getStaticProps: GetStaticProps = async () => {
 
   return {
     props: {
-      categories: categoriesWithData,
+      collectives,
+      categories,
       collectivesData,
       stories: storiesWithContent,
+      startYear,
+      currency,
     },
     revalidate: 60 * 60 * 24, // Revalidate the static page at most once every 24 hours to not overload the API
   };
@@ -254,14 +228,22 @@ export async function getStaticPaths() {
   };
 }
 
-export default function Page({ categories, collectivesData, stories }) {
+export default function Page({ categories, collectivesData, stories, collectives, currency, startYear }) {
   const locale = 'en';
   return (
     <Layout>
       <Head>
         <title>Discover Open Collective Foundation</title>
       </Head>
-      <Dashboard categories={categories} collectivesData={collectivesData} stories={stories} locale={locale} />
+      <Dashboard
+        categories={categories}
+        collectives={collectives}
+        collectivesData={collectivesData}
+        currency={currency}
+        stories={stories}
+        locale={locale}
+        startYear={startYear}
+      />
     </Layout>
   );
 }

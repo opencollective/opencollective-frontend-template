@@ -1,5 +1,8 @@
 import React from 'react';
 
+import { LocationFilter } from '../lib/location/filterLocation';
+import { Location } from '../lib/location/getLocation';
+
 export const LocationPin = ({ className }: { className?: string }) => (
   <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path
@@ -11,11 +14,41 @@ export const LocationPin = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export default function LocationTag({ children }) {
+const locationFilterFromLocation = (location: Location): LocationFilter => {
+  if (location?.city) {
+    return { type: 'city', value: location.city };
+  }
+  if (location?.stateCode) {
+    return { type: 'state', value: location.stateCode };
+  }
+  if (location?.countryCode) {
+    return { type: 'country', value: location.countryCode };
+  }
+  if (location?.region) {
+    return { type: 'region', value: location.region };
+  }
+  if (location?.isGlobal) {
+    return { type: 'other', value: 'global' };
+  }
+  if (location?.isOnline) {
+    return { type: 'other', value: 'online' };
+  }
+
+  return null;
+};
+
+export default function LocationTag({ location, setLocationFilter }) {
+  const onClick = e => {
+    e.stopPropagation();
+    setLocationFilter(locationFilterFromLocation(location));
+  };
   return (
-    <div className="flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border bg-gray-50 py-1 px-2 text-sm">
+    <button
+      onClick={onClick}
+      className="flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border bg-gray-50 py-1 px-2 text-sm transition-colors hover:bg-white"
+    >
       <LocationPin className="flex-shrink-0" />
-      <span className="overflow-hidden overflow-ellipsis">{children}</span>
-    </div>
+      <span className="overflow-hidden overflow-ellipsis">{location.label}</span>
+    </button>
   );
 }

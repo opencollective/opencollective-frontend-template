@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { computeStats } from '../lib/computeData';
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
 const Metric = ({ value, label }: { label: string; value: string }) => {
@@ -11,15 +12,31 @@ const Metric = ({ value, label }: { label: string; value: string }) => {
   );
 };
 
-export default function Stats({ collectiveCount, totalRaised, locale, numberOfContributions }) {
+export default function Stats({
+  currentCategory,
+  currentTag,
+  currentLocationFilter,
+  currentTimePeriod,
+  currency,
+  locale,
+}) {
+  const stats = React.useMemo(
+    () => computeStats(currentCategory.collectives, currency),
+    [currentTag, currentLocationFilter],
+  );
+  const { totalNetRaised, totalContributions, totalContributors } = stats[currentTimePeriod];
   return (
-    <div className="-mb-2 grid grid-cols-1 divide-y px-4 lg:grid-cols-3 lg:divide-y-0 lg:divide-x lg:px-8">
-      <Metric value={collectiveCount.toLocaleString(locale)} label="Collectives" />
+    <div className="-mb-2 grid grid-cols-1 divide-y px-4 lg:grid-cols-4 lg:divide-y-0 lg:divide-x lg:px-8">
+      <Metric value={currentCategory.collectives.length.toLocaleString(locale)} label="Collectives" />
       <Metric
-        value={formatCurrency(totalRaised.valueInCents, totalRaised.currency, { locale, precision: 0 })}
+        value={formatCurrency(totalNetRaised.valueInCents, totalNetRaised.currency, {
+          locale,
+          precision: 0,
+        })}
         label="Total raised"
       />
-      <Metric value={numberOfContributions.toLocaleString(locale)} label="Contributions" />
+      <Metric value={totalContributions.toLocaleString(locale)} label="Contributions" />
+      <Metric value={totalContributors.toLocaleString(locale)} label="Contributors" />
     </div>
   );
 }

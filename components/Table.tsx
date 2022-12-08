@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ChevronLeft } from '@styled-icons/fa-solid/ChevronLeft';
 import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
 import { SortDown } from '@styled-icons/fa-solid/SortDown';
-import { useFilters, usePagination, useSortBy, useTable } from 'react-table';
+import { usePagination, useSortBy, useTable } from 'react-table';
 import styled from 'styled-components';
 
-import getFilterOptions from '../lib/location/getFilterOptions';
+import { LocationFilter } from '../lib/location/filterLocation';
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
 import LocationTag from './LocationTag';
@@ -66,52 +66,15 @@ export const Avatar = styled.img`
   width: 40px;
 `;
 
-function LocationFilter({ column: { filterValue, setFilter, preFilteredRows } }) {
-  const options = React.useMemo(() => getFilterOptions(preFilteredRows), [preFilteredRows]);
-
-  return (
-    <select
-      value={filterValue}
-      className="mt-1 bg-gray-50 p-1"
-      onChange={e => {
-        setFilter(e.target.value || undefined);
-      }}
-    >
-      <option value="">All</option>
-      {options.map(option => (
-        <option key={option.label} value={JSON.stringify(option)}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-function filterLocation(rows, id, filterValue) {
-  const filter = JSON.parse(filterValue);
-  if (filter.value === '') {
-    return rows;
-  }
-  return rows.filter(row => {
-    const { region, domesticRegion, countryCode } = row.original.location;
-
-    if (filter.type === 'region') {
-      return region === filter.value;
-    } else if (filter.type === 'domesticRegion') {
-      return domesticRegion === filter.value;
-    } else if (filter.type === 'countryCode') {
-      return countryCode === filter.value;
-    }
-  });
-}
-
 interface Props {
   collectives: [any];
   currentTimePeriod: string;
   currentTag: string;
-  currentLocationFilter: string;
+  currentLocationFilter: LocationFilter;
   locale: string;
   openCollectiveModal: (slug: string) => void;
+  setLocationFilter: (location: LocationFilter) => void;
+  currency: string;
 }
 
 export default function Collectives({
@@ -120,9 +83,21 @@ export default function Collectives({
   currentTag,
   locale,
   currentLocationFilter,
+  setLocationFilter,
   openCollectiveModal,
+  currency,
 }: Props) {
-  const data = React.useMemo(() => collectives, [currentTag, currentTimePeriod]);
+  const data = React.useMemo(
+    () =>
+      collectives.map(c => ({
+        ...c,
+        contributorsCount: c.stats[currentTimePeriod].contributors,
+        totalRaised: c.stats[currentTimePeriod].totalNetRaised.valueInCents,
+        totalSpent: c.stats[currentTimePeriod].totalSpent.valueInCents,
+        percentDisbursed: c.stats[currentTimePeriod].percentDisbursed,
+      })),
+    [currentTag, currentTimePeriod, currentLocationFilter],
+  );
 
   const columns = React.useMemo(
     () => [
@@ -138,19 +113,16 @@ export default function Collectives({
         sortDescFirst: true,
         disableSortBy: true,
         className: 'max-w-[220px] text-left pl-4 lg:pl-8 pr-2 py-4',
-        disableFilters: true,
       },
       {
         accessor: 'location',
         Cell: ({ row }) =>
           row.original.location.label && (
             <div className="flex justify-start">
-              <LocationTag>{row.original.location.label}</LocationTag>
+              <LocationTag location={row.original.location} setLocationFilter={setLocationFilter} />
             </div>
           ),
         Header: 'Location',
-        Filter: LocationFilter,
-        filter: filterLocation,
         disableSortBy: true,
         className: 'max-w-[150px] text-left overflow-hidden px-2 py-4',
       },
@@ -160,7 +132,7 @@ export default function Collectives({
       //   sortDescFirst: true,
       //   Cell: ({ row }) => new Date(row.original.createdAt).getUTCFullYear(),
       //   className: 'center',
-      //   disableFilters: true,
+      //
       // },
       {
         Header: 'Contributors',
@@ -168,10 +140,9 @@ export default function Collectives({
         sortDescFirst: true,
         Cell: tableProps => tableProps.row.original.contributorsCount.toLocaleString(locale),
         className: 'text-center px-2 py-4',
-        disableFilters: true,
       },
       {
-        Header: '% disbursed',
+        Header: 'Disbursed',
         accessor: 'percentDisbursed',
         sortDescFirst: true,
         Cell: ({ row }) => {
@@ -179,14 +150,13 @@ export default function Collectives({
           return isNaN(percentDisbursed) ? 'n/a' : `${percentDisbursed.toFixed(1)}%`;
         },
         className: 'text-center px-2 py-4',
-        disableFilters: true,
       },
       {
-        Header: 'T. raised',
+        Header: 'Raised',
         accessor: 'totalRaised',
         Cell: tableProps => (
           <div className="">
-            {formatCurrency(tableProps.row.original.totalRaised, tableProps.row.original.currency, {
+            {formatCurrency(tableProps.row.original.totalRaised, currency, {
               locale: 'en-US',
               precision: 0,
             })}
@@ -194,7 +164,6 @@ export default function Collectives({
         ),
         sortDescFirst: true,
         className: 'text-right pr-4 lg:pr-8 pl-2 py-4',
-        disableFilters: true,
       },
     ],
     [currentTag, currentTimePeriod],
@@ -211,7 +180,6 @@ export default function Collectives({
     gotoPage,
     nextPage,
     previousPage,
-    setFilter,
     state: { pageIndex },
   } = useTable(
     {
@@ -227,7 +195,6 @@ export default function Collectives({
         ],
       },
     },
-    useFilters,
     useSortBy,
     usePagination,
   );
@@ -237,12 +204,6 @@ export default function Collectives({
   //     toggleSortBy('totalRaised', true, false);
   //   }
   // }, [currentMetric, currentTimePeriod, currentTag]);
-
-  // Listen for input changes outside
-  useEffect(() => {
-    // This will now use our custom filter for age
-    setFilter('location', currentLocationFilter);
-  }, [currentLocationFilter]);
 
   return (
     <React.Fragment>

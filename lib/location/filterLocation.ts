@@ -1,0 +1,30 @@
+export type LocationFilter = {
+  value: string;
+  type: 'city' | 'state' | 'country' | 'region' | 'other';
+};
+
+export default function filterLocation(collectives, filter: LocationFilter) {
+  if (!filter) {
+    return collectives;
+  }
+  const filtered = collectives.filter(collective => {
+    const { region, countryCode, stateCode, city, isGlobal, isOnline } = collective.location;
+
+    switch (filter.type) {
+      case 'city':
+        return city === filter.value;
+      case 'state':
+        return stateCode === filter.value;
+      case 'country':
+        return countryCode === filter.value;
+      case 'region':
+        return region === filter.value;
+      case 'other':
+        return filter.value === 'global' ? isGlobal : filter.value === 'online' ? isOnline : false;
+      default:
+        return false;
+    }
+  });
+
+  return filtered;
+}

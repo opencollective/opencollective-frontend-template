@@ -8,10 +8,10 @@ import styled from 'styled-components';
 
 const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-export const formatAmountForLegend = (value, type, currency, locale, isCompactNotation = true) => {
+export const formatAmountForLegend = (value, currency, locale, isCompactNotation = true) => {
   return new Intl.NumberFormat(locale, {
     currency,
-    style: type === 'amount' ? 'currency' : 'decimal',
+    style: 'currency',
     notation: isCompactNotation ? 'compact' : 'standard',
   }).format(value);
 };
@@ -47,7 +47,7 @@ export const ChartWrapper = styled.div`
   }
 `;
 
-const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors, type): ApexOptions => ({
+const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors): ApexOptions => ({
   chart: {
     id: 'totalRaised',
     toolbar: { show: false },
@@ -109,7 +109,7 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
         fontSize: '12px',
       },
       minWidth: 38,
-      formatter: value => formatAmountForLegend(value, type, hostCurrency, intl.locale, isCompactNotation),
+      formatter: value => formatAmountForLegend(value, hostCurrency, intl.locale, isCompactNotation),
     },
   },
   tooltip: {
@@ -117,41 +117,55 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
       fontSize: '12px',
     },
     y: {
-      formatter: value => formatAmountForLegend(value, type, hostCurrency, intl.locale, false),
+      formatter: value => formatAmountForLegend(value, hostCurrency, intl.locale, false),
     },
   },
 });
 
-const getSeriesDataFromNodes = (nodes, startYear, currentTimePeriod, type) => {
+const getSeriesDataFromNodes = (nodes, startYear, currentTimePeriod) => {
   const keyedData = {};
-  const currentYear = new Date().getUTCFullYear();
 
   if (currentTimePeriod === 'ALL') {
-    for (let year = startYear; year <= currentYear; year++) {
-      const date = new Date(Date.UTC(year, 0, 1, 0, 0, 0)).toISOString();
+    const years = dayjs.utc().year() - startYear;
+    for (let year = years; year >= 0; year--) {
+      const date = dayjs.utc().subtract(year, 'year').startOf('year').toISOString();
+      keyedData[date] = {
+        x: date,
+        y: 0,
+      };
+    }
+  } else if (currentTimePeriod === 'PAST_YEAR') {
+    for (let month = 12; month >= 0; month--) {
+      const date = dayjs.utc().subtract(month, 'month').startOf('month').toISOString();
 
       keyedData[date] = {
         x: date,
         y: 0,
-        kinds: {},
+      };
+    }
+  } else if (currentTimePeriod === 'PAST_QUARTER') {
+    for (let week = 12; week >= 0; week--) {
+      const date = dayjs.utc().subtract(week, 'week').startOf('isoWeek').toISOString();
+
+      keyedData[date] = {
+        x: date,
+        y: 0,
       };
     }
   }
-
-  nodes.forEach(({ date, amount, count }) => {
-    if (!keyedData[date]) {
-      keyedData[date] = { x: date, y: 0, kinds: {} };
+  nodes.forEach(({ date, amount }) => {
+    if (keyedData[date]) {
+      keyedData[date].y += amount.valueInCents / 100;
     }
-    keyedData[date].y += type === 'amount' ? amount.value : count;
   });
 
   return Object.values(keyedData);
 };
 
-const getSeriesFromData = (intl, timeSeriesArray, startYear, currentTimePeriod, type) => {
+const getSeriesFromData = (intl, timeSeriesArray, startYear, currentTimePeriod) => {
   const series = timeSeriesArray?.map(timeSeries => {
     const totalReceivedNodes = get(timeSeries, 'nodes', []);
-    const totalReceivedData = getSeriesDataFromNodes(totalReceivedNodes, startYear, currentTimePeriod, type);
+    const totalReceivedData = getSeriesDataFromNodes(totalReceivedNodes, startYear, currentTimePeriod);
 
     return {
       name: timeSeries.label,
@@ -162,21 +176,19 @@ const getSeriesFromData = (intl, timeSeriesArray, startYear, currentTimePeriod, 
   return series;
 };
 
-export default function Chart({ timeSeriesArray, startYear, currentTag, type, currentTimePeriod }) {
+export default function Chart({ timeSeriesArray, startYear, currentTag, currentTimePeriod, currentLocationFilter }) {
   const currency = 'USD';
   const intl = useIntl();
   const series = useMemo(
-    () => getSeriesFromData(intl, timeSeriesArray, startYear, currentTimePeriod, type),
-    [currentTag, type, currentTimePeriod],
+    () => getSeriesFromData(intl, timeSeriesArray, startYear, currentTimePeriod),
+    [currentTag, currentTimePeriod, currentLocationFilter],
   );
-  // useEffect(() => {
-  //   if (typeof window !== 'undefined') window.ApexCharts = Apppex;
-  // });
+
   const isCompactNotation = true; // getMinMaxDifference(series[0].data) >= 10000;
   const colors = timeSeriesArray.map(s => s.color);
   const chartOptions = useMemo(
-    () => getChartOptions(intl, timeSeriesArray[0].timeUnit, currency, isCompactNotation, colors, type),
-    [currentTag, type, currentTimePeriod],
+    () => getChartOptions(intl, timeSeriesArray[0].timeUnit, currency, isCompactNotation, colors),
+    [currentTag, currentTimePeriod],
   );
 
   return (
