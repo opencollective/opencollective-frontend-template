@@ -7,6 +7,7 @@ import filterLocation, { LocationFilter } from '../lib/location/filterLocation';
 import Chart from './Chart';
 import CollectiveModal from './CollectiveModal';
 import FilterArea from './FilterArea';
+import HostSwitcher from './HostSwitcher';
 import Stats from './Stats';
 import Stories from './Stories';
 import Table from './Table';
@@ -20,7 +21,17 @@ const getLocationFilter = query => {
   return location && locationType ? { value: location, type: locationType } : null;
 };
 
-export default function Dashboard({ categories, collectives, collectivesData, stories, locale, currency, startYear }) {
+export default function Dashboard({
+  host,
+  hosts,
+  categories,
+  collectives,
+  collectivesData,
+  stories,
+  locale,
+  currency,
+  startYear,
+}) {
   const router = useRouter();
   const currentTag: string = getParam(router.query?.tag) ?? 'ALL';
   const currentTimePeriod: string = getParam(router.query?.time) ?? 'ALL';
@@ -123,50 +134,67 @@ export default function Dashboard({ categories, collectives, collectivesData, st
 
   const totalCollectiveCount = collectives.length;
 
+  const hostStyles = {
+    button: { foundation: 'bg-ocf-brand text-white' },
+    ctaBox: { foundation: 'lg:bg-[#F7FEFF] text-ocf-brand' },
+  };
   return (
-    <div className="mx-auto mt-4 flex max-w-[1400px] flex-col space-y-10 p-4 lg:p-10">
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-4">
-        <div className="w-full rounded-lg bg-white p-6 lg:col-span-3 lg:p-12">
-          <h1 className="text-[28px] font-bold leading-tight text-[#111827] lg:text-[40px]">
-            Discover {totalCollectiveCount.toLocaleString(locale)} collectives making an impact in{' '}
-            <span className="group">
+    <div className="mx-auto mt-2 flex max-w-[1400px] flex-col space-y-6 p-4 lg:space-y-10 lg:p-10">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-10">
+        <div className="w-full rounded-lg p-2 lg:col-span-3 lg:bg-white lg:p-12">
+          <h1 className="text-[24px] font-bold leading-tight text-[#111827] lg:text-[40px]">
+            Discover {totalCollectiveCount.toLocaleString(locale)} collectives hosted by{' '}
+            <HostSwitcher host={host} hosts={hosts} /> making an impact in{' '}
+            <span className="">
               {categories
                 .filter(c => c.tag !== 'ALL')
                 .map((cat, i, arr) => (
                   <React.Fragment key={cat.label}>
-                    <button
-                      className={`inline-block whitespace-nowrap underline decoration-${
-                        cat.tc
-                      }-500 underline-offset-4 transition-colors hover:!decoration-${
-                        cat.tc
-                      }-500 group-hover:decoration-transparent ${
-                        currentTag !== 'ALL' && currentTag !== cat.tag ? `decoration-transparent` : ` `
-                      }`}
-                      onClick={() => setTag(cat.tag)}
-                    >
-                      {cat.label.toLowerCase()}
-                    </button>
-                    {arr.length - 1 === i ? '' : ', '}
+                    <span className="whitespace-nowrap">
+                      <button
+                        className={`inline-block whitespace-nowrap underline underline-offset-4 transition-colors ${
+                          currentTag !== 'ALL' && currentTag !== cat.tag
+                            ? `decoration-transparent hover:decoration-${cat.tw}-500`
+                            : `decoration-${cat.tw}-500`
+                        }`}
+                        onClick={() => setTag(cat.tag)}
+                      >
+                        {cat.label.toLowerCase()}
+                      </button>
+                      {arr.length - 1 === i ? '' : ','}
+                    </span>
+                    {` `}
                   </React.Fragment>
                 ))}
-            </span>{' '}
+            </span>
             and more.
           </h1>
         </div>
-        <div className="flex flex-col items-center justify-center bg-[#F7FEFF]  p-12 lg:rounded-lg">
-          <img src="/ocf-logo.svg" alt="OCF Logotype" className="h-10" />
+        <div
+          className={`flex flex-col items-center justify-center px-2 lg:rounded-lg lg:p-10 ${
+            hostStyles.ctaBox[host.slug]
+          }`}
+        >
+          <img src={host.logoSrc} alt={host.name} className="hidden h-8 lg:block" />
+
+          <p className={`my-4 hidden text-center font-medium lg:block`}>
+            {host.cta?.text ?? `Learn more about ${host.name}`}
+          </p>
           <a
-            href="https://opencollective.com/solidarity-economy-fund"
+            href={host.cta?.buttonHref ?? host.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-10 block w-full rounded-full bg-[#044F54] px-3 py-2.5 text-center text-lg font-medium text-white"
+            className={`block w-full rounded-full lg:rounded-full ${
+              hostStyles.button[host.slug]
+            } px-3 py-3 text-center text-sm font-medium lg:text-lg`}
           >
-            Contribute
+            <span className="hidden lg:inline-block">{host.cta?.buttonLabel ?? 'Learn more'}</span>
+            <span className="inline-block lg:hidden">{host.cta?.text}</span>
           </a>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-4">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-4 lg:gap-10">
         <div className="sticky top-4 z-20 lg:top-10">
           <FilterArea
             currentTimePeriod={currentTimePeriod}
@@ -209,23 +237,24 @@ export default function Dashboard({ categories, collectives, collectivesData, st
               setLocationFilter={setLocationFilter}
               locale={locale}
               openCollectiveModal={openCollectiveModal}
+              hostSlug={host.slug}
               currency={currency}
             />
           </div>
-          <Stories stories={stories} currentTag={currentTag} />
-          <Updates currentTag={currentTag} openCollectiveModal={openCollectiveModal} />
+          <Stories stories={stories} currentTag={currentTag} openCollectiveModal={openCollectiveModal} />
+          <Updates host={host} currentTag={currentTag} openCollectiveModal={openCollectiveModal} />
         </div>
       </div>
       <div>
         <div className="order my-12 grid grid-cols-1 rounded-lg border-2 border-teal-500 bg-[#F7FEFF] lg:grid-cols-4 lg:gap-12">
           <div className="flex flex-col justify-center p-6 pt-0 lg:p-10 lg:pt-10 lg:pr-4 ">
             <a
-              href="https://opencollective.com/solidarity-economy-fund"
+              href={host.cta.buttonHref}
               target="_blank"
               rel="noopener noreferrer"
               className=" block rounded-full bg-[#044F54] px-3 py-3 text-center text-lg font-medium text-white lg:py-4 lg:text-xl"
             >
-              Contribute
+              {host.cta.buttonLabel}
             </a>
           </div>
           <div className="order-first p-6 lg:order-last lg:col-span-3 lg:p-10 lg:pl-0">

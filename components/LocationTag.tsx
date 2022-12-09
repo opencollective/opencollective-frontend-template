@@ -37,15 +37,24 @@ const locationFilterFromLocation = (location: Location): LocationFilter => {
   return null;
 };
 
-export default function LocationTag({ location, setLocationFilter }) {
+export default function LocationTag({
+  location,
+  setLocationFilter,
+}: {
+  location: Location;
+  setLocationFilter?: (filter: LocationFilter) => void;
+}) {
   const onClick = e => {
     e.stopPropagation();
-    setLocationFilter(locationFilterFromLocation(location));
+    setLocationFilter && setLocationFilter(locationFilterFromLocation(location));
   };
   return (
     <button
+      disabled={!setLocationFilter}
       onClick={onClick}
-      className="flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border bg-gray-50 py-1 px-2 text-sm transition-colors hover:bg-white"
+      className={`flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border bg-gray-50 py-1 px-2 text-sm transition-colors ${
+        !!setLocationFilter && 'hover:bg-white'
+      }`}
     >
       <LocationPin className="flex-shrink-0" />
       <span className="overflow-hidden overflow-ellipsis">{location.label}</span>

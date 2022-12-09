@@ -3,6 +3,8 @@ import { Flipped, Flipper } from 'react-flip-toolkit';
 import { FormattedDate } from 'react-intl';
 import sanitizeHtml from 'sanitize-html';
 
+import CollectiveButton from './CollectiveButton';
+
 const updates = [
   {
     title: 'FFFNYC 2021 End of Year Update',
@@ -413,10 +415,14 @@ const updates = [
   },
 ];
 
-export default function Updates({ currentTag, openCollectiveModal }) {
+export default function Updates({ host, currentTag, openCollectiveModal }) {
   const sortedUpdates = React.useMemo(() => {
     return updates.sort((a, b) => new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf());
   }, []);
+  if (host.slug !== 'foundation') {
+    return null;
+  }
+
   return (
     <div>
       <h1 className="mb-6  text-xl font-bold text-gray-600 lg:text-4xl">Updates from collectives</h1>
@@ -450,18 +456,7 @@ export default function Updates({ currentTag, openCollectiveModal }) {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                        <button
-                          className=" flex items-center gap-2 rounded-md px-2 py-2 hover:bg-gray-50 lg:px-4"
-                          type="button"
-                          onClick={() => openCollectiveModal(update.account.slug)}
-                        >
-                          <img
-                            src={update.account.imageUrl.replace('-staging', '')}
-                            alt={update.account.name}
-                            className="h-8 w-8 rounded object-cover"
-                          />
-                          <span className="font-medium">{update.account.name}</span>
-                        </button>
+                        <CollectiveButton collective={update.account} openCollectiveModal={openCollectiveModal} />
                         <span className="align-items hidden gap-2 lg:flex">
                           <img
                             src={update.fromAccount.imageUrl.replace('-staging', '')}

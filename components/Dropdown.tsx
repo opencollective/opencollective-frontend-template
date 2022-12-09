@@ -3,7 +3,19 @@ import { Listbox } from '@headlessui/react';
 import { Check } from '@styled-icons/fa-solid/Check';
 import { ChevronDown } from '@styled-icons/fa-solid/ChevronDown';
 
-export default function DropdownSelector({ options, fieldLabel, value, onChange }) {
+export default function DropdownSelector({
+  options,
+  fieldLabel,
+  value,
+  onChange,
+  onOpen,
+}: {
+  options: any;
+  fieldLabel: any;
+  value: any;
+  onChange: (any) => void;
+  onOpen?: () => void;
+}) {
   const selectedOption = options.find(option => {
     if (!value) {
       return option.value === '';
@@ -19,13 +31,16 @@ export default function DropdownSelector({ options, fieldLabel, value, onChange 
   return (
     <div className="relative w-full">
       <Listbox value={selectedOption} onChange={onChange}>
-        <Listbox.Button className="flex w-full items-center justify-between rounded-full p-2 transition-colors hover:bg-gray-50">
+        <Listbox.Button
+          className="flex w-full items-center justify-between rounded-full p-2 transition-colors hover:bg-gray-50"
+          onClick={onOpen}
+        >
           {fieldLabel}
           <div className="flex items-center gap-1 whitespace-nowrap text-xs text-gray-800">
             <span>{selectedOption?.label}</span> <ChevronDown size="10" />
           </div>
         </Listbox.Button>
-        <Listbox.Options className="absolute right-0 z-10 mt-2 mb-10 w-full rounded-lg bg-white p-2 shadow">
+        <Listbox.Options className="absolute right-0 z-10 mt-2 mb-10 w-full overflow-y-scroll rounded-lg bg-white p-2 shadow">
           {options.slice(0, lastVisibleIndex).map(option => {
             if (option.hr === true) {
               return <hr key="hr" className="my-2 border-t border-gray-200" />;

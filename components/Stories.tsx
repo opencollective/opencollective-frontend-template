@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { Navigation } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
+import CollectiveButton from '../components/CollectiveButton';
+import LocationTag from '../components/LocationTag';
+
 const Markdown = styled.div`
   line-height: 1.625;
   p,
@@ -15,14 +18,14 @@ const Markdown = styled.div`
   h1 {
     margin: 0 0 8px 0;
     line-height: 1.375;
-    font-size: 28px;
+    font-size: 20px;
     font-weight: 700;
   }
   h2 {
     margin: 8px 0;
     line-height: 1.375;
     font-weight: 500;
-    font-size: 18px;
+    font-size: 16px;
   }
 
   h3 {
@@ -52,36 +55,50 @@ const LeftArrow = () => (
   </svg>
 );
 
-const PlayButton = () => (
-  <svg width="80" height="49" viewBox="0 0 80 49" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect y="0.5" width="80" height="48" rx="9" fill="#323334" fillOpacity="0.9" />
-    <path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M46.3709 23.0333L34.9033 15.9111C34.4786 15.6556 34.1471 15.5 33.7431 15.5C32.9972 15.5 32.5 16.1111 32.5 17.0667V31.9333C32.5 32.8889 32.9972 33.5 33.7431 33.5C34.1471 33.5 34.4786 33.3444 34.9033 33.0889L46.3709 25.9667C47.1996 25.4556 47.5 25.0889 47.5 24.5C47.5 23.9111 47.1996 23.5444 46.3709 23.0333Z"
-      fill="white"
-      fillOpacity="0.9"
-    />
-  </svg>
-);
+// const PlayButton = () => (
+//   <svg width="80" height="49" viewBox="0 0 80 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+//     <rect y="0.5" width="80" height="48" rx="9" fill="#323334" fillOpacity="0.9" />
+//     <path
+//       fillRule="evenodd"
+//       clipRule="evenodd"
+//       d="M46.3709 23.0333L34.9033 15.9111C34.4786 15.6556 34.1471 15.5 33.7431 15.5C32.9972 15.5 32.5 16.1111 32.5 17.0667V31.9333C32.5 32.8889 32.9972 33.5 33.7431 33.5C34.1471 33.5 34.4786 33.3444 34.9033 33.0889L46.3709 25.9667C47.1996 25.4556 47.5 25.0889 47.5 24.5C47.5 23.9111 47.1996 23.5444 46.3709 23.0333Z"
+//       fill="white"
+//       fillOpacity="0.9"
+//     />
+//   </svg>
+// );
 
-export const Story = ({ story }) => {
+export const Story = ({ story, openCollectiveModal }) => {
+  console.log({ story });
   return (
-    <div className={`fadeIn max-w-lg rounded-lg bg-white py-6 px-4 lg:max-w-2xl lg:px-8`}>
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <div className="flex h-64 w-full flex-shrink-0 items-center justify-center rounded-lg bg-black object-contain lg:w-64">
-          <PlayButton />
-        </div>
+    <div className={`fadeIn max-w-lg rounded-lg bg-white p-4 lg:max-w-2xl lg:p-4`}>
+      <div className="flex flex-col gap-4">
+        {story.video && (
+          <div className=" relative w-full overflow-hidden rounded-lg pb-[56.25%]">
+            <iframe
+              className="absolute top-0 left-0 h-full w-full"
+              src={story.video.src}
+              title={story.video.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope;"
+              allowFullScreen
+            ></iframe>
+          </div>
+        )}
         <div>
-          <Markdown dangerouslySetInnerHTML={{ __html: story.content }} />
-          <div className="meta">
-            <div className="tags">
-              {story.tags.map(tag => (
-                <Tag color={tag.color} key={tag.tag}>
-                  {tag.tag}
-                </Tag>
+          {story.collective && (
+            <div className="flex items-center gap-2">
+              <CollectiveButton collective={story.collective} openCollectiveModal={openCollectiveModal} />
+              <LocationTag location={story.collective.location} />
+              {story?.tags?.map(({ tag, color }) => (
+                <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700">
+                  {tag}
+                </span>
               ))}
             </div>
+          )}
+          <div className="px-4 text-gray-600">
+            <Markdown dangerouslySetInnerHTML={{ __html: story.content }} />
           </div>
         </div>
       </div>
@@ -103,15 +120,15 @@ const SliderButton = ({ onClick, disabled, children }) => {
   );
 };
 
-export default function Stories({ stories, currentTag }) {
+export default function Stories({ stories, currentTag, openCollectiveModal }) {
   const swiperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  if (!stories?.length) {
+  const currentStories = stories.filter(story => currentTag === 'ALL' || !!story.tags.find(t => t.tag === currentTag));
+
+  if (!currentStories?.length) {
     return null;
   }
-
-  const currentStories = stories.filter(story => currentTag === 'ALL' || !!story.tags.find(t => t.tag === currentTag));
 
   return (
     <React.Fragment>
@@ -151,7 +168,7 @@ export default function Stories({ stories, currentTag }) {
             >
               {currentStories.map(story => (
                 <SwiperSlide key={story.slug}>
-                  <Story story={story} />
+                  <Story story={story} openCollectiveModal={openCollectiveModal} />
                 </SwiperSlide>
               ))}
             </Swiper>

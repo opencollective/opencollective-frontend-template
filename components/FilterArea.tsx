@@ -17,9 +17,9 @@ const DateIcon = () => (
 );
 
 const FilterIcon = () => (
-  <svg width="18" height="12" viewBox="0 0 18 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M10.125 10C10.7466 10 11.25 10.4475 11.25 11C11.25 11.5525 10.7466 12 10.125 12H7.875C7.25344 12 6.75 11.5525 6.75 11C6.75 10.4475 7.25344 10 7.875 10H10.125ZM13.5 5C14.1216 5 14.625 5.4475 14.625 6C14.625 6.5525 14.1216 7 13.5 7H4.5C3.87844 7 3.375 6.5525 3.375 6C3.375 5.4475 3.87844 5 4.5 5H13.5ZM16.875 0C17.4966 0 18 0.447504 18 1C18 1.5525 17.4966 2 16.875 2H1.125C0.503442 2 0 1.5525 0 1C0 0.447504 0.503442 0 1.125 0H16.875Z"
+      d="M11.125 14C11.7466 14 12.25 14.4475 12.25 15C12.25 15.5525 11.7466 16 11.125 16H8.875C8.25344 16 7.75 15.5525 7.75 15C7.75 14.4475 8.25344 14 8.875 14H11.125ZM14.5 9C15.1216 9 15.625 9.4475 15.625 10C15.625 10.5525 15.1216 11 14.5 11H5.5C4.87844 11 4.375 10.5525 4.375 10C4.375 9.4475 4.87844 9 5.5 9H14.5ZM17.875 4C18.4966 4 19 4.4475 19 5C19 5.5525 18.4966 6 17.875 6H2.125C1.50344 6 1 5.5525 1 5C1 4.4475 1.50344 4 2.125 4H17.875Z"
       fill="#4D4F51"
     />
   </svg>
@@ -44,22 +44,38 @@ export const Filters = ({
   setTag,
   setTimePeriod,
   hideLocationAndTimeFilters,
-  collapseFilterArea,
+  mobile = false,
 }) => {
   const locationOptions = React.useMemo(() => getFilterOptions(collectives), [collectives]);
+  const [expanded, setExpanded] = React.useState(!mobile);
+
   return (
     <div className="relative z-50 translate-x-0 bg-white">
-      <CategoryFilter
-        selectedTag={currentTag}
-        categories={categories}
-        onSelect={category => {
-          collapseFilterArea?.();
-          setTag(category.tag);
-        }}
-      />
+      {mobile && (
+        <button
+          className="flex w-full items-center justify-between px-4 py-2 font-medium"
+          onClick={() => setExpanded(!expanded)}
+        >
+          <span className={`transition-opacity duration-300 ${expanded ? 'opacity-25' : 'opacity-100'}`}>
+            {categories.find(c => c.tag === currentTag).label}
+          </span>{' '}
+          {expanded ? <CloseIcon /> : <FilterIcon />}
+        </button>
+      )}
+      <AnimateHeight id="categories" duration={300} height={!mobile ? 'auto' : expanded ? 'auto' : 0}>
+        <CategoryFilter
+          selectedTag={currentTag}
+          categories={categories}
+          onSelect={category => {
+            setTag(category.tag);
+            mobile && setExpanded(false);
+          }}
+        />
+      </AnimateHeight>
+
       <AnimateHeight id="example-panel" duration={500} height={hideLocationAndTimeFilters ? 0 : 'auto'}>
-        <div className="mt-4 border-t pt-4">
-          <div className="space-y-2">
+        <div className="mt-1 border-t pt-2 lg:mt-4 lg:pt-4">
+          <div className="space-y-1 lg:space-y-2">
             <Dropdown
               fieldLabel={
                 <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
@@ -74,7 +90,6 @@ export const Filters = ({
               ]}
               value={currentTimePeriod}
               onChange={option => {
-                collapseFilterArea?.();
                 setTimePeriod(option.value);
               }}
             />
@@ -87,8 +102,10 @@ export const Filters = ({
               }
               options={locationOptions}
               value={currentLocationFilter}
+              onOpen={() => {
+                mobile && setExpanded(false);
+              }}
               onChange={({ type, value }) => {
-                collapseFilterArea?.();
                 if (value === '') {
                   setLocationFilter(null);
                 } else {
@@ -114,7 +131,6 @@ export default function FilterArea({
   setTag,
   hideFilters,
 }) {
-  const [filtersExpanded, setFiltersExpanded] = React.useState(false);
   return (
     <Fragment>
       <div className="hidden lg:block">
@@ -129,35 +145,24 @@ export default function FilterArea({
             setTimePeriod={setTimePeriod}
             setTag={setTag}
             hideLocationAndTimeFilters={hideFilters}
-            collapseFilterArea={() => setFiltersExpanded(false)}
           />
         </div>
       </div>
       <div className="block lg:hidden">
-        <div className="relative h-14">
-          <div className="absolute top-0 right-0 left-0 rounded-2xl bg-white shadow">
-            <button
-              className="flex w-full  items-center justify-between rounded-2xl px-8 py-4 font-medium text-gray-800"
-              onClick={() => setFiltersExpanded(!filtersExpanded)}
-            >
-              <span>Filters</span> {filtersExpanded ? <CloseIcon /> : <FilterIcon />}
-            </button>
-            {filtersExpanded && (
-              <div className="p-4 pt-3">
-                <Filters
-                  currentTimePeriod={currentTimePeriod}
-                  currentTag={currentTag}
-                  categories={categories}
-                  collectives={collectives}
-                  currentLocationFilter={currentLocationFilter}
-                  setLocationFilter={setLocationFilter}
-                  setTimePeriod={setTimePeriod}
-                  setTag={setTag}
-                  hideLocationAndTimeFilters={hideFilters}
-                  collapseFilterArea={() => setFiltersExpanded(false)}
-                />
-              </div>
-            )}
+        <div className="relative h-36">
+          <div className="absolute top-0 right-0 left-0 rounded-2xl bg-white py-2 px-4 shadow">
+            <Filters
+              currentTimePeriod={currentTimePeriod}
+              currentTag={currentTag}
+              categories={categories}
+              collectives={collectives}
+              currentLocationFilter={currentLocationFilter}
+              setLocationFilter={setLocationFilter}
+              setTimePeriod={setTimePeriod}
+              setTag={setTag}
+              hideLocationAndTimeFilters={hideFilters}
+              mobile={true}
+            />
           </div>
         </div>
       </div>

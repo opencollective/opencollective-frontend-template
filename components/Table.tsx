@@ -72,6 +72,7 @@ interface Props {
   currentTag: string;
   currentLocationFilter: LocationFilter;
   locale: string;
+  hostSlug: string;
   openCollectiveModal: (slug: string) => void;
   setLocationFilter: (location: LocationFilter) => void;
   currency: string;

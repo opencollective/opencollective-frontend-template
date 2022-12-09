@@ -103,12 +103,86 @@ export const accountsQuery = gql`
   }
 `;
 
-export const categories = [
-  { label: 'All', tag: 'ALL', color: '#14B8A6', tc: 'teal' },
-  { label: 'Mutual aid', tag: 'mutual aid', color: '#3B82F6', tc: 'blue' },
-  { label: 'Civic Tech', tag: 'civic tech', color: '#A855F7', tc: 'purple' },
-  { label: 'Arts & Culture', tag: 'arts and culture', color: '#F43F5E', tc: 'rose' },
-  { label: 'Climate', tag: 'climate', extraTags: ['climate change', 'climate justice'], color: '#F59E0B', tc: 'amber' },
+const colors = [
+  { tw: 'red', color: '#EF4444' },
+  { tw: 'orange', color: '#F97316' },
+  { tw: 'amber', color: '#F59E0B' },
+  { tw: 'yellow', color: '#EAB308' },
+  { tw: 'lime', color: '#84CC16' },
+  { tw: 'green', color: '#22C55E' },
+  { tw: 'emerald', color: '#10B981' },
+  { tw: 'teal', color: '#14B8A6' },
+  { tw: 'cyan', color: '#06B6D4' },
+  { tw: 'light-blue', color: '#0EA5E9' },
+  { tw: 'blue', color: '#3B82F6' },
+  { tw: 'indigo', color: '#6366F1' },
+  { tw: 'violet', color: '#8B5CF6' },
+  { tw: 'purple', color: '#A855F7' },
+  { tw: 'fuchsia', color: '#D946EF' },
+  { tw: 'pink', color: '#EC4899' },
+  { tw: 'rose', color: '#F43F5E' },
+];
+
+const pickColorForCategory = (startColor: string, i: number, numOfCategories: number) => {
+  const startColorIndex = colors.findIndex(c => c.tw === startColor);
+  const step = Math.floor(colors.length / numOfCategories);
+  return colors[(startColorIndex + i * step) % colors.length];
+};
+
+export const hosts = [
+  {
+    name: 'Open Collective Foundation',
+    slug: 'foundation',
+    currency: 'USD',
+    startYear: 2018,
+    logoSrc: '/ocf-logo.svg',
+    color: 'teal',
+    brandColor: '#044F54',
+    cta: {
+      text: 'Contribute to many collectives at once',
+      buttonLabel: 'Contribute',
+      buttonHref: 'https://opencollective.com/solidarity-economy-fund',
+    },
+    categories: [
+      { label: 'Mutual aid', tag: 'mutual aid' },
+      { label: 'Education', tag: 'education' },
+      { label: 'Civic Tech', tag: 'civic tech' },
+      { label: 'Food', tag: 'food' },
+      { label: 'Arts & Culture', tag: 'arts and culture' },
+      {
+        label: 'Climate',
+        tag: 'climate',
+        extraTags: ['climate change', 'climate justice'],
+      },
+    ],
+  },
+  {
+    name: 'Open Source Collective',
+    slug: 'opensource',
+    currency: 'USD',
+    startYear: 2016,
+    logoSrc: '/osc-logo.svg',
+    website: 'https://opencollective.com/opensource',
+    color: 'purple',
+    categories: [
+      // { label: 'Open source', tag: 'open source', extraTags: ['opensource'] },
+      // { label: 'Javascript', tag: 'javascript', extraTags: ['nodejs', 'typescript'] },
+      // { label: 'React', tag: 'react' },
+      // { label: 'Python', tag: 'python' },
+      // { label: 'PHP', tag: 'php' },
+    ],
+    disabled: true,
+  },
+  {
+    name: 'Open Collective Europe',
+    slug: 'europe',
+    currency: 'EUR',
+    startYear: 2019,
+    logoSrc: '/oce-logo.svg',
+    color: 'yellow',
+    categories: [],
+    disabled: true,
+  },
 ];
 
 const getTotalStats = stats => {
@@ -184,32 +258,48 @@ const getDataForHost = async ({ apollo, hostSlug, currency }) => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async () => {
-  const hostSlug = 'foundation';
-  const currency = 'USD';
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const hostSlug: string = Array.isArray(params.slug) ? params.slug[0] : params.slug;
+  const host = hosts.find(h => h.slug === hostSlug);
+
+  const { currency } = host;
   const startYear = 2018;
   const apollo = initializeApollo();
   const { collectives } = await getDataForHost({ apollo, hostSlug, currency });
+
   const collectivesData = collectives.reduce((acc, collective) => {
     acc[collective.slug] = collective;
     return acc;
   }, {});
 
-  const allStories = getAllPosts(['title', 'content', 'tags', 'location', 'slug', 'video']);
-  // run markdownToHtml on content in stories
+  // add color to categories
+  const categories = [{ label: 'All Categories', tag: 'ALL' }, ...host.categories].map((category, i, arr) => {
+    const { color, tw } = pickColorForCategory(host.color, i, arr.length);
 
+    return {
+      ...category,
+      color,
+      tw,
+    };
+  });
+
+  const allStories = getAllPosts(hostSlug, ['title', 'content', 'tags', 'location', 'slug', 'video', 'collectiveSlug']);
+  // run markdownToHtml on content in stories
   const storiesWithContent = await Promise.all(
     allStories.map(async story => {
       return {
         ...story,
         tags: story.tags.map(tag => ({ color: categories.find(c => c.tag === tag)?.color ?? null, tag: tag })),
         content: await markdownToHtml(story.content),
+        collective: collectivesData[story.collectiveSlug] ?? null,
       };
     }),
   );
 
   return {
     props: {
+      host,
+      hosts,
       collectives,
       categories,
       collectivesData,
@@ -223,26 +313,28 @@ export const getStaticProps: GetStaticProps = async () => {
 
 export async function getStaticPaths() {
   return {
-    paths: [{ params: { slug: 'foundation' } }],
+    paths: hosts.filter(h => !h.disabled).map(host => ({ params: { slug: host.slug } })),
     fallback: false,
   };
 }
 
-export default function Page({ categories, collectivesData, stories, collectives, currency, startYear }) {
+export default function Page({ categories, collectivesData, stories, host, hosts, collectives, currency, startYear }) {
   const locale = 'en';
   return (
     <Layout>
       <Head>
-        <title>Discover Open Collective Foundation</title>
+        <title>Discover {host.name}</title>
       </Head>
       <Dashboard
         categories={categories}
         collectives={collectives}
-        collectivesData={collectivesData}
         currency={currency}
+        startYear={startYear}
+        collectivesData={collectivesData}
         stories={stories}
         locale={locale}
-        startYear={startYear}
+        host={host}
+        hosts={hosts}
       />
     </Layout>
   );
