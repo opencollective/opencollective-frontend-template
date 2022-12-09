@@ -141,8 +141,8 @@ export const hosts = [
     styles: {
       text: 'text-[#0C2D66]',
       button: 'bg-[#0C2D66] text-white',
-      brandBox: 'lg:bg-blue-100 text-[#0C2D66]',
-      box: 'bg-blue-50 text-[#0C2D66]',
+      brandBox: 'lg:bg-[#F5FAFF] text-[#0C2D66]',
+      box: 'bg-[#F5FAFF] text-[#0C2D66]',
     },
   },
   {
