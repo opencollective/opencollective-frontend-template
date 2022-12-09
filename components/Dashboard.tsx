@@ -40,9 +40,9 @@ export default function Dashboard({
 
   const setTag = (value: string) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { slug, tag, ...rest } = router.query;
+    const { slug = '', tag, ...rest } = router.query;
     router.push(
-      { pathname: `/${slug}`, query: { ...rest, ...(value !== 'ALL' && tag !== value && { tag: value }) } },
+      { pathname: `/${slug ?? ''}`, query: { ...rest, ...(value !== 'ALL' && tag !== value && { tag: value }) } },
       null,
       {
         shallow: true,
@@ -52,10 +52,10 @@ export default function Dashboard({
 
   const setTimePeriod = (value: string) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { slug, time, ...rest } = router.query;
+    const { slug = '', time, ...rest } = router.query;
     router.push(
       {
-        pathname: `/${slug}`,
+        pathname: `/${slug ?? ''}`,
         query: { ...rest, ...(value !== 'ALL' && { time: value }) },
       },
       null,
@@ -67,10 +67,10 @@ export default function Dashboard({
 
   const setLocationFilter = (locationFilter: LocationFilter) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { slug, location, locationType, ...rest } = router.query;
+    const { slug = '', location, locationType, ...rest } = router.query;
     router.push(
       {
-        pathname: `/${slug}`,
+        pathname: `/${slug ?? ''}`,
         query: {
           ...rest,
           ...(locationFilter && { location: locationFilter.value, locationType: locationFilter.type }),
@@ -130,7 +130,7 @@ export default function Dashboard({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-10">
         <div className="w-full rounded-lg p-2 lg:col-span-3 lg:bg-white lg:p-12">
           <h1 className="text-[24px] font-bold leading-tight text-[#111827] lg:text-[40px]">
-            Discover {totalCollectiveCount.toLocaleString(locale)} collectives hosted by{' '}
+            Discover {totalCollectiveCount.toLocaleString(locale)} collectives {host.slug ? 'hosted by' : 'on'}{' '}
             <HostSwitcher host={host} hosts={hosts} /> making an impact in{' '}
             <span className="">
               {categories

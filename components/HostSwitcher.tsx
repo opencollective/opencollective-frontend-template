@@ -72,9 +72,9 @@ export default function HostSwitcher({ host, hosts }) {
               >
                 <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-4 text-left align-middle shadow-xl transition-all lg:p-8">
                   <Dialog.Title as="h3" className="mb-4 text-xl font-bold leading-6 text-gray-900">
-                    Switch host
+                    Switch context
                   </Dialog.Title>
-                  <div className="grid grid-cols-1 gap-4 lg:gap-6">
+                  <div className="grid grid-cols-2 gap-4 lg:gap-6">
                     {hosts
                       .filter(h => !h.disabled)
                       .map(host => (

@@ -15,8 +15,8 @@ import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
 export const accountsQuery = gql`
-  query SearchAccounts($hostSlug: String, $quarterAgo: DateTime, $yearAgo: DateTime, $currency: Currency) {
-    accounts(type: [COLLECTIVE, FUND], limit: 5000, host: { slug: $hostSlug }) {
+  query SearchAccounts($host: [AccountReferenceInput], $quarterAgo: DateTime, $yearAgo: DateTime, $currency: Currency) {
+    accounts(type: [COLLECTIVE, FUND], limit: 20000, host: $host) {
       totalCount
       nodes {
         id
@@ -131,6 +131,21 @@ const pickColorForCategory = (startColor: string, i: number, numOfCategories: nu
 
 export const hosts = [
   {
+    name: 'Open Collective',
+    slug: '',
+    currency: 'USD',
+    startYear: 2016,
+    logoSrc: '/oc-logo.svg',
+    color: 'blue',
+    //brandColor: '#044F54',
+    styles: {
+      text: 'text-[#0C2D66]',
+      button: 'bg-[#0C2D66] text-white',
+      brandBox: 'lg:bg-blue-100 text-[#0C2D66]',
+      box: 'bg-blue-50 text-[#0C2D66]',
+    },
+  },
+  {
     name: 'Open Collective Foundation',
     slug: 'foundation',
     currency: 'USD',
@@ -217,13 +232,13 @@ const getTotalStats = stats => {
 };
 
 const getDataForHost = async ({ apollo, hostSlug, currency }) => {
-  let data = getDump(hostSlug);
+  let data = getDump(hostSlug ?? 'ALL');
 
   if (!data) {
     ({ data } = await apollo.query({
       query: accountsQuery,
       variables: {
-        hostSlug,
+        ...(hostSlug && { host: { slug: hostSlug } }),
         quarterAgo: dayjs.utc().subtract(12, 'week').startOf('isoWeek').toISOString(),
         yearAgo: dayjs.utc().subtract(12, 'month').startOf('month').toISOString(),
         currency,
@@ -232,7 +247,7 @@ const getDataForHost = async ({ apollo, hostSlug, currency }) => {
 
     // eslint-disable-next-line no-process-env
     if (data && process.env.NODE_ENV === 'development') {
-      fs.writeFile(`_dump/${hostSlug}.json`, JSON.stringify(data), error => {
+      fs.writeFile(`_dump/${hostSlug ?? 'ALL'}.json`, JSON.stringify(data), error => {
         if (error) {
           throw error;
         }
@@ -263,30 +278,27 @@ const getDataForHost = async ({ apollo, hostSlug, currency }) => {
   };
 };
 
-// a function that capitalizes first letter in each words of a string
-const capitalize = str => {
-  return str
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
-
-const extraTags = {
+const associatedTags = {
   climate: ['climate change', 'climate justice'],
   'open source': ['opensource'],
 };
 
 // function that if I have the extra tag gives me the key
 const getTagKey = tag => {
-  const tagKey = Object.keys(extraTags).find(key => extraTags[key].includes(tag));
+  const tagKey = Object.keys(associatedTags).find(key => associatedTags[key].includes(tag));
   return tagKey || tag;
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const hostSlug: string = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-  const host = hosts.find(h => h.slug === hostSlug);
+  const hostSlug: string = params ? (Array.isArray(params.slug) ? params.slug[0] : params.slug) : null;
+  const host = hosts.find(h => {
+    if (!hostSlug) {
+      return h.slug === '';
+    }
+    return h.slug === hostSlug;
+  });
 
-  const { currency, startYear } = host;
+  const { currency = 'USD', startYear = 2016 } = host || {};
   const apollo = initializeApollo();
   const { collectives } = await getDataForHost({ apollo, hostSlug, currency });
 
@@ -295,11 +307,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return acc;
   }, {});
 
-  if (!host.categories) {
+  let categories;
+  if (!host?.categories) {
     // go through collectives and find the top tags
     const tags = collectives.reduce((acc, collective) => {
       collective.tags
-        ?.filter(t => !['other', 'community'].includes(t))
+        ?.filter(t => !['other', 'community', 'association', 'movement', 'USA'].includes(t))
         .forEach(tag => {
           const tagToUse = getTagKey(tag);
           if (!acc[tagToUse]) {
@@ -312,19 +325,21 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
     const sortedTags = Object.keys(tags).sort((a, b) => tags[b] - tags[a]);
     const topTags = sortedTags.slice(0, 4);
-    host.categories = topTags.map(tag => {
+    categories = topTags.map(tag => {
       // capitalize first letter in all words
       const label = tag
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 
-      return { label, tag, extraTags: extraTags[tag] ?? null };
+      return { label, tag, extraTags: associatedTags[tag] ?? null };
     });
+  } else {
+    categories = host.categories;
   }
   // add color to categories
-  const categories = [{ label: 'All Categories', tag: 'ALL' }, ...host.categories].map((category, i, arr) => {
-    const { color, tw } = pickColorForCategory(host.color, i, arr.length);
+  categories = [{ label: 'All Categories', tag: 'ALL' }, ...categories].map((category, i, arr) => {
+    const { color, tw } = pickColorForCategory(host?.color ?? 'blue', i, arr.length);
 
     return {
       ...category,
@@ -363,7 +378,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
 export async function getStaticPaths() {
   return {
-    paths: hosts.map(host => ({ params: { slug: host.slug } })),
+    paths: hosts.filter(h => h.slug).map(host => ({ params: { slug: host.slug } })),
     fallback: false,
   };
 }
