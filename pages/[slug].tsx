@@ -137,12 +137,14 @@ export const hosts = [
     startYear: 2018,
     logoSrc: '/ocf-logo.svg',
     color: 'teal',
-    brandColor: '#044F54',
-    cta: {
-      text: 'Contribute to many collectives at once',
-      buttonLabel: 'Contribute',
-      buttonHref: 'https://opencollective.com/solidarity-economy-fund',
+    //brandColor: '#044F54',
+    styles: {
+      text: 'text-ocf-brand',
+      button: 'bg-ocf-brand text-white',
+      brandBox: 'lg:bg-[#F7FEFF] text-ocf-brand',
+      box: 'bg-[#F7FEFF] text-ocf-brand',
     },
+
     categories: [
       { label: 'Mutual aid', tag: 'mutual aid' },
       { label: 'Education', tag: 'education' },
@@ -152,7 +154,6 @@ export const hosts = [
       {
         label: 'Climate',
         tag: 'climate',
-        extraTags: ['climate change', 'climate justice'],
       },
     ],
   },
@@ -164,14 +165,12 @@ export const hosts = [
     logoSrc: '/osc-logo.svg',
     website: 'https://opencollective.com/opensource',
     color: 'purple',
-    categories: [
-      // { label: 'Open source', tag: 'open source', extraTags: ['opensource'] },
-      // { label: 'Javascript', tag: 'javascript', extraTags: ['nodejs', 'typescript'] },
-      // { label: 'React', tag: 'react' },
-      // { label: 'Python', tag: 'python' },
-      // { label: 'PHP', tag: 'php' },
-    ],
-    disabled: true,
+    styles: {
+      text: 'text-[#4B3084]',
+      button: 'bg-[#4B3084] text-white',
+      brandBox: 'lg:bg-[#4B3084] lg:bg-opacity-5 text-[#4B3084]',
+      box: 'bg-[#4B3084] bg-opacity-5 text-[#4B3084]',
+    },
   },
   {
     name: 'Open Collective Europe',
@@ -179,9 +178,15 @@ export const hosts = [
     currency: 'EUR',
     startYear: 2019,
     logoSrc: '/oce-logo.svg',
-    color: 'yellow',
-    categories: [],
-    disabled: true,
+    website: 'https://opencollective.com/europe',
+    color: 'blue',
+    styles: {
+      text: 'text-[#0C2D66]',
+      button: 'bg-[#0C2D66] text-white',
+      brandBox: 'lg:bg-[#E0EC7B] lg:bg-opacity-20 text-[#0C2D66]',
+      box: 'bg-[#E0EC7B] bg-opacity-20 text-[#0C2D66]',
+    },
+    brandColor: '#0C2D66',
   },
 ];
 
@@ -258,12 +263,30 @@ const getDataForHost = async ({ apollo, hostSlug, currency }) => {
   };
 };
 
+// a function that capitalizes first letter in each words of a string
+const capitalize = str => {
+  return str
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+const extraTags = {
+  climate: ['climate change', 'climate justice'],
+  'open source': ['opensource'],
+};
+
+// function that if I have the extra tag gives me the key
+const getTagKey = tag => {
+  const tagKey = Object.keys(extraTags).find(key => extraTags[key].includes(tag));
+  return tagKey || tag;
+};
+
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const hostSlug: string = Array.isArray(params.slug) ? params.slug[0] : params.slug;
   const host = hosts.find(h => h.slug === hostSlug);
 
-  const { currency } = host;
-  const startYear = 2018;
+  const { currency, startYear } = host;
   const apollo = initializeApollo();
   const { collectives } = await getDataForHost({ apollo, hostSlug, currency });
 
@@ -272,6 +295,33 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return acc;
   }, {});
 
+  if (!host.categories) {
+    // go through collectives and find the top tags
+    const tags = collectives.reduce((acc, collective) => {
+      collective.tags
+        ?.filter(t => !['other', 'community'].includes(t))
+        .forEach(tag => {
+          const tagToUse = getTagKey(tag);
+          if (!acc[tagToUse]) {
+            acc[tagToUse] = 0;
+          }
+          acc[tagToUse]++;
+        });
+      return acc;
+    }, {});
+
+    const sortedTags = Object.keys(tags).sort((a, b) => tags[b] - tags[a]);
+    const topTags = sortedTags.slice(0, 4);
+    host.categories = topTags.map(tag => {
+      // capitalize first letter in all words
+      const label = tag
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      return { label, tag, extraTags: extraTags[tag] ?? null };
+    });
+  }
   // add color to categories
   const categories = [{ label: 'All Categories', tag: 'ALL' }, ...host.categories].map((category, i, arr) => {
     const { color, tw } = pickColorForCategory(host.color, i, arr.length);
@@ -313,7 +363,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
 export async function getStaticPaths() {
   return {
-    paths: hosts.filter(h => !h.disabled).map(host => ({ params: { slug: host.slug } })),
+    paths: hosts.map(host => ({ params: { slug: host.slug } })),
     fallback: false,
   };
 }

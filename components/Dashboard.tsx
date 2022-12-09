@@ -95,32 +95,36 @@ export default function Dashboard({
 
   const locationFilteredCollectives = React.useMemo(
     () => filterLocation(collectives, currentLocationFilter),
-    [currentLocationFilter],
+    [currentLocationFilter, host.slug],
   );
 
-  const categoriesWithCollectives = categories.map(category => {
-    const collectivesInCategory = locationFilteredCollectives.filter(
-      collective =>
-        category.tag === 'ALL' ||
-        collective.tags?.includes(category.tag) ||
-        category.extraTags?.filter(tag => collective.tags?.includes(tag)).length > 0,
-    );
-    return {
-      ...category,
-      collectives: collectivesInCategory,
-    };
-  });
+  const categoriesWithCollectives = React.useMemo(
+    () =>
+      categories.map(category => {
+        const collectivesInCategory = locationFilteredCollectives.filter(
+          collective =>
+            category.tag === 'ALL' ||
+            collective.tags?.includes(category.tag) ||
+            category.extraTags?.filter(tag => collective.tags?.includes(tag)).length > 0,
+        );
+        return {
+          ...category,
+          collectives: collectivesInCategory,
+        };
+      }),
+    [currentLocationFilter, host.slug],
+  );
+
   const currentCategory = categoriesWithCollectives.find(category =>
     currentTag ? category.tag === currentTag : !category.tag,
   );
   const locationOptions = React.useMemo(() => getFilterOptions(collectives), [collectives]);
-  const timeSeries = React.useMemo(() => computeTimeSeries(categoriesWithCollectives), [currentLocationFilter]);
+  const timeSeries = React.useMemo(
+    () => computeTimeSeries(categoriesWithCollectives),
+    [currentLocationFilter, host.slug],
+  );
   const totalCollectiveCount = collectives.length;
 
-  const hostStyles = {
-    button: { foundation: 'bg-ocf-brand text-white' },
-    ctaBox: { foundation: 'lg:bg-[#F7FEFF] text-ocf-brand' },
-  };
   return (
     <div className="mx-auto mt-2 flex max-w-[1400px] flex-col space-y-6 p-4 lg:space-y-10 lg:p-10">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-10">
@@ -153,11 +157,7 @@ export default function Dashboard({
             and more.
           </h1>
         </div>
-        <div
-          className={`flex flex-col items-center justify-center px-2 lg:rounded-lg lg:p-10 ${
-            hostStyles.ctaBox[host.slug]
-          }`}
-        >
+        <div className={`flex flex-col items-center justify-center px-2 lg:rounded-lg lg:p-10 ${host.styles.brandBox}`}>
           <img src={host.logoSrc} alt={host.name} className="hidden h-8 lg:block" />
 
           <p className={`my-4 hidden text-center font-medium lg:block`}>
@@ -167,9 +167,7 @@ export default function Dashboard({
             href={host.cta?.buttonHref ?? host.website}
             target="_blank"
             rel="noopener noreferrer"
-            className={`block w-full rounded-full lg:rounded-full ${
-              hostStyles.button[host.slug]
-            } px-3 py-3 text-center text-sm font-medium lg:text-lg`}
+            className={`block w-full rounded-full lg:rounded-full ${host.styles.button} px-3 py-3 text-center text-sm font-medium lg:text-lg`}
           >
             <span className="hidden lg:inline-block">{host.cta?.buttonLabel ?? 'Learn more'}</span>
             <span className="inline-block lg:hidden">{host.cta?.text}</span>
@@ -201,6 +199,7 @@ export default function Dashboard({
               currentTimePeriod={currentTimePeriod}
               locale={locale}
               currency={currency}
+              hostSlug={host.slug}
             />
             <div className="lg:px-4">
               <Chart
@@ -211,6 +210,8 @@ export default function Dashboard({
                 timeSeriesArray={timeSeries[currentTimePeriod].filter(category =>
                   currentTag === 'ALL' ? true : category.tag === currentTag,
                 )}
+                hostSlug={host.slug}
+                currency={currency}
               />
             </div>
             <Table
@@ -229,7 +230,7 @@ export default function Dashboard({
           <Updates host={host} currentTag={currentTag} openCollectiveModal={openCollectiveModal} />
         </div>
       </div>
-      <div>
+      {host.cta && (
         <div className="order my-12 grid grid-cols-1 rounded-lg border-2 border-teal-500 bg-[#F7FEFF] lg:grid-cols-4 lg:gap-12">
           <div className="flex flex-col justify-center p-6 pt-0 lg:p-10 lg:pt-10 lg:pr-4 ">
             <a
@@ -248,7 +249,8 @@ export default function Dashboard({
             <div className="flex justify-end"> </div>
           </div>
         </div>
-      </div>
+      )}
+
       <CollectiveModal
         isOpen={isModalOpen}
         collective={collectiveInModal}

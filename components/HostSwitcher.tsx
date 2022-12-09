@@ -35,18 +35,12 @@ export default function HostSwitcher({ host, hosts }) {
     setIsOpen(true);
   }
 
-  const hostStyles = {
-    button: {
-      foundation: 'text-ocf-brand hover:border-ocf-brand ',
-    },
-  };
-
   return (
     <Fragment>
       <a
         // This is a link since it needs to break with the text, TODO: fix suggestion
         onClick={openModal}
-        className={`cursor-pointer underline underline-offset-4 transition-colors ${hostStyles.button[host.slug]}`}
+        className={`cursor-pointer underline underline-offset-4 transition-colors ${host.styles.text}`}
       >
         {host.name}
         <ChevronUpDown className="inline h-6 w-6 flex-shrink-0 text-gray-800 lg:h-12 lg:w-12" />
@@ -87,9 +81,9 @@ export default function HostSwitcher({ host, hosts }) {
                         <Link href={`/${host.slug}`} key={host.slug}>
                           <a
                             key={host.slug}
-                            className={`flex h-24 items-center justify-start gap-3 rounded-xl border-3 px-4 lg:h-32 lg:gap-4 lg:px-6 bg-${
+                            className={`flex h-24 items-center justify-start gap-3 rounded-xl border-3 px-4 focus:outline-none lg:h-32 lg:gap-4 lg:px-6 focus:border-${
                               host.color
-                            }-500 bg-opacity-5 transition-colors ${
+                            }-500 ${host.styles.box} transition-colors ${
                               activeHost.slug === host.slug
                                 ? `border-${host.color}-500`
                                 : `border-transparent hover:border-${host.color}-500`

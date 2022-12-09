@@ -176,19 +176,26 @@ const getSeriesFromData = (intl, timeSeriesArray, startYear, currentTimePeriod) 
   return series;
 };
 
-export default function Chart({ timeSeriesArray, startYear, currentTag, currentTimePeriod, currentLocationFilter }) {
-  const currency = 'USD';
+export default function Chart({
+  timeSeriesArray,
+  startYear,
+  currentTag,
+  currentTimePeriod,
+  currentLocationFilter,
+  hostSlug,
+  currency,
+}) {
   const intl = useIntl();
   const series = useMemo(
     () => getSeriesFromData(intl, timeSeriesArray, startYear, currentTimePeriod),
-    [currentTag, currentTimePeriod, currentLocationFilter],
+    [currentTag, currentTimePeriod, currentLocationFilter, hostSlug],
   );
 
   const isCompactNotation = true; // getMinMaxDifference(series[0].data) >= 10000;
   const colors = timeSeriesArray.map(s => s.color);
   const chartOptions = useMemo(
     () => getChartOptions(intl, timeSeriesArray[0].timeUnit, currency, isCompactNotation, colors),
-    [currentTag, currentTimePeriod],
+    [currentTag, currentTimePeriod, hostSlug],
   );
 
   return (

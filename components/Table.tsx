@@ -87,6 +87,7 @@ export default function Collectives({
   setLocationFilter,
   openCollectiveModal,
   currency,
+  hostSlug,
 }: Props) {
   const data = React.useMemo(
     () =>
@@ -97,7 +98,7 @@ export default function Collectives({
         totalSpent: c.stats[currentTimePeriod].totalSpent.valueInCents,
         percentDisbursed: c.stats[currentTimePeriod].percentDisbursed,
       })),
-    [currentTag, currentTimePeriod, currentLocationFilter],
+    [currentTag, currentTimePeriod, currentLocationFilter, hostSlug],
   );
 
   const columns = React.useMemo(

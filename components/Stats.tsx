@@ -19,10 +19,11 @@ export default function Stats({
   currentTimePeriod,
   currency,
   locale,
+  hostSlug,
 }) {
   const stats = React.useMemo(
     () => computeStats(currentCategory.collectives, currency),
-    [currentTag, currentLocationFilter],
+    [currentTag, currentLocationFilter, hostSlug],
   );
   const { totalNetRaised, totalContributions, totalContributors } = stats[currentTimePeriod];
   return (
