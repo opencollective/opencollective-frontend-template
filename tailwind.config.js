@@ -18,7 +18,7 @@ module.exports = {
   safelist: [
     {
       pattern:
-        /(border|bg|text|decoration)-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|light-blue|blue|indigo|violet|purple|fuchsia|pink|rose)/,
+        /(border|bg|text|decoration)-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)/,
       variants: ['hover', 'focus'],
     },
   ],

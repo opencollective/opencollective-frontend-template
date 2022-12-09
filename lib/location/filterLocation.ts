@@ -1,6 +1,6 @@
 export type LocationFilter = {
-  value: string;
   type: 'city' | 'state' | 'country' | 'region' | 'other';
+  value: string;
 };
 
 export default function filterLocation(collectives, filter: LocationFilter) {

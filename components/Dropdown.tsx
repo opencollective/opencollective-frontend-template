@@ -1,75 +1,79 @@
 import React from 'react';
-import { Listbox } from '@headlessui/react';
-import { Check } from '@styled-icons/fa-solid/Check';
 import { ChevronDown } from '@styled-icons/fa-solid/ChevronDown';
+
+const findOptionFromValue = (options, value) => {
+  return options.find(option => {
+    if (!value) {
+      return option.value === '';
+    }
+
+    return option.value === value;
+  });
+};
 
 export default function DropdownSelector({
   options,
   fieldLabel,
   value,
+  id,
   onChange,
-  onOpen,
+  currentCategoryColor,
 }: {
   options: any;
   fieldLabel: any;
+  id: string;
   value: any;
+  currentCategoryColor: string;
   onChange: (any) => void;
   onOpen?: () => void;
 }) {
-  const selectedOption = options.find(option => {
-    if (!value) {
-      return option.value === '';
-    }
-    if (value.type) {
-      return option.value === value.value && option.type === value.type;
-    }
-    return option.value === value;
-  });
+  const selectedOption = findOptionFromValue(options, value);
   const breakIndex = options.findIndex(option => option.break);
   const lastVisibleIndex = breakIndex > 0 ? breakIndex : options.length;
+  const filterApplied = selectedOption?.value !== '' && selectedOption?.value !== 'ALL';
 
   return (
-    <div className="relative w-full">
-      <Listbox value={selectedOption} onChange={onChange}>
-        <Listbox.Button
-          className="flex w-full items-center justify-between rounded-full p-2 transition-colors hover:bg-gray-50"
-          onClick={onOpen}
-        >
-          {fieldLabel}
-          <div className="flex items-center gap-1 whitespace-nowrap text-xs text-gray-800">
-            <span>{selectedOption?.label}</span> <ChevronDown size="10" />
-          </div>
-        </Listbox.Button>
-        <Listbox.Options className="absolute right-0 z-10 mt-2 mb-10 w-full overflow-y-scroll rounded-lg bg-white p-2 shadow">
-          {options.slice(0, lastVisibleIndex).map(option => {
-            if (option.hr === true) {
-              return <hr key="hr" className="my-2 border-t border-gray-200" />;
-            }
+    <div className="group relative h-10 w-full">
+      <label
+        htmlFor={id}
+        className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between py-2 px-3 text-gray-800"
+      >
+        {fieldLabel}
+        <div className="flex items-center gap-1 whitespace-nowrap text-sm ">
+          <span>{selectedOption?.label}</span> <ChevronDown size="10" />
+        </div>
+      </label>
+      <select
+        id={id}
+        className={`absolute inset-0 flex w-full  items-center justify-end rounded-lg border-2 bg-opacity-75 text-transparent transition-colors  focus:outline-none  ${
+          filterApplied
+            ? `bg-${currentCategoryColor}-50 border-transparent hover:bg-opacity-100 hover:border-${currentCategoryColor}-100`
+            : 'border-transparent hover:border-gray-100  hover:bg-gray-50 '
+        }`}
+        value={value}
+        onChange={e => {
+          const { value } = e.target;
+          const option = findOptionFromValue(options, value);
+          onChange(option);
+        }}
+      >
+        {options.slice(0, lastVisibleIndex).map(option => {
+          if (option.hr === true) {
             return (
-              <Listbox.Option
-                key={option.value}
-                value={option}
-                className={({ active }) =>
-                  `cursor-pointer select-none rounded-lg px-2 py-1 ${active ? 'bg-gray-50 ' : ''}`
-                }
-              >
-                {({ selected }) => (
-                  <span className="relative flex items-center justify-between pl-5">
-                    {selected ? (
-                      <span className="absolute left-0 ">
-                        <Check size="12" aria-hidden="true" />
-                      </span>
-                    ) : null}
-
-                    <span className={option.type === 'country' ? 'pl-3' : ''}>{option.label}</span>
-                    {option.count && <span className="text-sm text-gray-500">{option.count}</span>}
-                  </span>
-                )}
-              </Listbox.Option>
+              <option disabled={true} key="hr">
+                ----
+              </option>
             );
-          })}
-        </Listbox.Options>
-      </Listbox>
+          }
+          return (
+            <option key={option.value} value={option.value}>
+              {option.type === 'country' ? ' - ' : ''}
+              {option.label}
+              {option.count && `  (${option.count})`}
+            </option>
+          );
+        })}
+      </select>
     </div>
   );
 }

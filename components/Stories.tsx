@@ -34,15 +34,6 @@ const Markdown = styled.div`
   }
 `;
 
-const Tag = styled.div`
-  background: ${({ color }) => color ?? '#333'};
-  color: white;
-  padding: 4px 12px;
-  border-radius: 99px;
-
-  display: inline-block;
-`;
-
 const RightArrow = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M8.23035 13.791C7.93876 13.5124 7.93876 13.0607 8.23035 12.782L12.4563 8.71345L1.59111 8.71345C1.26465 8.71345 1 8.39403 1 7.99999C1 7.60596 1.26465 7.28653 1.59111 7.28653L12.4563 7.28653L8.23035 3.21795C7.93876 2.93933 7.93876 2.48759 8.23035 2.20897C8.52194 1.93034 8.99471 1.93034 9.2863 2.20897L14.7813 7.49551C15.0729 7.77413 15.0729 8.22587 14.7813 8.50449L9.2863 13.791C8.99471 14.0697 8.52194 14.0697 8.23035 13.791Z" />
@@ -55,21 +46,7 @@ const LeftArrow = () => (
   </svg>
 );
 
-// const PlayButton = () => (
-//   <svg width="80" height="49" viewBox="0 0 80 49" fill="none" xmlns="http://www.w3.org/2000/svg">
-//     <rect y="0.5" width="80" height="48" rx="9" fill="#323334" fillOpacity="0.9" />
-//     <path
-//       fillRule="evenodd"
-//       clipRule="evenodd"
-//       d="M46.3709 23.0333L34.9033 15.9111C34.4786 15.6556 34.1471 15.5 33.7431 15.5C32.9972 15.5 32.5 16.1111 32.5 17.0667V31.9333C32.5 32.8889 32.9972 33.5 33.7431 33.5C34.1471 33.5 34.4786 33.3444 34.9033 33.0889L46.3709 25.9667C47.1996 25.4556 47.5 25.0889 47.5 24.5C47.5 23.9111 47.1996 23.5444 46.3709 23.0333Z"
-//       fill="white"
-//       fillOpacity="0.9"
-//     />
-//   </svg>
-// );
-
 export const Story = ({ story, openCollectiveModal }) => {
-  console.log({ story });
   return (
     <div className={`fadeIn max-w-lg rounded-lg bg-white p-4 lg:max-w-2xl lg:p-4`}>
       <div className="flex flex-col gap-4">
@@ -85,19 +62,21 @@ export const Story = ({ story, openCollectiveModal }) => {
             ></iframe>
           </div>
         )}
-        <div>
+        <div className="px-4">
           {story.collective && (
-            <div className="flex items-center gap-2">
-              <CollectiveButton collective={story.collective} openCollectiveModal={openCollectiveModal} />
+            <div className="flex flex-wrap items-center gap-2  lg:-mx-4">
+              <div className="-mx-2 lg:mx-0">
+                <CollectiveButton collective={story.collective} openCollectiveModal={openCollectiveModal} />
+              </div>
               <LocationTag location={story.collective.location} />
-              {story?.tags?.map(({ tag, color }) => (
+              {story?.tags?.map(({ tag }) => (
                 <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700">
                   {tag}
                 </span>
               ))}
             </div>
           )}
-          <div className="px-4 text-gray-600">
+          <div className=" text-gray-600">
             <Markdown dangerouslySetInnerHTML={{ __html: story.content }} />
           </div>
         </div>

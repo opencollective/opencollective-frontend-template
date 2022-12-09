@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { computeTimeSeries } from '../lib/computeData';
 import filterLocation, { LocationFilter } from '../lib/location/filterLocation';
+import getFilterOptions from '../lib/location/getFilterOptions';
 
 import Chart from './Chart';
 import CollectiveModal from './CollectiveModal';
@@ -18,7 +19,7 @@ const getParam = param => (Array.isArray(param) ? param[0] : param);
 const getLocationFilter = query => {
   const location = getParam(query?.location);
   const locationType = getParam(query?.locationType);
-  return location && locationType ? { value: location, type: locationType } : null;
+  return location && locationType ? { type: locationType, value: location } : null;
 };
 
 export default function Dashboard({
@@ -41,7 +42,7 @@ export default function Dashboard({
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { slug, tag, ...rest } = router.query;
     router.push(
-      { pathname: '/foundation', query: { ...rest, ...(value !== 'ALL' && tag !== value && { tag: value }) } },
+      { pathname: `/${slug}`, query: { ...rest, ...(value !== 'ALL' && tag !== value && { tag: value }) } },
       null,
       {
         shallow: true,
@@ -54,7 +55,7 @@ export default function Dashboard({
     const { slug, time, ...rest } = router.query;
     router.push(
       {
-        pathname: '/foundation',
+        pathname: `/${slug}`,
         query: { ...rest, ...(value !== 'ALL' && { time: value }) },
       },
       null,
@@ -69,7 +70,7 @@ export default function Dashboard({
     const { slug, location, locationType, ...rest } = router.query;
     router.push(
       {
-        pathname: '/foundation',
+        pathname: `/${slug}`,
         query: {
           ...rest,
           ...(locationFilter && { location: locationFilter.value, locationType: locationFilter.type }),
@@ -91,22 +92,6 @@ export default function Dashboard({
   };
 
   const collectivesDataContainer = useRef(null);
-  const [hideFilters, setHideFilters] = useState(false);
-
-  const handleScroll = () => {
-    const { bottom } = collectivesDataContainer.current.getBoundingClientRect();
-    // hide extra filters only related to collectives data
-    if (bottom < 400) {
-      setHideFilters(true);
-    } else {
-      setHideFilters(false);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const locationFilteredCollectives = React.useMemo(
     () => filterLocation(collectives, currentLocationFilter),
@@ -125,13 +110,11 @@ export default function Dashboard({
       collectives: collectivesInCategory,
     };
   });
-
   const currentCategory = categoriesWithCollectives.find(category =>
     currentTag ? category.tag === currentTag : !category.tag,
   );
-
+  const locationOptions = React.useMemo(() => getFilterOptions(collectives), [collectives]);
   const timeSeries = React.useMemo(() => computeTimeSeries(categoriesWithCollectives), [currentLocationFilter]);
-
   const totalCollectiveCount = collectives.length;
 
   const hostStyles = {
@@ -195,17 +178,18 @@ export default function Dashboard({
       </div>
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-4 lg:gap-10">
-        <div className="sticky top-4 z-20 lg:top-10">
+        <div className="sticky top-0 z-20 lg:top-10">
           <FilterArea
             currentTimePeriod={currentTimePeriod}
             currentTag={currentTag}
             categories={categoriesWithCollectives}
-            collectives={collectives}
             currentLocationFilter={currentLocationFilter}
             setLocationFilter={setLocationFilter}
             setTimePeriod={setTimePeriod}
             setTag={setTag}
-            hideFilters={hideFilters}
+            collectivesDataContainerRef={collectivesDataContainer}
+            currentCategory={currentCategory}
+            locationOptions={locationOptions}
           />
         </div>
         <div className="space-y-12 lg:col-span-3">

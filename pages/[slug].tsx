@@ -113,7 +113,7 @@ const colors = [
   { tw: 'emerald', color: '#10B981' },
   { tw: 'teal', color: '#14B8A6' },
   { tw: 'cyan', color: '#06B6D4' },
-  { tw: 'light-blue', color: '#0EA5E9' },
+  { tw: 'sky', color: '#0EA5E9' },
   { tw: 'blue', color: '#3B82F6' },
   { tw: 'indigo', color: '#6366F1' },
   { tw: 'violet', color: '#8B5CF6' },
