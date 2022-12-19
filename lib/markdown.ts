@@ -7,13 +7,13 @@ import html from 'remark-html';
 
 const postsDirectory = join(process.cwd(), '_stories');
 
-export function getPostSlugs(hostSlug) {
-  return fs.readdirSync(join(postsDirectory, hostSlug));
+export function getPostSlugs() {
+  return fs.readdirSync(join(postsDirectory));
 }
 
-export function getPostBySlug(hostSlug, slug: string, fields: string[] = []) {
+export function getPostBySlug(slug: string, fields: string[] = []) {
   const realSlug = slug.replace(/\.md$/, '');
-  const fullPath = join(postsDirectory, hostSlug, `${realSlug}.md`);
+  const fullPath = join(postsDirectory, `${realSlug}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
@@ -25,6 +25,7 @@ export function getPostBySlug(hostSlug, slug: string, fields: string[] = []) {
     location?: string;
     date?: string;
     collectiveSlug?: string;
+    published?: boolean;
   };
 
   const items: Items = {};
@@ -42,15 +43,18 @@ export function getPostBySlug(hostSlug, slug: string, fields: string[] = []) {
       items[field] = data[field];
     }
   });
+  // If published is defined, use that, otherwise default to true
+  items.published = data.published ?? true;
 
   return items;
 }
 
-export function getAllPosts(hostSlug, fields: string[] = []) {
+export function getAllPosts(fields: string[] = []) {
   try {
-    const slugs = getPostSlugs(hostSlug);
+    const slugs = getPostSlugs();
     const posts = slugs
-      .map(slug => getPostBySlug(hostSlug, slug, fields))
+      .map(slug => getPostBySlug(slug, fields))
+      .filter(post => post.published)
       // sort posts by date in descending order
       .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
     return posts;

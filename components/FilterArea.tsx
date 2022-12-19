@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import AnimateHeight from 'react-animate-height';
 
 import CategoryFilter from './CategorySelect';
@@ -31,35 +31,16 @@ const CloseIcon = () => (
 );
 
 export const Filters = ({
-  currentTimePeriod,
-  currentTag,
+  filter,
   categories,
-  currentLocationFilter,
-  setLocationFilter,
-  setTag,
-  setTimePeriod,
+  setFilter,
+  locale,
   locationOptions,
   mobile = false,
   currentCategory,
-  collectivesDataContainerRef,
+  collectivesInView,
 }) => {
-  const [hideLocationAndTimeFilters, setHideLocationAndTimeFilters] = useState(false);
   const [expanded, setExpanded] = React.useState(!mobile);
-
-  const handleScroll = () => {
-    const { bottom } = collectivesDataContainerRef.current.getBoundingClientRect();
-    // hide extra filters only related to collectives data
-    if (bottom < (expanded ? 300 : 100)) {
-      setHideLocationAndTimeFilters(true);
-    } else {
-      setHideLocationAndTimeFilters(false);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
     <div className="relative z-50 translate-x-0 bg-white">
@@ -74,31 +55,53 @@ export const Filters = ({
           {expanded ? (
             <CloseIcon />
           ) : (
-            <FilterIcon className={`${currentCategory.tag !== 'ALL' && `text-${currentCategory.tw}-600`}`} />
+            <FilterIcon className={`${currentCategory.tag !== 'ALL' && `text-${currentCategory.color.name}-600`}`} />
           )}
         </button>
       )}
       <AnimateHeight id="categories" duration={300} height={!mobile ? 'auto' : expanded ? 'auto' : 0}>
         <CategoryFilter
-          selectedTag={currentTag}
+          locale={locale}
+          selectedTag={filter.tag}
           categories={categories}
           onSelect={category => {
-            setTag(category.tag);
+            setFilter({ tag: category.tag });
             mobile && setExpanded(false);
           }}
         />
       </AnimateHeight>
 
-      <AnimateHeight id="date-location-filters" duration={500} height={hideLocationAndTimeFilters ? 0 : 'auto'}>
+      <AnimateHeight id="date-location-filters" duration={500} height={collectivesInView ? 'auto' : 0}>
         <div className="mt-1 border-t pb-1 pt-2 lg:mt-4 lg:pt-4">
           <div className="space-y-1 lg:space-y-2">
             <Dropdown
-              id={'date'}
-              currentCategoryColor={currentCategory.tw}
+              ariaLabel="Location"
+              currentCategoryColor={currentCategory.color.name}
+              fieldLabel={
+                <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
+                  <LocationPin />
+                  <span>Location</span>
+                </div>
+              }
+              options={locationOptions.map(option => ({
+                ...option,
+                value: JSON.stringify({ type: option.type, value: option.value }),
+              }))}
+              value={JSON.stringify(filter.location)}
+              onOpen={() => {
+                mobile && setExpanded(false);
+              }}
+              onChange={option => {
+                setFilter({ location: JSON.parse(option.value) });
+              }}
+            />
+            <Dropdown
+              ariaLabel="Date range"
+              currentCategoryColor={currentCategory.color.name}
               fieldLabel={
                 <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
                   <DateIcon />
-                  <span className="">Date range</span>
+                  <span>Date range</span>
                 </div>
               }
               options={[
@@ -106,34 +109,9 @@ export const Filters = ({
                 { value: 'PAST_YEAR', label: 'Past 12 months' },
                 { value: 'PAST_QUARTER', label: 'Past 3 months' },
               ]}
-              value={currentTimePeriod}
+              value={filter.timePeriod}
               onChange={({ value }) => {
-                setTimePeriod(value);
-              }}
-            />
-            <Dropdown
-              id={'loc'}
-              currentCategoryColor={currentCategory.tw}
-              fieldLabel={
-                <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium">
-                  <LocationPin />
-                  <span className="">Location</span>
-                </div>
-              }
-              options={locationOptions.map(option => ({
-                ...option,
-                value: option.value ? JSON.stringify({ type: option.type, value: option.value }) : '',
-              }))}
-              value={currentLocationFilter ? JSON.stringify(currentLocationFilter) : null}
-              onOpen={() => {
-                mobile && setExpanded(false);
-              }}
-              onChange={option => {
-                if (!option.value) {
-                  setLocationFilter(null);
-                } else {
-                  setLocationFilter(JSON.parse(option.value));
-                }
+                setFilter({ timePeriod: value });
               }}
             />
           </div>
@@ -143,52 +121,18 @@ export const Filters = ({
   );
 };
 
-export default function FilterArea({
-  currentTimePeriod,
-  currentTag,
-  categories,
-  currentLocationFilter,
-  setLocationFilter,
-  setTimePeriod,
-  setTag,
-  collectivesDataContainerRef,
-  currentCategory,
-  locationOptions,
-}) {
+export default function FilterArea(props) {
   return (
     <Fragment>
       <div className="hidden lg:block">
         <div className="rounded-lg bg-white p-4">
-          <Filters
-            currentTimePeriod={currentTimePeriod}
-            currentTag={currentTag}
-            categories={categories}
-            currentLocationFilter={currentLocationFilter}
-            setLocationFilter={setLocationFilter}
-            setTimePeriod={setTimePeriod}
-            setTag={setTag}
-            locationOptions={locationOptions}
-            currentCategory={currentCategory}
-            collectivesDataContainerRef={collectivesDataContainerRef}
-          />
+          <Filters {...props} />
         </div>
       </div>
       <div className="block lg:hidden">
         <div className="relative h-40">
-          <div className="absolute top-0 right-0 left-0 -mx-4 bg-white py-2 px-4 shadow">
-            <Filters
-              currentTimePeriod={currentTimePeriod}
-              currentTag={currentTag}
-              categories={categories}
-              currentLocationFilter={currentLocationFilter}
-              setLocationFilter={setLocationFilter}
-              setTimePeriod={setTimePeriod}
-              setTag={setTag}
-              locationOptions={locationOptions}
-              currentCategory={currentCategory}
-              collectivesDataContainerRef={collectivesDataContainerRef}
-              mobile={true}
-            />
+          <div className="absolute top-0 right-0 left-0 bg-white py-2 px-4 shadow">
+            <Filters {...props} mobile={true} />
           </div>
         </div>
       </div>

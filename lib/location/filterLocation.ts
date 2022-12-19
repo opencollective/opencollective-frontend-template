@@ -4,10 +4,13 @@ export type LocationFilter = {
 };
 
 export default function filterLocation(collectives, filter: LocationFilter) {
-  if (!filter) {
+  if (!filter.value || !filter.type) {
     return collectives;
   }
   const filtered = collectives.filter(collective => {
+    if (!collective.location) {
+      return false;
+    }
     const { region, countryCode, stateCode, city, isGlobal, isOnline } = collective.location;
 
     switch (filter.type) {

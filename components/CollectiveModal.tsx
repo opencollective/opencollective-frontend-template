@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import { Dialog, Transition } from '@headlessui/react';
-import { Xmark } from '@styled-icons/fa-solid/Xmark';
 import AnimateHeight, { Height } from 'react-animate-height';
 import { FormattedDate } from 'react-intl';
 import sanitizeHtml from 'sanitize-html';
 
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
+import { CloseIcon } from './Icons';
 import LocationTag from './LocationTag';
 import { Avatar } from './Table';
 
@@ -16,6 +16,8 @@ export const collectiveQuery = gql`
     account(slug: $slug) {
       id
       slug
+      createdAt
+      description
       updates(limit: 3) {
         totalCount
         nodes {
@@ -33,7 +35,7 @@ export const collectiveQuery = gql`
     }
   }
 `;
-export default function CollectiveModal({ isOpen, onClose, collective, locale = 'en', setLocationFilter }) {
+export default function CollectiveModal({ isOpen, onClose, collective, locale = 'en', setFilter, currency }) {
   const { data } = useQuery(collectiveQuery, {
     variables: { slug: collective?.slug },
     skip: !collective,
@@ -41,7 +43,7 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
   const [height, setHeight] = useState<Height>(0);
 
   useEffect(() => {
-    if (data?.account?.updates?.nodes.length > 0) {
+    if (data?.account) {
       setHeight('auto');
     } else {
       setHeight(0);
@@ -83,18 +85,23 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                     <span>{collective?.name}</span>
                   </Dialog.Title>
                   <button
-                    className="absolute right-2 top-2 h-10 w-10 rounded-full text-gray-600 hover:bg-gray-50"
+                    className="absolute right-6 top-5 flex h-12 w-12 items-center justify-center rounded-full border text-gray-600 hover:bg-gray-50"
                     onClick={onClose}
                   >
-                    <Xmark size={22} />
+                    <CloseIcon className="" />
                   </button>
-                  <div className="mt-3">
-                    <p className="text-base text-gray-500">{collective?.description}</p>
-                  </div>
+                  <AnimateHeight id="description" duration={500} height={height}>
+                    <div className="mt-3">
+                      <p className="text-base text-gray-500">{data?.account?.description}</p>
+                    </div>
+                  </AnimateHeight>
                   {(collective.tags?.length > 0 || collective.location?.label) && (
                     <div className="mt-4 flex flex-wrap gap-2">
                       {collective.location && (
-                        <LocationTag setLocationFilter={setLocationFilter} location={collective.location} />
+                        <LocationTag
+                          setLocationFilter={filter => setFilter({ location: filter })}
+                          location={collective.location}
+                        />
                       )}
                       {collective?.tags?.map(tag => (
                         <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700">
@@ -107,28 +114,27 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                   <div className="mt-4 grid grid-cols-4 gap-1 rounded bg-gray-50 p-4 text-sm text-gray-600">
                     <div className="text-black">Total disbursed</div>
                     <div>
-                      {formatCurrency(collective.stats.ALL.totalSpent.valueInCents, collective.currency, {
+                      {formatCurrency(Math.abs(collective.stats?.ALL.spent), currency, {
                         locale,
                         precision: 0,
                       })}
                     </div>
                     <div className="text-black">Total raised</div>
                     <div>
-                      {formatCurrency(collective.stats.ALL.totalNetRaised.valueInCents, collective.currency, {
+                      {formatCurrency(collective.stats?.ALL.raised, currency, {
                         locale,
                         precision: 0,
                       })}
                     </div>
-                    {/* <div className="text-black">Expenses</div>{' '}
-                    <div>{collective.expensesCount.toLocaleString(locale)}</div> */}
-                    {/* <div className="text-black">Admins</div> <div>{collective.adminCount.toLocaleString(locale)}</div> */}
                     <div className="text-black">Contributors</div>{' '}
-                    <div>{collective.stats.ALL.contributors.toLocaleString(locale)}</div>
+                    <div>{collective.stats?.ALL.contributors.toLocaleString(locale)}</div>
                     <div className="text-black">Contributions</div>{' '}
-                    <div>{collective.stats.ALL.contributions.toLocaleString(locale)}</div>
+                    <div>{collective.stats?.ALL.contributions.toLocaleString(locale)}</div>
                     <div className="text-black">Created</div>
                     <div>
-                      <FormattedDate dateStyle={'medium'} value={collective.createdAt} />
+                      {data?.account?.createdAt && (
+                        <FormattedDate dateStyle={'medium'} value={data.account.createdAt} />
+                      )}
                     </div>
                   </div>
                   <AnimateHeight id="updates" duration={500} height={height}>

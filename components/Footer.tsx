@@ -11,7 +11,9 @@ export default function Footer() {
             <img
               src="/oc-logo.svg"
               alt="Open Collective"
-              className="h-8 grayscale transition-all duration-300 hover:grayscale-0"
+              height="32px"
+              width="164px"
+              className="grayscale transition-all duration-300 hover:grayscale-0"
             />
           </a>
         </div>

@@ -1,8 +1,8 @@
-categoriesDataDump.json
-
+_data
 # Env file
 .env
 .env.local
+
 
 # VSCode & VSCode's extensions
 .vscode/*

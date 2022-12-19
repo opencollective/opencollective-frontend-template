@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { computeStats } from '../lib/computeData';
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
 const Metric = ({ value, label }: { label: string; value: string }) => {
@@ -12,24 +11,13 @@ const Metric = ({ value, label }: { label: string; value: string }) => {
   );
 };
 
-export default function Stats({
-  currentCategory,
-  currentTag,
-  currentLocationFilter,
-  currentTimePeriod,
-  currency,
-  locale,
-}) {
-  const stats = React.useMemo(
-    () => computeStats(currentCategory.collectives, currency),
-    [currentTag, currentLocationFilter],
-  );
-  const { totalNetRaised, totalContributions, totalContributors } = stats[currentTimePeriod];
+export default function Stats({ currency, locale, stats }) {
+  const { raised, totalContributions, totalContributors, collectivesCount } = stats;
   return (
     <div className="-mb-2 grid grid-cols-1 divide-y px-4 lg:grid-cols-4 lg:divide-y-0 lg:divide-x lg:px-8">
-      <Metric value={currentCategory.collectives.length.toLocaleString(locale)} label="Collectives" />
+      <Metric value={collectivesCount?.toLocaleString(locale)} label="Collectives" />
       <Metric
-        value={formatCurrency(totalNetRaised.valueInCents, totalNetRaised.currency, {
+        value={formatCurrency(raised, currency, {
           locale,
           precision: 0,
         })}

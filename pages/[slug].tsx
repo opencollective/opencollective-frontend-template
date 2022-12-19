@@ -1,324 +1,252 @@
-import fs from 'fs';
-
 import React from 'react';
-import { gql } from '@apollo/client';
-import dayjs from 'dayjs';
 import type { GetStaticProps } from 'next';
 import Head from 'next/head';
 
-import { initializeApollo } from '../lib/apollo-client';
-import { getDump } from '../lib/getDataDump';
+import { hosts } from '../lib/hosts';
 import getLocation from '../lib/location/getLocation';
 import { getAllPosts, markdownToHtml } from '../lib/markdown';
+import { tagTransforms } from '../lib/tag-transforms';
 
 import Dashboard from '../components/Dashboard';
 import Layout from '../components/Layout';
 
-export const accountsQuery = gql`
-  query SearchAccounts($hostSlug: String, $quarterAgo: DateTime, $yearAgo: DateTime, $currency: Currency) {
-    accounts(type: [COLLECTIVE, FUND], limit: 5000, host: { slug: $hostSlug }) {
-      totalCount
-      nodes {
-        id
-        name
-        slug
-        createdAt
-        description
-        imageUrl(height: 100, format: png)
-        tags
-
-        ALL_stats: stats {
-          contributorsCount(includeChildren: true)
-          contributionsCount(includeChildren: true)
-
-          totalAmountSpent(includeChildren: true, currency: $currency) {
-            valueInCents
-            currency
-          }
-
-          totalNetAmountReceivedTimeSeries(timeUnit: YEAR, includeChildren: true, currency: $currency) {
-            timeUnit
-            nodes {
-              date
-              amount {
-                valueInCents
-                currency
-              }
-            }
-          }
-        }
-
-        PAST_YEAR_stats: stats {
-          contributorsCount(includeChildren: true, dateFrom: $yearAgo)
-          contributionsCount(includeChildren: true, dateFrom: $yearAgo)
-
-          totalAmountSpent(includeChildren: true, dateFrom: $yearAgo, currency: $currency) {
-            valueInCents
-            currency
-          }
-          totalNetAmountReceivedTimeSeries(
-            dateFrom: $yearAgo
-            timeUnit: MONTH
-            includeChildren: true
-            currency: $currency
-          ) {
-            timeUnit
-            nodes {
-              date
-              amount {
-                valueInCents
-                currency
-              }
-            }
-          }
-        }
-
-        PAST_QUARTER_stats: stats {
-          contributorsCount(includeChildren: true, dateFrom: $quarterAgo)
-          contributionsCount(includeChildren: true, dateFrom: $quarterAgo)
-
-          totalAmountSpent(includeChildren: true, dateFrom: $quarterAgo, currency: $currency) {
-            valueInCents
-            currency
-          }
-
-          totalNetAmountReceivedTimeSeries(
-            dateFrom: $quarterAgo
-            timeUnit: WEEK
-            includeChildren: true
-            currency: $currency
-          ) {
-            timeUnit
-            nodes {
-              date
-              amount {
-                valueInCents
-                currency
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const colors = [
-  { tw: 'red', color: '#EF4444' },
-  { tw: 'orange', color: '#F97316' },
-  { tw: 'amber', color: '#F59E0B' },
-  { tw: 'yellow', color: '#EAB308' },
-  { tw: 'lime', color: '#84CC16' },
-  { tw: 'green', color: '#22C55E' },
-  { tw: 'emerald', color: '#10B981' },
-  { tw: 'teal', color: '#14B8A6' },
-  { tw: 'cyan', color: '#06B6D4' },
-  { tw: 'sky', color: '#0EA5E9' },
-  { tw: 'blue', color: '#3B82F6' },
-  { tw: 'indigo', color: '#6366F1' },
-  { tw: 'violet', color: '#8B5CF6' },
-  { tw: 'purple', color: '#A855F7' },
-  { tw: 'fuchsia', color: '#D946EF' },
-  { tw: 'pink', color: '#EC4899' },
-  { tw: 'rose', color: '#F43F5E' },
-];
-
-const pickColorForCategory = (startColor: string, i: number, numOfCategories: number) => {
-  const startColorIndex = colors.findIndex(c => c.tw === startColor);
-  const step = Math.floor(colors.length / numOfCategories);
-  return colors[(startColorIndex + i * step) % colors.length];
-};
-
-export const hosts = [
-  {
-    name: 'Open Collective Foundation',
-    slug: 'foundation',
-    currency: 'USD',
-    startYear: 2018,
-    logoSrc: '/ocf-logo.svg',
-    color: 'teal',
-    brandColor: '#044F54',
-    cta: {
-      text: 'Contribute to many collectives at once',
-      buttonLabel: 'Contribute',
-      buttonHref: 'https://opencollective.com/solidarity-economy-fund',
-    },
-    categories: [
-      { label: 'Mutual aid', tag: 'mutual aid' },
-      { label: 'Education', tag: 'education' },
-      { label: 'Civic Tech', tag: 'civic tech' },
-      { label: 'Food', tag: 'food' },
-      { label: 'Arts & Culture', tag: 'arts and culture' },
-      {
-        label: 'Climate',
-        tag: 'climate',
-        extraTags: ['climate change', 'climate justice'],
-      },
-    ],
-  },
-  {
-    name: 'Open Source Collective',
-    slug: 'opensource',
-    currency: 'USD',
-    startYear: 2016,
-    logoSrc: '/osc-logo.svg',
-    website: 'https://opencollective.com/opensource',
-    color: 'purple',
-    categories: [
-      // { label: 'Open source', tag: 'open source', extraTags: ['opensource'] },
-      // { label: 'Javascript', tag: 'javascript', extraTags: ['nodejs', 'typescript'] },
-      // { label: 'React', tag: 'react' },
-      // { label: 'Python', tag: 'python' },
-      // { label: 'PHP', tag: 'php' },
-    ],
-    disabled: true,
-  },
-  {
-    name: 'Open Collective Europe',
-    slug: 'europe',
-    currency: 'EUR',
-    startYear: 2019,
-    logoSrc: '/oce-logo.svg',
-    color: 'yellow',
-    categories: [],
-    disabled: true,
-  },
-];
-
 const getTotalStats = stats => {
-  const totalNetAmountReceived = stats.totalNetAmountReceivedTimeSeries.nodes.reduce(
-    (acc, node) => {
-      return {
-        valueInCents: acc.valueInCents + node.amount.valueInCents,
-        currency: node.amount.currency,
-      };
-    },
-    { valueInCents: 0 },
-  );
-  const totalSpent = {
-    valueInCents: Math.abs(stats.totalAmountSpent.valueInCents),
-    currency: stats.totalAmountSpent.currency,
+  const raisedSeries = {
+    timeUnit: stats.totalAmountReceivedTimeSeries.timeUnit,
+    nodes: stats.totalAmountReceivedTimeSeries.nodes.map(node => ({
+      date: node.date,
+      amount: node.amount.valueInCents,
+    })),
   };
-  const percentDisbursed = (totalSpent.valueInCents / totalNetAmountReceived.valueInCents) * 100;
+  const raised = raisedSeries.nodes.reduce((acc, node) => acc + node.amount, 0);
+  const spent = Math.abs(stats.totalAmountSpent.valueInCents);
 
   return {
     contributors: stats.contributorsCount,
     contributions: stats.contributionsCount,
-    totalSpent,
-    totalNetRaised: totalNetAmountReceived,
-    percentDisbursed,
-    totalNetRaisedTimeSeries: stats.totalNetAmountReceivedTimeSeries.nodes,
+    spent,
+    raised,
+    raisedSeries,
   };
 };
 
-const getDataForHost = async ({ apollo, hostSlug, currency }) => {
-  let data = getDump(hostSlug);
-
-  if (!data) {
-    ({ data } = await apollo.query({
-      query: accountsQuery,
-      variables: {
-        hostSlug,
-        quarterAgo: dayjs.utc().subtract(12, 'week').startOf('isoWeek').toISOString(),
-        yearAgo: dayjs.utc().subtract(12, 'month').startOf('month').toISOString(),
-        currency,
-      },
-    }));
-
-    // eslint-disable-next-line no-process-env
-    if (data && process.env.NODE_ENV === 'development') {
-      fs.writeFile(`_dump/${hostSlug}.json`, JSON.stringify(data), error => {
-        if (error) {
-          throw error;
-        }
-      });
-    }
-  }
-
-  const collectives = data.accounts.nodes.map(collective => {
-    return {
-      id: collective.id,
-      name: collective.name,
-      slug: collective.slug,
-      description: collective.description,
-      imageUrl: collective.imageUrl.replace('-staging', ''),
-      location: getLocation(collective),
-      tags: collective.tags,
-      createdAt: collective.createdAt,
-      stats: {
-        ALL: getTotalStats(collective.ALL_stats),
-        PAST_YEAR: getTotalStats(collective.PAST_YEAR_stats),
-        PAST_QUARTER: getTotalStats(collective.PAST_QUARTER_stats),
-      },
-    };
-  });
-
-  return {
-    collectives,
+const getStats = collective => {
+  const stats = {
+    ALL: getTotalStats(collective.ALL),
+    PAST_YEAR: getTotalStats(collective.PAST_YEAR),
+    PAST_QUARTER: getTotalStats(collective.PAST_QUARTER),
   };
+  return stats.ALL.raised !== 0 ? stats : null;
+};
+
+const colors = [
+  { name: 'red', hex: '#EF4444' },
+  { name: 'orange', hex: '#F97316' },
+  { name: 'amber', hex: '#F59E0B' },
+  { name: 'yellow', hex: '#EAB308' },
+  { name: 'lime', hex: '#84CC16' },
+  { name: 'green', hex: '#22C55E' },
+  { name: 'emerald', hex: '#10B981' },
+  { name: 'teal', hex: '#14B8A6' },
+  { name: 'cyan', hex: '#06B6D4' },
+  { name: 'sky', hex: '#0EA5E9' },
+  { name: 'blue', hex: '#3B82F6' },
+  { name: 'indigo', hex: '#6366F1' },
+  { name: 'violet', hex: '#8B5CF6' },
+  { name: 'purple', hex: '#A855F7' },
+  { name: 'fuchsia', hex: '#D946EF' },
+  { name: 'pink', hex: '#EC4899' },
+  { name: 'rose', hex: '#F43F5E' },
+];
+
+const pickColorForCategory = (startColor: string, i: number, numOfCategories: number) => {
+  const startColorIndex = colors.findIndex(c => c.name === startColor);
+  const step = Math.floor(colors.length / numOfCategories);
+  return colors[(startColorIndex + i * step) % colors.length];
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const hostSlug: string = Array.isArray(params.slug) ? params.slug[0] : params.slug;
-  const host = hosts.find(h => h.slug === hostSlug);
+  const hostSlug: string = params ? (Array.isArray(params.slug) ? params.slug[0] : params.slug) : null;
 
-  const { currency } = host;
-  const startYear = 2018;
-  const apollo = initializeApollo();
-  const { collectives } = await getDataForHost({ apollo, hostSlug, currency });
+  const host = hosts.find(h => {
+    if (!hostSlug) {
+      return h.slug === '';
+    }
+    return h.slug === hostSlug;
+  });
 
-  const collectivesData = collectives.reduce((acc, collective) => {
-    acc[collective.slug] = collective;
-    return acc;
-  }, {});
+  if (!host) {
+    return {
+      notFound: true,
+    };
+  }
 
-  // add color to categories
-  const categories = [{ label: 'All Categories', tag: 'ALL' }, ...host.categories].map((category, i, arr) => {
-    const { color, tw } = pickColorForCategory(host.color, i, arr.length);
+  // eslint-disable-next-line node/no-missing-require, node/no-unpublished-require
+  const { accounts } = await require(`../_data/${hostSlug ?? 'ALL'}.json`);
+  // eslint-disable-next-line node/no-missing-require, node/no-unpublished-require
+  const { collectiveCounts } = await require(`../_data/shared.json`);
+
+  const collectives = accounts.nodes.map(collective => {
+    const stats = getStats(collective);
+    const location = getLocation(collective);
+    return {
+      name: collective.name,
+      slug: collective.slug,
+      imageUrl: collective.imageUrl.replace('-staging', ''),
+      // tags: collective.tags,
+      tags:
+        collective.tags
+          ?.filter(t => !['other', 'online', 'community', 'association', 'movement', 'USA', 'europe'].includes(t))
+          .map(tag => tagTransforms[tag] || tag)
+          .filter((tag, i, arr) => arr.indexOf(tag) === i) ?? null,
+      ...(stats && { stats }),
+      ...(location && { location }),
+    };
+  });
+
+  let categories;
+
+  // If no categories defined, generate them from most popular tags
+  if (!host?.categories) {
+    // Go through collectives and count tags
+    const tagCounts = collectives.reduce((acc, collective) => {
+      collective.tags?.forEach(tag => {
+        if (!acc[tag]) {
+          acc[tag] = 0;
+        }
+        acc[tag]++;
+      });
+      return acc;
+    }, {});
+
+    const sortedTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]);
+
+    /* Find the top tags that are (sort of?) "mutually exclusive", so that we are not displaying many categories 
+       that are essentially the same (Open Source, Javascript, React etc), by adding a single count for each
+       collectives' most popular tag. */
+    const topMutuallyExclusiveTags = collectives.reduce((acc, collective) => {
+      if (!collective.tags) {
+        return acc;
+      }
+      // Go through 20 top tags until we find one that is in the collective and add count to it
+      for (let i = 0; i < 20; i++) {
+        const tag = sortedTags[i];
+        if (collective.tags?.includes(tag)) {
+          if (!acc[tag]) {
+            acc[tag] = 0;
+          }
+          acc[tag]++;
+          break;
+        }
+      }
+      return acc;
+    }, {});
+    const sortedMutualExclusiveTags = Object.keys(topMutuallyExclusiveTags).sort(
+      (a, b) => topMutuallyExclusiveTags[b] - topMutuallyExclusiveTags[a],
+    );
+    const topMutualExclusiveTagsSortedOnActualCount = sortedMutualExclusiveTags
+      .slice(0, 6)
+      .sort((a, b) => tagCounts[b] - tagCounts[a]);
+
+    categories = topMutualExclusiveTagsSortedOnActualCount.map(tag => {
+      // Capitalize first letter in all words for the label
+      const label = tag
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      return { label, tag };
+    });
+  } else {
+    categories = host.categories;
+  }
+
+  // Add All category and add colors and counts
+  categories = [{ label: 'All Categories', tag: 'ALL' }, ...categories].map((category, i, arr) => {
+    const color = pickColorForCategory(host?.color ?? 'blue', i, arr.length);
+
+    const count = collectives.filter(
+      collective => category.tag === 'ALL' || collective.tags?.includes(category.tag),
+    ).length;
 
     return {
       ...category,
       color,
-      tw,
+      count,
     };
   });
 
-  const allStories = getAllPosts(hostSlug, ['title', 'content', 'tags', 'location', 'slug', 'video', 'collectiveSlug']);
+  const allStories = getAllPosts([
+    'title',
+    'content',
+    'tags',
+    'location',
+    'slug',
+    'youtube',
+    'video',
+    'collectiveSlug',
+  ]);
   // run markdownToHtml on content in stories
-  const storiesWithContent = await Promise.all(
-    allStories.map(async story => {
-      return {
+  const stories = await Promise.all(
+    allStories
+      .map(story => ({
         ...story,
-        tags: story.tags.map(tag => ({ color: categories.find(c => c.tag === tag)?.color ?? null, tag: tag })),
-        content: await markdownToHtml(story.content),
-        collective: collectivesData[story.collectiveSlug] ?? null,
-      };
-    }),
+        collective: collectives.find(c => c.slug === story.collectiveSlug) ?? null,
+      }))
+      .filter(story => story.collective)
+      .map(async story => {
+        return {
+          ...story,
+          // tags: story.tags.map(tag => ({ color: categories.find(c => c.tag === tag)?.color.hex ?? null, tag: tag })),
+          content: await markdownToHtml(story.content),
+        };
+      }),
   );
+
+  const { currency, startYear } = host;
 
   return {
     props: {
-      host,
-      hosts,
+      host: { ...host, count: collectiveCounts[host.slug !== '' ? host.slug : 'ALL'] },
+      hosts: hosts.map(host => ({ ...host, count: collectiveCounts[host.slug !== '' ? host.slug : 'ALL'] })),
       collectives,
       categories,
-      collectivesData,
-      stories: storiesWithContent,
+      hostSlug: host.slug,
+      stories,
       startYear,
       currency,
+      platformTotalCollectives: collectiveCounts.platform,
     },
-    revalidate: 60 * 60 * 24, // Revalidate the static page at most once every 24 hours to not overload the API
+    // revalidate: 60 * 60 * 24, // Revalidate the static page at most once every 24 hours to not overload the API
   };
 };
 
 export async function getStaticPaths() {
+  const hostSlugs = hosts.filter(h => h.slug !== '').map(host => host.slug);
   return {
-    paths: hosts.filter(h => !h.disabled).map(host => ({ params: { slug: host.slug } })),
+    paths: [
+      ...hostSlugs.map(slug => ({
+        params: {
+          slug,
+        },
+      })),
+    ],
     fallback: false,
   };
 }
 
-export default function Page({ categories, collectivesData, stories, host, hosts, collectives, currency, startYear }) {
+export default function Page({
+  categories,
+  stories,
+  host,
+  hosts,
+  collectives,
+  hostSlug,
+  currency,
+  startYear,
+  platformTotalCollectives,
+}) {
+  // eslint-disable-next-line no-console
   const locale = 'en';
   return (
     <Layout>
@@ -328,13 +256,14 @@ export default function Page({ categories, collectivesData, stories, host, hosts
       <Dashboard
         categories={categories}
         collectives={collectives}
+        hostSlug={hostSlug}
         currency={currency}
         startYear={startYear}
-        collectivesData={collectivesData}
         stories={stories}
         locale={locale}
         host={host}
         hosts={hosts}
+        platformTotalCollectives={platformTotalCollectives}
       />
     </Layout>
   );

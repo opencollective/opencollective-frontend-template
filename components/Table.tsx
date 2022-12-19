@@ -1,16 +1,15 @@
 import React from 'react';
 import { ChevronLeft } from '@styled-icons/fa-solid/ChevronLeft';
 import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
-import { SortDown } from '@styled-icons/fa-solid/SortDown';
 import { usePagination, useSortBy, useTable } from 'react-table';
 import styled from 'styled-components';
 
-import { LocationFilter } from '../lib/location/filterLocation';
 import { formatCurrency } from '@opencollective/frontend-components/lib/currency-utils';
 
+import { Filter } from './Dashboard';
 import LocationTag from './LocationTag';
 
-const Table = styled.table`
+const StyledTable = styled.table`
   padding: 0;
   border-collapse: collapse;
   border-spacing: 0;
@@ -68,36 +67,29 @@ export const Avatar = styled.img`
 
 interface Props {
   collectives: [any];
-  currentTimePeriod: string;
-  currentTag: string;
-  currentLocationFilter: LocationFilter;
+  filter: any;
   locale: string;
-  hostSlug: string;
   openCollectiveModal: (slug: string) => void;
-  setLocationFilter: (location: LocationFilter) => void;
+  setFilter: (filter: Filter) => void;
   currency: string;
 }
 
-export default function Collectives({
-  collectives,
-  currentTimePeriod,
-  currentTag,
-  locale,
-  currentLocationFilter,
-  setLocationFilter,
-  openCollectiveModal,
-  currency,
-}: Props) {
+export default function Table({ collectives, filter, locale, setFilter, openCollectiveModal, currency }: Props) {
   const data = React.useMemo(
     () =>
-      collectives.map(c => ({
-        ...c,
-        contributorsCount: c.stats[currentTimePeriod].contributors,
-        totalRaised: c.stats[currentTimePeriod].totalNetRaised.valueInCents,
-        totalSpent: c.stats[currentTimePeriod].totalSpent.valueInCents,
-        percentDisbursed: c.stats[currentTimePeriod].percentDisbursed,
-      })),
-    [currentTag, currentTimePeriod, currentLocationFilter],
+      collectives.map(collective => {
+        return {
+          ...collective,
+          raised: collective.stats?.[filter.timePeriod].raised ?? 0,
+          spent: collective.stats?.[filter.timePeriod].spent ?? 0,
+          contributors: collective.stats?.[filter.timePeriod].contributors ?? 0,
+          percentDisbursed: (
+            (collective.stats?.[filter.timePeriod].spent / collective.stats?.[filter.timePeriod].raised) *
+            100
+          ).toFixed(1),
+        };
+      }),
+    [JSON.stringify(filter)],
   );
 
   const columns = React.useMemo(
@@ -118,28 +110,20 @@ export default function Collectives({
       {
         accessor: 'location',
         Cell: ({ row }) =>
-          row.original.location.label && (
+          row.original.location?.label ? (
             <div className="flex justify-start">
-              <LocationTag location={row.original.location} setLocationFilter={setLocationFilter} />
+              <LocationTag location={row.original.location} setLocationFilter={location => setFilter({ location })} />
             </div>
-          ),
+          ) : null,
         Header: 'Location',
         disableSortBy: true,
         className: 'max-w-[150px] text-left overflow-hidden px-2 py-4',
       },
-      // {
-      //   Header: 'Created',
-      //   accessor: 'createdAt',
-      //   sortDescFirst: true,
-      //   Cell: ({ row }) => new Date(row.original.createdAt).getUTCFullYear(),
-      //   className: 'center',
-      //
-      // },
       {
         Header: 'Contributors',
-        accessor: 'contributorsCount',
+        accessor: 'contributors',
         sortDescFirst: true,
-        Cell: tableProps => tableProps.row.original.contributorsCount.toLocaleString(locale),
+        Cell: tableProps => tableProps.row.original.contributors.toLocaleString(locale),
         className: 'text-center px-2 py-4',
       },
       {
@@ -147,17 +131,16 @@ export default function Collectives({
         accessor: 'percentDisbursed',
         sortDescFirst: true,
         Cell: ({ row }) => {
-          const percentDisbursed = parseFloat(row.original.percentDisbursed);
-          return isNaN(percentDisbursed) ? 'n/a' : `${percentDisbursed.toFixed(1)}%`;
+          return `${isNaN(row.original.percentDisbursed) ? 0 : row.original.percentDisbursed}%`;
         },
         className: 'text-center px-2 py-4',
       },
       {
         Header: 'Raised',
-        accessor: 'totalRaised',
+        accessor: 'raised',
         Cell: tableProps => (
           <div className="">
-            {formatCurrency(tableProps.row.original.totalRaised, currency, {
+            {formatCurrency(tableProps.row.original.raised, currency, {
               locale: 'en-US',
               precision: 0,
             })}
@@ -167,7 +150,7 @@ export default function Collectives({
         className: 'text-right pr-4 lg:pr-8 pl-2 py-4',
       },
     ],
-    [currentTag, currentTimePeriod],
+    [filter.slug],
   );
   const {
     getTableProps,
@@ -190,7 +173,7 @@ export default function Collectives({
       initialState: {
         sortBy: [
           {
-            id: 'totalRaised',
+            id: 'raised',
             desc: true,
           },
         ],
@@ -209,7 +192,7 @@ export default function Collectives({
   return (
     <React.Fragment>
       <div className="overflow-auto">
-        <Table {...getTableProps()} className="">
+        <StyledTable {...getTableProps()} className="">
           <thead>
             {headerGroups.map(headerGroup => {
               const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
@@ -231,7 +214,7 @@ export default function Collectives({
                         }}
                       >
                         {column.render('Header')}{' '}
-                        {column.canSort && column.isSorted && (
+                        {column.canSort && (
                           <span
                             style={{
                               display: 'inline-block',
@@ -240,11 +223,7 @@ export default function Collectives({
                               opacity: column.isSorted ? '100%' : '25%',
                             }}
                           >
-                            {column.isSortedDesc ? (
-                              <SortDown size="16" />
-                            ) : (
-                              <SortDown style={{ transform: 'rotate(180deg)' }} size="16" />
-                            )}
+                            {column.isSorted && !column.isSortedDesc ? '▲' : '▼'}
                           </span>
                         )}
                       </th>
@@ -278,13 +257,14 @@ export default function Collectives({
               );
             })}
           </tbody>
-        </Table>
+        </StyledTable>
       </div>
       <div className="flex items-center gap-4 px-10 text-sm text-gray-700">
         <span>
-          Page{' '}
+          <label htmlFor="page-number">Page</label>{' '}
           <input
             type="number"
+            id="page-number"
             className="inline-block w-10 rounded border text-center"
             value={pageIndex + 1}
             onChange={e => {
@@ -297,6 +277,7 @@ export default function Collectives({
 
         <div>
           <button
+            aria-label="Previous page"
             onClick={() => previousPage()}
             disabled={!canPreviousPage}
             className="h-10 w-10 rounded-full p-2 hover:bg-gray-100 hover:text-black"
@@ -304,6 +285,7 @@ export default function Collectives({
             <ChevronLeft size="12" />
           </button>{' '}
           <button
+            aria-label="Next page"
             onClick={() => nextPage()}
             disabled={!canNextPage}
             className="h-10 w-10 rounded-full p-2 hover:bg-gray-100 hover:text-black"

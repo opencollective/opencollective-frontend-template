@@ -1,10 +1,13 @@
 import React, { useRef, useState } from 'react';
+import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import styled from 'styled-components';
 import { Navigation } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import CollectiveButton from '../components/CollectiveButton';
 import LocationTag from '../components/LocationTag';
+
+import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
 
 const Markdown = styled.div`
   line-height: 1.625;
@@ -50,16 +53,13 @@ export const Story = ({ story, openCollectiveModal }) => {
   return (
     <div className={`fadeIn max-w-lg rounded-lg bg-white p-4 lg:max-w-2xl lg:p-4`}>
       <div className="flex flex-col gap-4">
-        {story.video && (
-          <div className=" relative w-full overflow-hidden rounded-lg pb-[56.25%]">
-            <iframe
-              className="absolute top-0 left-0 h-full w-full"
-              src={story.video.src}
-              title={story.video.title}
-              frameBorder="0"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope;"
-              allowFullScreen
-            ></iframe>
+        {story.youtube && (
+          <div className=" overflow-hidden rounded-lg">
+            <LiteYouTubeEmbed
+              // iframeClass="rounded-lg overflow-hidden"
+              id={story.youtube.id}
+              title={story.youtube.title}
+            />
           </div>
         )}
         <div className="px-4">
@@ -69,7 +69,7 @@ export const Story = ({ story, openCollectiveModal }) => {
                 <CollectiveButton collective={story.collective} openCollectiveModal={openCollectiveModal} />
               </div>
               <LocationTag location={story.collective.location} />
-              {story?.tags?.map(({ tag }) => (
+              {story?.tags?.map(tag => (
                 <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700">
                   {tag}
                 </span>
@@ -85,9 +85,10 @@ export const Story = ({ story, openCollectiveModal }) => {
   );
 };
 
-const SliderButton = ({ onClick, disabled, children }) => {
+const SliderButton = ({ onClick, disabled, children, ariaLabel }) => {
   return (
     <button
+      aria-label={ariaLabel}
       disabled={disabled}
       className={`flex h-8 w-8 items-center justify-center rounded-full border p-2 transition-colors lg:h-10 lg:w-10 ${
         disabled ? 'border-gray-200  text-gray-400' : 'border-blue-500 bg-white text-blue-800'
@@ -99,63 +100,66 @@ const SliderButton = ({ onClick, disabled, children }) => {
   );
 };
 
-export default function Stories({ stories, currentTag, openCollectiveModal }) {
+export default function Stories({ stories, filter, openCollectiveModal }) {
   const swiperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const currentStories = stories.filter(story => currentTag === 'ALL' || !!story.tags.find(t => t.tag === currentTag));
+  const currentStories = stories.filter(story => filter.tag === 'ALL' || !!story.tags.find(t => t.tag === filter.tag));
 
   if (!currentStories?.length) {
     return null;
   }
 
   return (
-    <React.Fragment>
-      <div>
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className=" text-xl font-bold text-gray-600 lg:text-4xl">Featured stories</h2>
-          <div className="flex items-center gap-2">
-            <SliderButton onClick={() => swiperRef.current?.slidePrev()} disabled={activeIndex === 0}>
-              <LeftArrow />
-            </SliderButton>
-            <SliderButton
-              onClick={() => swiperRef.current?.slideNext()}
-              disabled={activeIndex === currentStories.length - 1}
-            >
-              <RightArrow />
-            </SliderButton>
-          </div>
-        </div>
-
-        <div className="relative">
-          <div className="-mx-4 lg:-ml-8 lg:-mr-10">
-            <Swiper
-              slidesPerView={'auto'}
-              spaceBetween={30}
-              className="swiper"
-              pagination={{
-                clickable: true,
-              }}
-              modules={[Navigation]}
-              onReachEnd={swiper => (swiper.snapGrid = [...swiperRef.current.slidesGrid])}
-              onSlideChange={swiper => {
-                setActiveIndex(swiper.activeIndex);
-              }}
-              onBeforeInit={swiper => {
-                swiperRef.current = swiper;
-              }}
-            >
-              {currentStories.map(story => (
-                <SwiperSlide key={story.slug}>
-                  <Story story={story} openCollectiveModal={openCollectiveModal} />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-          <div className="absolute top-0 -left-4 z-10 hidden h-full w-4 bg-gradient-to-l from-transparent to-[#f9fafb] lg:-left-8 lg:block lg:w-8"></div>
-          <div className="absolute top-0 -right-4 z-10 hidden h-full w-4 bg-gradient-to-r from-transparent to-[#f9fafb] lg:-right-10 lg:block lg:w-10"></div>
+    <div className="px-4 lg:px-0">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-600 lg:text-4xl">Featured stories</h2>
+        <div className="flex items-center gap-2">
+          <SliderButton
+            onClick={() => swiperRef.current?.slidePrev()}
+            disabled={activeIndex === 0}
+            ariaLabel="Previous story"
+          >
+            <LeftArrow />
+          </SliderButton>
+          <SliderButton
+            onClick={() => swiperRef.current?.slideNext()}
+            disabled={activeIndex === currentStories.length - 1}
+            ariaLabel="Next story"
+          >
+            <RightArrow />
+          </SliderButton>
         </div>
       </div>
-    </React.Fragment>
+
+      <div className="relative">
+        <div className="-mx-4 lg:-ml-8 lg:-mr-10">
+          <Swiper
+            slidesPerView={'auto'}
+            spaceBetween={30}
+            className="swiper"
+            pagination={{
+              clickable: true,
+            }}
+            modules={[Navigation]}
+            onReachEnd={swiper => (swiper.snapGrid = [...swiperRef.current.slidesGrid])}
+            onSlideChange={swiper => {
+              setActiveIndex(swiper.activeIndex);
+            }}
+            onBeforeInit={swiper => {
+              swiperRef.current = swiper;
+            }}
+          >
+            {currentStories.map(story => (
+              <SwiperSlide key={story.slug}>
+                <Story story={story} openCollectiveModal={openCollectiveModal} />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+        <div className="absolute top-0 -left-4 z-10 hidden h-full w-4 bg-gradient-to-l from-transparent to-[#f9fafb] lg:-left-8 lg:block lg:w-8"></div>
+        <div className="absolute top-0 -right-4 z-10 hidden h-full w-4 bg-gradient-to-r from-transparent to-[#f9fafb] lg:-right-10 lg:block lg:w-10"></div>
+      </div>
+    </div>
   );
 }

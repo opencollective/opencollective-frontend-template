@@ -6,6 +6,7 @@ video:
   title: 'What do we mean with mutual aid?'
 
 collectiveSlug: 'stlmutualaid'
+published: false
 ---
 
 STL Mutual Aid is a network of people coming together to deliver supplies, provide financial solidarity, and connect people to their neighbors.

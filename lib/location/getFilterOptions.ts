@@ -20,35 +20,37 @@ export default function getFilterOptions(collectives) {
     cities: {},
   };
   collectives.forEach(c => {
-    if (c.location.region) {
-      foundLocations.regions[c.location.region] = {
-        type: 'region',
-        value: c.location.region,
-        label: c.location.region,
-        count: (foundLocations.regions[c.location.region]?.count || 0) + 1,
-      };
-    }
-    if (c.location.countryCode) {
-      foundLocations.countries[c.location.countryCode] = {
-        type: 'country',
-        value: c.location.countryCode,
-        count: (foundLocations.countries[c.location.countryCode]?.count || 0) + 1,
-      };
-    }
-    if (c.location.stateCode) {
-      foundLocations.states[c.location.stateCode] = {
-        type: 'state',
-        value: c.location.stateCode,
-        count: (foundLocations.states[c.location.stateCode]?.count || 0) + 1,
-      };
-    }
-    if (c.location.city) {
-      foundLocations.cities[c.location.city] = {
-        type: 'city',
-        value: c.location.city,
-        label: c.location.city,
-        count: (foundLocations.cities[c.location.city]?.count || 0) + 1,
-      };
+    if (c.location) {
+      if (c.location.region) {
+        foundLocations.regions[c.location.region] = {
+          type: 'region',
+          value: c.location.region,
+          label: c.location.region,
+          count: (foundLocations.regions[c.location.region]?.count || 0) + 1,
+        };
+      }
+      if (c.location.countryCode) {
+        foundLocations.countries[c.location.countryCode] = {
+          type: 'country',
+          value: c.location.countryCode,
+          count: (foundLocations.countries[c.location.countryCode]?.count || 0) + 1,
+        };
+      }
+      if (c.location.stateCode) {
+        foundLocations.states[c.location.stateCode] = {
+          type: 'state',
+          value: c.location.stateCode,
+          count: (foundLocations.states[c.location.stateCode]?.count || 0) + 1,
+        };
+      }
+      if (c.location.city) {
+        foundLocations.cities[c.location.city] = {
+          type: 'city',
+          value: c.location.city,
+          label: c.location.city,
+          count: (foundLocations.cities[c.location.city]?.count || 0) + 1,
+        };
+      }
     }
   });
 
@@ -83,14 +85,14 @@ export default function getFilterOptions(collectives) {
   });
 
   return [
-    { value: '', label: 'All locations', count: collectives.length },
+    { type: null, value: null, label: 'All locations', count: collectives.length },
     ...topCities,
     { hr: true },
     ...regionsAndCountriesNested,
     { break: true },
     ...restCities,
     ...states,
-    { type: 'other', value: 'online', label: 'Online', count: collectives.filter(c => c.location.isOnline).length },
-    { type: 'other', value: 'global', label: 'Global', count: collectives.filter(c => c.location.isGlobal).length },
+    { type: 'other', value: 'online', label: 'Online', count: collectives.filter(c => c.location?.isOnline).length },
+    { type: 'other', value: 'global', label: 'Global', count: collectives.filter(c => c.location?.isGlobal).length },
   ];
 }

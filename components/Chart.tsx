@@ -36,14 +36,14 @@ export const ChartWrapper = styled.div`
     user-select: none;
   }
   .apexcharts-legend-series {
-    padding: 8px;
+    padding: 4px;
     & > span {
       vertical-align: middle;
     }
   }
 
   .apexcharts-legend-marker {
-    margin-right: 8px;
+    margin-right: 4px;
   }
 `;
 
@@ -70,16 +70,16 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
     enabled: false,
   },
   legend: {
-    show: false,
-    // showForSingleSeries: false,
-    // fontSize: '14px',
-    // position: 'top',
-    // offsetY: 10,
-    // floating: true,
-    // horizontalAlign: 'center',
-    // onItemClick: {
-    //   toggleDataSeries: true,
-    // },
+    show: true,
+    showForSingleSeries: false,
+    fontSize: '12px',
+    position: 'top',
+    offsetY: 10,
+    floating: true,
+    horizontalAlign: 'center',
+    onItemClick: {
+      toggleDataSeries: false,
+    },
   },
   colors,
   xaxis: {
@@ -122,10 +122,10 @@ const getChartOptions = (intl, timeUnit, hostCurrency, isCompactNotation, colors
   },
 });
 
-const getSeriesDataFromNodes = (nodes, startYear, currentTimePeriod) => {
+const getSeriesDataFromNodes = (nodes, startYear, timePeriod) => {
   const keyedData = {};
 
-  if (currentTimePeriod === 'ALL') {
+  if (timePeriod === 'ALL') {
     const years = dayjs.utc().year() - startYear;
     for (let year = years; year >= 0; year--) {
       const date = dayjs.utc().subtract(year, 'year').startOf('year').toISOString();
@@ -134,7 +134,7 @@ const getSeriesDataFromNodes = (nodes, startYear, currentTimePeriod) => {
         y: 0,
       };
     }
-  } else if (currentTimePeriod === 'PAST_YEAR') {
+  } else if (timePeriod === 'PAST_YEAR') {
     for (let month = 12; month >= 0; month--) {
       const date = dayjs.utc().subtract(month, 'month').startOf('month').toISOString();
 
@@ -143,7 +143,7 @@ const getSeriesDataFromNodes = (nodes, startYear, currentTimePeriod) => {
         y: 0,
       };
     }
-  } else if (currentTimePeriod === 'PAST_QUARTER') {
+  } else if (timePeriod === 'PAST_QUARTER') {
     for (let week = 12; week >= 0; week--) {
       const date = dayjs.utc().subtract(week, 'week').startOf('isoWeek').toISOString();
 
@@ -155,17 +155,17 @@ const getSeriesDataFromNodes = (nodes, startYear, currentTimePeriod) => {
   }
   nodes.forEach(({ date, amount }) => {
     if (keyedData[date]) {
-      keyedData[date].y += amount.valueInCents / 100;
+      keyedData[date].y += amount / 100;
     }
   });
 
   return Object.values(keyedData);
 };
 
-const getSeriesFromData = (intl, timeSeriesArray, startYear, currentTimePeriod) => {
+const getSeriesFromData = (intl, timeSeriesArray, startYear, timePeriod) => {
   const series = timeSeriesArray?.map(timeSeries => {
     const totalReceivedNodes = get(timeSeries, 'nodes', []);
-    const totalReceivedData = getSeriesDataFromNodes(totalReceivedNodes, startYear, currentTimePeriod);
+    const totalReceivedData = getSeriesDataFromNodes(totalReceivedNodes, startYear, timePeriod);
 
     return {
       name: timeSeries.label,
@@ -176,19 +176,17 @@ const getSeriesFromData = (intl, timeSeriesArray, startYear, currentTimePeriod) 
   return series;
 };
 
-export default function Chart({ timeSeriesArray, startYear, currentTag, currentTimePeriod, currentLocationFilter }) {
-  const currency = 'USD';
+export default function Chart({ timeSeriesArray, startYear, filter, currency }) {
   const intl = useIntl();
   const series = useMemo(
-    () => getSeriesFromData(intl, timeSeriesArray, startYear, currentTimePeriod),
-    [currentTag, currentTimePeriod, currentLocationFilter],
+    () => getSeriesFromData(intl, timeSeriesArray, startYear, filter.timePeriod),
+    [JSON.stringify(filter)],
   );
-
   const isCompactNotation = true; // getMinMaxDifference(series[0].data) >= 10000;
   const colors = timeSeriesArray.map(s => s.color);
   const chartOptions = useMemo(
     () => getChartOptions(intl, timeSeriesArray[0].timeUnit, currency, isCompactNotation, colors),
-    [currentTag, currentTimePeriod],
+    [JSON.stringify(filter)],
   );
 
   return (

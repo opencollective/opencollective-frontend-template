@@ -25,13 +25,8 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   }
 });
 
-const httpLink = new HttpLink({
-  uri: `${PublicEnv.OPENCOLLECTIVE_API_URL}/graphql`, // Server URL (must be absolute)
-  // credentials: "same-origin", // Additional fetch() options like `credentials` or `headers`
-});
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function createApolloClient({ context }: { context?: GetSessionParams } = {}) {
+function createApolloClient({ context, fetch }: { context?: GetSessionParams; fetch?: any } = {}) {
   const authLink = setContext(async (_, { headers }) => {
     return {
       headers: {
@@ -42,6 +37,13 @@ function createApolloClient({ context }: { context?: GetSessionParams } = {}) {
       },
     };
   });
+
+  const httpLink = new HttpLink({
+    uri: `${PublicEnv.OPENCOLLECTIVE_API_URL}/graphql`, // Server URL (must be absolute)
+    // credentials: "same-origin", // Additional fetch() options like `credentials` or `headers`
+    fetch,
+  });
+
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: from([authLink, errorLink, httpLink]),
@@ -52,8 +54,9 @@ function createApolloClient({ context }: { context?: GetSessionParams } = {}) {
 export function initializeApollo({
   context,
   initialState = null,
-}: { context?: GetSessionParams; initialState?: Record<string, unknown> } = {}) {
-  const _apolloClient = apolloClient ?? createApolloClient({ context });
+  fetch = null,
+}: { context?: GetSessionParams; initialState?: Record<string, unknown>; fetch?: any } = {}) {
+  const _apolloClient = apolloClient ?? createApolloClient({ context, fetch });
 
   // If your page has Next.js data fetching methods that use Apollo Client, the initial state
   // gets hydrated here

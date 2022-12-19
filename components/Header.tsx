@@ -1,177 +1,51 @@
 import React from 'react';
-// import Link from 'next/link';
-import { signIn, signOut } from 'next-auth/react';
-import { FormattedMessage } from 'react-intl';
-import styled from 'styled-components';
 
-import { useLoggedInUser } from '../lib/hooks/useLoggedInUser';
-import { OPENCOLLECTIVE_OAUTH_PROVIDER_ID } from '../lib/opencollective-oauth-config';
+import HostSwitcher from './HostSwitcher';
 
-import Avatar from '@opencollective/frontend-components/components/Avatar';
-import { Flex } from '@opencollective/frontend-components/components/Grid';
-import StyledButton from '@opencollective/frontend-components/components/StyledButton';
-import { Strong } from '@opencollective/frontend-components/components/Text';
-
-const StyledHeader = styled.header`
-  /* Set min-height to avoid page reflow while session loading */
-  .signedInStatus {
-    display: block;
-    min-height: 4rem;
-    width: 100%;
-  }
-
-  .loading,
-  .loaded {
-    position: relative;
-    top: 0;
-    opacity: 1;
-    overflow: hidden;
-    border-radius: 0 0 0.6rem 0.6rem;
-    padding: 0.6rem 1rem;
-    margin: 0;
-    background-color: rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease-in;
-  }
-
-  .loading {
-    top: -2rem;
-    opacity: 0;
-  }
-
-  .signedInText,
-  .notSignedInText {
-    padding-top: 0.8rem;
-    left: 1rem;
-    right: 6.5rem;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    display: inherit;
-    z-index: 1;
-    line-height: 1.3rem;
-  }
-
-  .signedInText {
-    padding-top: 0rem;
-    left: 4.6rem;
-  }
-
-  .avatar {
-    border-radius: 2rem;
-    float: left;
-    height: 2.8rem;
-    width: 2.8rem;
-    background-color: white;
-    background-size: cover;
-    background-repeat: no-repeat;
-  }
-
-  .button,
-  .buttonPrimary {
-    float: right;
-    margin-right: -0.4rem;
-    font-weight: 500;
-    border-radius: 0.3rem;
-    cursor: pointer;
-    font-size: 1rem;
-    line-height: 1.4rem;
-    padding: 0.7rem 0.8rem;
-    position: relative;
-    z-index: 10;
-    background-color: transparent;
-    color: #555;
-  }
-
-  .buttonPrimary {
-    background-color: #346df1;
-    border-color: #346df1;
-    color: #fff;
-    text-decoration: none;
-    padding: 0.7rem 1.4rem;
-  }
-
-  .buttonPrimary:hover {
-    box-shadow: inset 0 0 5rem rgba(0, 0, 0, 0.2);
-  }
-
-  .navItems {
-    margin-bottom: 2rem;
-    padding: 0;
-    list-style: none;
-  }
-
-  .navItem {
-    display: inline-block;
-    margin-right: 1rem;
-  }
-`;
-
-// The approach used in this component shows how to build a sign in and sign out
-// component that works on pages which support both client and server side
-// rendering, and avoids any flash incorrect content on initial page load.
-export default function Header() {
-  const { loadingLoggedInUser, LoggedInUser } = useLoggedInUser();
+export default function Header({ hosts, platformTotalCollectives, locale, host, categories, filter, setFilter }) {
   return (
-    <StyledHeader>
-      <div className={'signedInStatus'}>
-        <div className={`${!LoggedInUser && loadingLoggedInUser ? 'loading' : 'loaded'}`}>
-          {!LoggedInUser && (
-            <Flex justifyContent="space-between">
-              <span className={'notSignedInText'}>
-                <FormattedMessage defaultMessage="You are not signed in" />
-              </span>
-              <StyledButton
-                buttonStyle="primary"
-                onClick={e => {
-                  e.preventDefault();
-                  signIn(OPENCOLLECTIVE_OAUTH_PROVIDER_ID);
-                }}
-              >
-                <FormattedMessage defaultMessage="Sign in with Open Collective" />
-              </StyledButton>
-            </Flex>
-          )}
-          {LoggedInUser && (
-            <Flex justifyContent="space-between">
-              <Flex>
-                <Avatar collective={LoggedInUser.collective} radius={42} />
-                <Flex flexDirection="column" ml={2} justifyContent="center">
-                  <small>Signed in as</small>
-                  <br />
-                  <Strong fontSize="14px">{LoggedInUser.email ?? LoggedInUser.collective.name}</Strong>
-                </Flex>
-              </Flex>
-              <StyledButton
-                onClick={e => {
-                  e.preventDefault();
-                  signOut();
-                }}
-              >
-                <FormattedMessage defaultMessage="Sign out" />
-              </StyledButton>
-            </Flex>
-          )}
-        </div>
-      </div>
-      {/* <nav>
-        <ul className={'navItems'}>
-          <li className={'navItem'}>
-            <Link href="/">
-              <a>Home</a>
-            </Link>
-          </li>
-          <li className={'navItem'}>
-            <Link href="/apollo-server-side">
-              <a>Apollo SSR</a>
-            </Link>
-          </li>
-          <li className={'navItem'}>
-            <Link href="/apollo-client-side">
-              <a>Apollo Client</a>
-            </Link>
-          </li>
-        </ul>
-      </nav> */}
-    </StyledHeader>
+    <div className={`w-full bg-white p-6 lg:col-span-3 lg:mx-0 lg:rounded-lg lg:p-10 ${host.root && 'lg:pb-8'}`}>
+      <h1 className="text-[24px] font-bold leading-tight text-[#111827] lg:text-[40px]">
+        <span>Discover {host.count.toLocaleString(locale)}</span>
+        {host.root && <span className={`relative -top-2 -mx-0.5 -mr-1 select-none text-gray-400`}>*</span>}{' '}
+        <span>collectives</span> <span>{host.root ? 'on ' : 'hosted by '}</span>
+        <HostSwitcher
+          hosts={hosts}
+          platformTotalCollectives={platformTotalCollectives}
+          locale={locale}
+          host={host}
+        />{' '}
+        <span>making an impact in</span>{' '}
+        <span className="">
+          {categories
+            .filter(c => c.tag !== 'ALL')
+            .map((cat, i, arr) => (
+              <React.Fragment key={cat.label}>
+                <span className="whitespace-nowrap">
+                  <button
+                    className={`inline-block whitespace-nowrap underline decoration-3 underline-offset-3 transition-colors lg:decoration-4 lg:underline-offset-4 ${
+                      filter.tag !== 'ALL' && filter.tag !== cat.tag
+                        ? `decoration-transparent hover:decoration-${cat.color.name}-500`
+                        : `decoration-${cat.color.name}-500`
+                    }`}
+                    onClick={() => setFilter({ tag: cat.tag })}
+                  >
+                    {cat.label.toLowerCase()}
+                  </button>
+                  {arr.length - 1 === i ? '' : ','}
+                </span>
+                {` `}
+              </React.Fragment>
+            ))}
+        </span>
+        <span>and more.</span>
+      </h1>
+      {host.root && (
+        <p className="mt-4 text-sm text-gray-600">
+          * out of {platformTotalCollectives.toLocaleString(locale)} collectives on Open Collective. Displaying data
+          from selected Fiscal Hosts.
+        </p>
+      )}
+    </div>
   );
 }

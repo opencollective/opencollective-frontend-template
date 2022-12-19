@@ -2,8 +2,8 @@
 location: London
 tags:
   - 'mutual aid'
-video:
-  src: 'https://www.youtube.com/embed/YyRevDuSETU'
+youtube:
+  id: 'YyRevDuSETU'
   title: 'Open Collective Foundation presents Kola Nut Collaborative'
 
 collectiveSlug: 'kolanutcollab'
