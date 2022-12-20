@@ -58,7 +58,7 @@ export default function getFilterOptions(collectives) {
 
   const countries = Object.values(foundLocations.countries).map(c => {
     const country = countriesData.find(c2 => c2.code === c.value);
-    return { ...c, label: country.code === 'US' ? 'USA' : country.name, region: country.region };
+    return { ...c, label: country.name, region: country.region };
   });
 
   const states = Object.values(foundLocations.states);

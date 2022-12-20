@@ -5,7 +5,6 @@ import usStates from './us_states.json';
 export type Location = {
   city?: string;
   stateCode?: string;
-  // domesticRegion?: string;
   countryCode?: string;
   region?: string;
   isGlobal?: boolean;
@@ -13,44 +12,37 @@ export type Location = {
   label?: string;
 };
 
-function getLocation(tags: string[]): Location {
+function getLocation(tags: string[], countryCode?: string): Location {
   if (!tags.length) {
     return null;
   }
-
   const city = cities.find(city => tags.includes(city.name.toLowerCase()));
-  if (city) {
+  if (city && (city.countryCode === countryCode || !countryCode)) {
     return {
       city: city.name,
       stateCode: city.stateCode,
-      // domesticRegion: usStates.find(state => state.code === city.stateCode).region,
       countryCode: city.countryCode,
       region: countries.find(c => c.code === city.countryCode)?.region,
     };
   }
 
   const state = usStates.find(s => tags.includes(s.name.toLowerCase()));
-  if (state) {
+  if (state && ('US' === countryCode || !countryCode)) {
     return {
       stateCode: state.code,
-      // domesticRegion: state.region,
       countryCode: 'US',
       region: countries.find(c => c.code === 'US').region,
     };
   }
 
-  const country = countries.find(country => {
-    return (
-      tags.includes(country.code.toLowerCase()) ||
-      tags.includes(country.code3chars.toLowerCase()) ||
-      tags.includes(country.name.toLowerCase())
-    );
-  });
-  if (country) {
-    return {
-      countryCode: country.code,
-      region: country.region,
-    };
+  if (countryCode) {
+    const country = countries.find(country => country.code === countryCode);
+    if (country) {
+      return {
+        countryCode: country.code,
+        region: country.region,
+      };
+    }
   }
 
   const region = countries.find(({ region }) => tags.includes(region.toLowerCase()))?.region;
@@ -79,13 +71,19 @@ function getLabel(location: Location): string {
 
 export default function getLocationWithLabel(collective): Location {
   const tags = collective.tags?.map((s: string) => s.toLowerCase()) || [];
-
+  const countryCode = collective.location?.country;
   const isGlobal = tags.includes('global');
   const isOnline = tags.includes('online');
-  const location = { ...getLocation(tags), ...(isGlobal && { isGlobal }), ...(isOnline && { isOnline }) };
+  const location = {
+    ...getLocation(tags, countryCode),
+    ...(isGlobal && { isGlobal }),
+    ...(isOnline && { isOnline }),
+  };
 
   const label = getLabel(location);
-  if (!label) {return null;}
+  if (!label) {
+    return null;
+  }
   return {
     ...location,
     label,

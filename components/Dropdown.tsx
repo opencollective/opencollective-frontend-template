@@ -34,10 +34,10 @@ export default function DropdownSelector({
 
   return (
     <div className="group relative h-10 w-full">
-      <label className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between py-2 px-3 text-gray-800">
+      <label className="pointer-events-none absolute inset-0 z-10 flex items-center justify-between gap-2 py-2 px-3 text-gray-800">
         {fieldLabel}
-        <div className="flex items-center gap-1 whitespace-nowrap text-sm ">
-          <span>{selectedOption?.label}</span> <ChevronDown size="10" />
+        <div className="flex items-center gap-1 overflow-hidden whitespace-nowrap text-sm">
+          <span className="overflow-hidden overflow-ellipsis">{selectedOption?.label}</span> <ChevronDown size="10" />
         </div>
       </label>
       <select

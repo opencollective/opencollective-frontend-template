@@ -18,6 +18,9 @@ export const accountsQuery = gql`
         slug
         imageUrl
         tags
+        location {
+          country
+        }
         ... on Collective {
           host {
             slug
