@@ -93,7 +93,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       name: collective.name,
       slug: collective.slug,
       imageUrl: collective.imageUrl.replace('-staging', ''),
-      // tags: collective.tags,
+      host: { name: collective.host.name, slug: collective.host.slug },
       tags:
         collective.tags
           ?.filter(t => !['other', 'online', 'community', 'association', 'movement', 'USA', 'europe'].includes(t))

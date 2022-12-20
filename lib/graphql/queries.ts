@@ -21,18 +21,10 @@ export const accountsQuery = gql`
         location {
           country
         }
-        ... on Collective {
+        ... on AccountWithHost {
           host {
             slug
             name
-            imageUrl
-          }
-        }
-        ... on Fund {
-          host {
-            slug
-            name
-            imageUrl
           }
         }
 

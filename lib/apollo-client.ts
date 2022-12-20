@@ -47,7 +47,11 @@ function createApolloClient({ context, fetch }: { context?: GetSessionParams; fe
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: from([authLink, errorLink, httpLink]),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      possibleTypes: {
+        AccountWithHost: ['Collective', 'Event', 'Fund', 'Project'],
+      },
+    }),
   });
 }
 
