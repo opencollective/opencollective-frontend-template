@@ -8,7 +8,7 @@
     "url": "https://github.com/opencollective/opencollective/issues"
   },
   "engines": {
-    "node": "16.x",
+    "node": "18.x",
     "npm": "8.x"
   },
   "scripts": {
@@ -59,7 +59,7 @@
     "@graphql-codegen/gql-tag-operations-preset": "^1.6.0",
     "@graphql-eslint/eslint-plugin": "^3.12.0",
     "@next/eslint-plugin-next": "^12.3.1",
-    "@types/node": "^17",
+    "@types/node": "^18.0.0",
     "@types/node-fetch": "^2.6.2",
     "@types/react": "^18.0.15",
     "@types/styled-components": "^5.1.26",
