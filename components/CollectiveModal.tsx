@@ -96,14 +96,24 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                       <div className="flex flex-wrap gap-2">
                         {collective.location && (
                           <LocationTag
-                            setLocationFilter={filter => setFilter({ location: filter })}
+                            setLocationFilter={filter => {
+                              setFilter({ location: filter });
+                              onClose();
+                            }}
                             location={collective.location}
                           />
                         )}
                         {collective?.tags?.map(tag => (
-                          <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700">
+                          <button
+                            key={tag}
+                            className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700"
+                            onClick={() => {
+                              setFilter({ tag });
+                              onClose();
+                            }}
+                          >
                             {tag}
-                          </span>
+                          </button>
                         ))}
                       </div>
                     )}

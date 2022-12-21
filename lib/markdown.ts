@@ -11,13 +11,13 @@ export function getPostSlugs() {
   return fs.readdirSync(join(postsDirectory));
 }
 
-export function getPostBySlug(slug: string, fields: string[] = []) {
+export function getPostBySlug(slug: string) {
   const realSlug = slug.replace(/\.md$/, '');
   const fullPath = join(postsDirectory, `${realSlug}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
-  type Items = {
+  type Post = {
     // [key: string]: string | string[];
     content?: string;
     video?: object;
@@ -28,25 +28,29 @@ export function getPostBySlug(slug: string, fields: string[] = []) {
     published?: boolean;
   };
 
-  const items: Items = {};
+  const post: Post = {
+    ...data,
+    published: data.published ?? true,
+    content,
+  };
 
-  // Ensure only the minimal needed data is exposed
-  fields.forEach(field => {
-    if (field === 'slug') {
-      items[field] = realSlug;
-    }
-    if (field === 'content') {
-      items[field] = content;
-    }
+  // // Ensure only the minimal needed data is exposed
+  // fields.forEach(field => {
+  //   if (field === 'slug') {
+  //     items[field] = realSlug;
+  //   }
+  //   if (field === 'content') {
+  //     items[field] = content;
+  //   }
 
-    if (typeof data[field] !== 'undefined') {
-      items[field] = data[field];
-    }
-  });
-  // If published is defined, use that, otherwise default to true
-  items.published = data.published ?? true;
+  //   if (typeof data[field] !== 'undefined') {
+  //     items[field] = data[field];
+  //   }
+  // });
+  // // If published is defined, use that, otherwise default to true
+  // items.published =
 
-  return items;
+  return post;
 }
 
 export function getAllPosts(fields: string[] = []) {

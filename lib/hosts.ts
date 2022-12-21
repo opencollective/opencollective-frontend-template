@@ -1,6 +1,26 @@
+// Group tags will not transform the tag itself, but just include more tags when filtering on the key tag
+const defaultGroupTags = {
+  climate: ['climate', 'climate change', 'climate justice', 'climate crisis', 'climate action', 'climate emergency'],
+};
+
+// Tags to exclude from the automatic category creation. These will still show up under "More..."
+const defaultExcludeCategoryTags = [
+  'other',
+  'online',
+  'community',
+  'association',
+  'movement',
+  'USA',
+  'midwestern USA',
+  'illinois',
+  'europe',
+  'chicago',
+];
+
 export const hosts: {
+  root?: boolean;
   name: string;
-  slug: string;
+  slug?: string;
   hostSlugs?: string[];
   currency: string;
   startYear: number;
@@ -8,13 +28,14 @@ export const hosts: {
   color: string;
   styles: { text: string; groupHoverText: string; button: string; brandBox: string; box: string; border: string };
   website?: string;
-  categories?: { label: string; tag: string }[];
   cta?: { text: string; textLonger: string; href: string; buttonLabel: string };
-  root?: boolean;
+  groupTags: { [key: string]: string[] };
+  includeCategoryTags: string[];
+  excludeCategoryTags: string[];
 }[] = [
   {
+    root: true,
     name: 'Open Collective',
-    slug: '',
     hostSlugs: [
       'foundation',
       'europe',
@@ -32,7 +53,6 @@ export const hosts: {
       'nfsc',
       'xwikisas',
     ],
-    root: true,
     currency: 'USD',
     startYear: 2016,
     logoSrc: '/oc-logo.svg',
@@ -46,6 +66,13 @@ export const hosts: {
       box: 'bg-[#F5FAFF] text-[#0C2D66]',
       border: 'border-[#0C2D66]',
     },
+    groupTags: {
+      ...defaultGroupTags,
+      education: ['education', 'meetup'],
+      'mutual aid': ['mutual aid', 'covid'],
+    },
+    includeCategoryTags: [],
+    excludeCategoryTags: [...defaultExcludeCategoryTags],
   },
   {
     name: 'Open Collective Foundation',
@@ -68,17 +95,11 @@ export const hosts: {
       text: 'Contribute to many collectives at once',
       textLonger: 'Contribute to a pooled fund to benefit multiple collectives within Open Collective Foundation',
     },
-    categories: [
-      { label: 'Mutual aid', tag: 'mutual aid' },
-      { label: 'Education', tag: 'education' },
-      { label: 'Civic Tech', tag: 'civic tech' },
-      { label: 'Food', tag: 'food' },
-      { label: 'Arts & Culture', tag: 'arts and culture' },
-      {
-        label: 'Climate',
-        tag: 'climate',
-      },
-    ],
+    groupTags: {
+      ...defaultGroupTags,
+    },
+    includeCategoryTags: ['climate', 'food'],
+    excludeCategoryTags: [...defaultExcludeCategoryTags],
   },
   {
     name: 'Open Source Collective',
@@ -96,6 +117,11 @@ export const hosts: {
       box: 'bg-[#4B3084] bg-opacity-5 text-[#4B3084]',
       border: 'border-[#4B3084]',
     },
+    groupTags: {
+      ...defaultGroupTags,
+    },
+    includeCategoryTags: [],
+    excludeCategoryTags: [...defaultExcludeCategoryTags, 'open source'],
   },
   {
     name: 'Open Collective Europe',
@@ -113,5 +139,10 @@ export const hosts: {
       box: 'bg-[#E0EC7B] bg-opacity-20 text-[#0C2D66]',
       border: 'border-[#0C2D66]',
     },
+    groupTags: {
+      ...defaultGroupTags,
+    },
+    includeCategoryTags: [],
+    excludeCategoryTags: [...defaultExcludeCategoryTags, 'opencollectiveeu'],
   },
 ];

@@ -1,6 +1,6 @@
-import cities from './cities.json';
-import countries from './countries.json';
-import usStates from './us_states.json';
+import cities from './data/cities.json';
+import countries from './data/countries.json';
+import usStates from './data/us_states.json';
 
 export type Location = {
   city?: string;
@@ -12,7 +12,7 @@ export type Location = {
   label?: string;
 };
 
-function getLocation(tags: string[], countryCode?: string): Location {
+function determineLocation(tags: string[], countryCode?: string): Location {
   if (!tags.length) {
     return null;
   }
@@ -69,13 +69,13 @@ function getLabel(location: Location): string {
   return null;
 }
 
-export default function getLocationWithLabel(collective): Location {
+export function getLocation(collective): Location {
   const tags = collective.tags?.map((s: string) => s.toLowerCase()) || [];
   const countryCode = collective.location?.country;
   const isGlobal = tags.includes('global');
   const isOnline = tags.includes('online');
   const location = {
-    ...getLocation(tags, countryCode),
+    ...determineLocation(tags, countryCode),
     ...(isGlobal && { isGlobal }),
     ...(isOnline && { isOnline }),
   };

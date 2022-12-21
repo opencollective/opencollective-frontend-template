@@ -18,12 +18,12 @@ export default function Header({ hosts, platformTotalCollectives, locale, host, 
         <span>making an impact in</span>{' '}
         <span className="">
           {categories
-            .filter(c => c.tag !== 'ALL')
+            .filter(c => !c.options && c.tag !== 'ALL')
             .map((cat, i, arr) => (
               <React.Fragment key={cat.label}>
                 <span className="whitespace-nowrap">
                   <button
-                    className={`inline-block whitespace-nowrap underline decoration-3 underline-offset-3 transition-colors lg:decoration-4 lg:underline-offset-4 ${
+                    className={`inline-block whitespace-nowrap tracking-tight underline decoration-3 underline-offset-3 transition-colors lg:decoration-4 lg:underline-offset-4 ${
                       filter.tag !== 'ALL' && filter.tag !== cat.tag
                         ? `decoration-transparent hover:decoration-${cat.color.name}-500`
                         : `decoration-${cat.color.name}-500`
