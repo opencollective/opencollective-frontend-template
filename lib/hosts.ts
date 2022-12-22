@@ -2,6 +2,7 @@
 // Group tags should include the tag itself
 const defaultGroupTags = {
   climate: ['climate', 'climate change', 'climate justice', 'climate crisis', 'climate action', 'climate emergency'],
+  'arts and culture': ['arts and culture', 'art', 'arts', 'visual art', 'visual arts', 'music'],
 };
 
 // Tags to exclude from the automatic category creation. These will still show up under "More..."
