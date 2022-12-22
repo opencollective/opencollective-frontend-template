@@ -10,7 +10,7 @@ import CollectiveButton from './CollectiveButton';
 
 export const updatesQuery = gql`
   query Updates($host: [AccountReferenceInput], $tag: [String], $limit: Int) {
-    updates(host: $host, tag: $tag, limit: $limit) {
+    updates(host: $host, accountTag: $tag, accountType: [COLLECTIVE, FUND], limit: $limit) {
       totalCount
       nodes {
         title
