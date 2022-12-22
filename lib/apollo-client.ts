@@ -51,6 +51,23 @@ function createApolloClient({ context, fetch }: { context?: GetSessionParams; fe
       possibleTypes: {
         AccountWithHost: ['Collective', 'Event', 'Fund', 'Project'],
       },
+      typePolicies: {
+        Query: {
+          fields: {
+            updates: {
+              keyArgs: ['accountTag', 'host'],
+              merge(existing = { nodes: [] }, incoming = { nodes: [] }) {
+                const merged = {
+                  ...existing,
+                  ...incoming,
+                  nodes: [...existing.nodes, ...incoming.nodes],
+                };
+                return merged;
+              },
+            },
+          },
+        },
+      },
     }),
   });
 }

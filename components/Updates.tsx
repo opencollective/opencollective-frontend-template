@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { gql, useQuery } from '@apollo/client';
 import { Flipped, Flipper } from 'react-flip-toolkit';
 import { FormattedDate } from 'react-intl';
@@ -7,12 +7,15 @@ import sanitizeHtml from 'sanitize-html';
 import { getAllPossibleTagValues } from '../utils/tag-transforms';
 
 import CollectiveButton from './CollectiveButton';
+import { PaginationControls } from './PaginationControls';
 
 export const updatesQuery = gql`
-  query Updates($host: [AccountReferenceInput], $tag: [String], $limit: Int) {
-    updates(host: $host, accountTag: $tag, accountType: [COLLECTIVE, FUND], limit: $limit) {
+  query Updates($host: [AccountReferenceInput], $tag: [String], $limit: Int, $offset: Int) {
+    updates(host: $host, accountTag: $tag, accountType: [COLLECTIVE, FUND], limit: $limit, offset: $offset) {
       totalCount
+      offset
       nodes {
+        id
         title
         createdAt
         slug
@@ -33,23 +36,75 @@ export const updatesQuery = gql`
 `;
 
 export default function Updates({ host, filter, openCollectiveModal }) {
-  const { data } = useQuery(updatesQuery, {
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const limit = 6;
+
+  const { data, loading, fetchMore, error } = useQuery(updatesQuery, {
     variables: {
       host: host.hostSlugs ? host.hostSlugs.map(slug => ({ slug })) : { slug: host.slug },
       ...(filter.tag !== 'ALL' && { tag: getAllPossibleTagValues(filter.tag, host.groupTags) }),
-      limit: 3,
+      limit,
+      offset: 0,
     },
+    notifyOnNetworkStatusChange: true,
   });
+
+  const loadingNodes = Array(limit)
+    .fill({})
+    .map((_, i) => ({ id: i, loading: true }));
+  const [nodes, setNodes] = React.useState<any[]>(loadingNodes);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [filter.tag, filter.slug]);
+
+  useEffect(() => {
+    const currentPageNodes = data?.updates.nodes.slice(pageIndex * limit, (pageIndex + 1) * limit);
+    if (loading) {
+      setNodes(loadingNodes);
+    } else if (currentPageNodes?.length) {
+      setNodes(currentPageNodes);
+    } else {
+      setNodes([]);
+    }
+  }, [data, loading, pageIndex]);
+
+  const totalPageLength = Math.ceil(data?.updates.totalCount / limit);
+
+  // limit to 3 pages
+  const pageLength = totalPageLength > 3 ? 3 : totalPageLength;
 
   return (
     <div className="px-4 pb-6 lg:px-0">
       <h2 className="mb-6  text-xl font-bold text-gray-600 lg:text-4xl">Updates from collectives</h2>
-      <Flipper flipKey={filter.tag}>
-        <div className="min-h-[440px] space-y-4 lg:min-h-[560px]">
-          {data?.updates.nodes.map(update => {
-            return (
-              <Flipped flipId={update.createdAt} key={update.createdAt}>
-                <div className="fadeIn flex flex-col gap-1 rounded-lg bg-white p-2 lg:p-4">
+      <div className="space-y-4">
+        {nodes?.map(update => {
+          return (
+            <div key={update.id} className="fadeIn rounded-lg bg-white p-2 lg:p-4">
+              {update.loading ? (
+                <div className="fadeIn">
+                  <div role="status" className="animate-pulse space-y-3 p-2 lg:space-y-4 lg:p-4 lg:pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="h-6 w-4/12 rounded-full bg-gray-200 lg:h-7"></div>
+                      <div className="hidden h-5 w-24 rounded-full bg-gray-100 lg:block"></div>
+                    </div>
+                    <div className="h-5 w-10/12 rounded-full bg-gray-100 lg:h-6"></div>
+                    <div className="flex items-center gap-4 pt-1">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-md bg-gray-100"></div>
+                        <div className="h-5 w-32 rounded-full bg-gray-100"></div>
+                      </div>
+                      <div className="hidden items-center gap-2 lg:flex">
+                        <div className="h-6 w-6 rounded-full bg-gray-100"></div>
+
+                        <div className="h-5  w-32 rounded-full bg-gray-100"></div>
+                      </div>
+                    </div>
+                    <span className="sr-only">Loading...</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="fadeIn flex flex-col gap-1 ">
                   <a
                     className=" relative mb-0  block space-y-2 overflow-hidden rounded-lg p-2 transition-colors duration-100 hover:bg-gray-50 lg:p-4 "
                     href={`https://opencollective.com/${update.account.slug}/updates/${update.slug}`}
@@ -86,11 +141,27 @@ export default function Updates({ host, filter, openCollectiveModal }) {
                     </p>
                   </div>
                 </div>
-              </Flipped>
-            );
-          })}
-        </div>
-      </Flipper>
+              )}
+            </div>
+          );
+        })}
+        {error && <span>error.message</span>}
+        <PaginationControls
+          pageIndex={pageIndex}
+          pageLength={pageLength ?? 1}
+          canPreviousPage={pageIndex > 0}
+          canNextPage={!loading && pageIndex + 1 < pageLength}
+          previousPage={() => setPageIndex(pageIndex - 1)}
+          nextPage={() => {
+            fetchMore({
+              variables: {
+                offset: data?.updates.nodes.length,
+              },
+            });
+            setPageIndex(pageIndex + 1);
+          }}
+        />
+      </div>
     </div>
   );
 }
