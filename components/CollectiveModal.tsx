@@ -49,7 +49,7 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
     return null;
   }
 
-  const statsLabelClasses = 'flex items-center text-xs font-bold uppercase text-gray-700';
+  const statsLabelClasses = 'flex items-center text-xs font-bold uppercase text-gray-700 leading-6';
   return (
     <React.Fragment>
       <Transition appear show={isOpen} as={Fragment}>
@@ -140,7 +140,7 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                         })}
                       </div>
                       <div className={statsLabelClasses}>Contributors</div>{' '}
-                      <div>{collective.stats?.ALL.contributors.toLocaleString(locale)}</div>
+                      <div>{(collective.stats?.ALL.contributors ?? 0).toLocaleString(locale)}</div>
                       <div className={statsLabelClasses}>Disbursed</div>
                       <div>
                         {formatCurrency(Math.abs(collective.stats?.ALL.spent ?? 0), currency, {

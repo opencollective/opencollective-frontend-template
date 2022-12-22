@@ -30,12 +30,9 @@ export const accountsQuery = gql`
 
         ALL: stats {
           contributorsCount(includeChildren: true)
-          contributionsCount(includeChildren: true)
-
           totalAmountSpent(net: false, includeChildren: true, currency: $currency) {
             valueInCents
           }
-
           totalAmountReceivedTimeSeries(net: true, timeUnit: YEAR, includeChildren: true, currency: $currency) {
             timeUnit
             nodes {
@@ -49,8 +46,6 @@ export const accountsQuery = gql`
 
         PAST_YEAR: stats {
           contributorsCount(includeChildren: true, dateFrom: $yearAgo)
-          contributionsCount(includeChildren: true, dateFrom: $yearAgo)
-
           totalAmountSpent(net: false, includeChildren: true, dateFrom: $yearAgo, currency: $currency) {
             valueInCents
           }
@@ -73,12 +68,9 @@ export const accountsQuery = gql`
 
         PAST_QUARTER: stats {
           contributorsCount(includeChildren: true, dateFrom: $quarterAgo)
-          contributionsCount(includeChildren: true, dateFrom: $quarterAgo)
-
           totalAmountSpent(net: false, includeChildren: true, dateFrom: $quarterAgo, currency: $currency) {
             valueInCents
           }
-
           totalAmountReceivedTimeSeries(
             net: true
             dateFrom: $quarterAgo

@@ -11,7 +11,6 @@ const getCollectiveStats = stats => {
 
   return {
     contributors: stats.contributorsCount,
-    contributions: stats.contributionsCount,
     spent,
     raised,
     raisedSeries,
@@ -36,14 +35,12 @@ export function getTotalStats(collectives, timePeriod) {
       return {
         collectivesCount: collectives.length,
         raised: acc.raised + collective.stats[timePeriod].raised,
-        totalContributions: acc.totalContributions + collective.stats[timePeriod].contributions,
         totalContributors: acc.totalContributors + collective.stats[timePeriod].contributors,
       };
     },
     {
       collectivesCount: 0,
       raised: 0,
-      totalContributions: 0,
       totalContributors: 0,
     },
   );
