@@ -1,26 +1,4 @@
-export function computeStats(collectives, timePeriod) {
-  return collectives.reduce(
-    (acc, collective) => {
-      if (!collective.stats?.[timePeriod]) {
-        return acc;
-      }
-      return {
-        collectivesCount: collectives.length,
-        raised: acc.raised + collective.stats[timePeriod].raised,
-        totalContributions: acc.totalContributions + collective.stats[timePeriod].contributions,
-        totalContributors: acc.totalContributors + collective.stats[timePeriod].contributors,
-      };
-    },
-    {
-      collectivesCount: 0,
-      raised: 0,
-      totalContributions: 0,
-      totalContributors: 0,
-    },
-  );
-}
-
-export function computeTimeSeries(categoriesWithFilteredData, timePeriod) {
+export function getTimeSeries(categoriesWithFilteredData, timePeriod) {
   const categoriesTimeSeries = categoriesWithFilteredData.map(category => {
     const timeSeries = category.collectives.reduce(
       (acc, collective) => {

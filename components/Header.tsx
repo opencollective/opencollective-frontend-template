@@ -4,11 +4,15 @@ import HostSwitcher from './HostSwitcher';
 
 export default function Header({ hosts, platformTotalCollectives, locale, host, categories, filter, setFilter }) {
   return (
-    <div className={`w-full bg-white p-6 lg:col-span-3 lg:mx-0 lg:rounded-lg lg:p-10 ${host.root && 'lg:pb-8'}`}>
-      <h1 className="text-[24px] font-bold leading-tight text-[#111827] lg:text-[40px]">
+    <div
+      className={`flex w-full flex-col justify-center bg-white p-6 lg:mx-0 lg:rounded-lg lg:p-10 ${
+        host.root && 'lg:pb-8'
+      }`}
+    >
+      <h1 className="text-[24px] font-bold leading-snug tracking-tight text-[#111827] lg:text-[40px]">
         <span>Discover {host.count.toLocaleString(locale)}</span>
         {host.root && <span className={`relative -top-2 -mx-0.5 -mr-1 select-none text-gray-400`}>*</span>}{' '}
-        <span>collectives</span> <span>{host.root ? 'on ' : 'hosted by '}</span>
+        <span>collectives {host.root ? 'on ' : 'hosted by '}</span>
         <HostSwitcher
           hosts={hosts}
           platformTotalCollectives={platformTotalCollectives}
@@ -16,14 +20,14 @@ export default function Header({ hosts, platformTotalCollectives, locale, host, 
           host={host}
         />{' '}
         <span>making an impact in</span>{' '}
-        <span className="">
+        <span>
           {categories
-            .filter(c => c.tag !== 'ALL')
+            .filter(c => !c.options && c.tag !== 'ALL')
             .map((cat, i, arr) => (
               <React.Fragment key={cat.label}>
                 <span className="whitespace-nowrap">
                   <button
-                    className={`inline-block whitespace-nowrap underline decoration-3 underline-offset-3 transition-colors lg:decoration-4 lg:underline-offset-4 ${
+                    className={`inline-block whitespace-nowrap tracking-tight underline decoration-3 underline-offset-3 transition-colors lg:decoration-4 lg:underline-offset-4 ${
                       filter.tag !== 'ALL' && filter.tag !== cat.tag
                         ? `decoration-transparent hover:decoration-${cat.color.name}-500`
                         : `decoration-${cat.color.name}-500`

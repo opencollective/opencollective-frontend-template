@@ -1,4 +1,4 @@
-import countriesData from './countries.json';
+import countriesData from './data/countries.json';
 
 type LocationOption = {
   type: string;

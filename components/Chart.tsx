@@ -35,6 +35,9 @@ export const ChartWrapper = styled.div`
     -webkit-user-select: none;
     user-select: none;
   }
+  .apexcharts-legend {
+    padding: 0 60px;
+  }
   .apexcharts-legend-series {
     padding: 4px;
     & > span {

@@ -96,14 +96,24 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                       <div className="flex flex-wrap gap-2">
                         {collective.location && (
                           <LocationTag
-                            setLocationFilter={filter => setFilter({ location: filter })}
+                            setLocationFilter={filter => {
+                              setFilter({ location: filter });
+                              onClose();
+                            }}
                             location={collective.location}
                           />
                         )}
                         {collective?.tags?.map(tag => (
-                          <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700">
+                          <button
+                            key={tag}
+                            className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-700"
+                            onClick={() => {
+                              setFilter({ tag });
+                              onClose();
+                            }}
+                          >
                             {tag}
-                          </span>
+                          </button>
                         ))}
                       </div>
                     )}
@@ -124,7 +134,7 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                     <div className="font-regular grid grid-cols-2 gap-2 rounded-lg bg-gray-50 px-5 py-4 text-gray-700">
                       <div className={statsLabelClasses}>Raised</div>
                       <div>
-                        {formatCurrency(collective.stats?.ALL.raised, currency, {
+                        {formatCurrency(collective.stats?.ALL.raised ?? 0, currency, {
                           locale,
                           precision: 0,
                         })}
@@ -133,7 +143,7 @@ export default function CollectiveModal({ isOpen, onClose, collective, locale = 
                       <div>{collective.stats?.ALL.contributors.toLocaleString(locale)}</div>
                       <div className={statsLabelClasses}>Disbursed</div>
                       <div>
-                        {formatCurrency(Math.abs(collective.stats?.ALL.spent), currency, {
+                        {formatCurrency(Math.abs(collective.stats?.ALL.spent ?? 0), currency, {
                           locale,
                           precision: 0,
                         })}

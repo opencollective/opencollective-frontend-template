@@ -11,15 +11,15 @@ export function getPostSlugs() {
   return fs.readdirSync(join(postsDirectory));
 }
 
-export function getPostBySlug(slug: string, fields: string[] = []) {
+export function getPostBySlug(slug: string) {
   const realSlug = slug.replace(/\.md$/, '');
   const fullPath = join(postsDirectory, `${realSlug}.md`);
   const fileContents = fs.readFileSync(fullPath, 'utf8');
   const { data, content } = matter(fileContents);
 
-  type Items = {
-    // [key: string]: string | string[];
+  type Post = {
     content?: string;
+    slug?: string;
     video?: object;
     tags?: string[];
     location?: string;
@@ -28,32 +28,21 @@ export function getPostBySlug(slug: string, fields: string[] = []) {
     published?: boolean;
   };
 
-  const items: Items = {};
+  const post: Post = {
+    ...data,
+    slug: realSlug,
+    published: data.published ?? true,
+    content,
+  };
 
-  // Ensure only the minimal needed data is exposed
-  fields.forEach(field => {
-    if (field === 'slug') {
-      items[field] = realSlug;
-    }
-    if (field === 'content') {
-      items[field] = content;
-    }
-
-    if (typeof data[field] !== 'undefined') {
-      items[field] = data[field];
-    }
-  });
-  // If published is defined, use that, otherwise default to true
-  items.published = data.published ?? true;
-
-  return items;
+  return post;
 }
 
-export function getAllPosts(fields: string[] = []) {
+export function getAllPosts() {
   try {
     const slugs = getPostSlugs();
     const posts = slugs
-      .map(slug => getPostBySlug(slug, fields))
+      .map(slug => getPostBySlug(slug))
       .filter(post => post.published)
       // sort posts by date in descending order
       .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));

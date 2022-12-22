@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useInView } from 'react-intersection-observer';
 
-import { computeStats, computeTimeSeries } from '../lib/compute-data';
-import filterLocation, { LocationFilter } from '../lib/location/filterLocation';
-import getFilterOptions from '../lib/location/getFilterOptions';
-import { pushFilterToRouter } from '../lib/set-filter';
+import { filterTags } from '../utils/filter-tags';
+import { filterLocation, LocationFilter } from '../utils/location/filter-location';
+import getFilterOptions from '../utils/location/get-filter-options';
+import { pushFilterToRouter } from '../utils/set-filter';
+import { getTotalStats } from '../utils/stats';
+import { getTimeSeries } from '../utils/timeseries';
 
 import Chart from './Chart';
 import CollectiveModal from './CollectiveModal';
@@ -36,8 +38,7 @@ export default function Dashboard({
   host,
   hosts,
   categories,
-  collectives: allCollectives,
-  hostSlug,
+  collectives,
   stories,
   locale,
   currency,
@@ -46,65 +47,76 @@ export default function Dashboard({
 }) {
   const router = useRouter();
   const filter: Filter = {
-    slug: hostSlug,
+    slug: host.slug ?? '',
     timePeriod: getParam(router.query?.time) ?? 'ALL',
     tag: getParam(router.query?.tag) ?? 'ALL',
     location: getLocationFilterParams(router.query) ?? { type: null, value: null },
   };
 
   const locationFilteredCollectives = React.useMemo(
-    () => filterLocation(allCollectives, filter.location),
+    () => filterLocation(collectives, filter.location),
     [JSON.stringify(filter)],
   );
 
-  const categoriesWithFilteredCollectives = React.useMemo(
-    () =>
-      categories.map(category => {
-        return {
-          ...category,
-          collectives: locationFilteredCollectives.filter(
-            collective => category.tag === 'ALL' || collective.tags?.includes(category.tag),
-          ),
-        };
-      }),
-    [JSON.stringify(filter)],
-  );
+  const tagFilteredCollectives = React.useMemo(() => {
+    return filterTags(locationFilteredCollectives, filter.tag, host.groupTags);
+  }, [JSON.stringify(filter)]);
 
-  const series = React.useMemo(
-    () => computeTimeSeries(categoriesWithFilteredCollectives, filter.timePeriod),
-    [JSON.stringify(filter)],
-  );
+  // If current tag is not a standard category, replace the "More..." category that has options field
+  categories = categories.map(category => {
+    if (category.options && !categories.some(category => category.tag === filter.tag)) {
+      return {
+        ...category,
+        tag: filter.tag,
+        label: filter.tag,
+        count: tagFilteredCollectives.length,
+      };
+    }
+    return category;
+  });
 
-  const currentCatWithCollectives = categoriesWithFilteredCollectives.find(category =>
-    filter.tag ? category.tag === filter.tag : category.tag === 'ALL',
-  );
+  const currentCategory = categories.find(category => filter.tag === category.tag);
 
-  const stats = React.useMemo(
-    () => computeStats(currentCatWithCollectives?.collectives, filter.timePeriod),
-    [JSON.stringify(filter)],
-  );
+  const timeSeries = React.useMemo(() => {
+    const categoriesWithCollectives =
+      filter.tag === 'ALL'
+        ? categories
+            // Remove pseudo category (when filter.tag === "ALL" it is empty)
+            .filter(c => !c.options)
+            .map(category => ({
+              ...category,
+              collectives: filterTags(locationFilteredCollectives, category.tag, host.groupTags),
+            }))
+        : [
+            {
+              ...currentCategory,
+              collectives: tagFilteredCollectives,
+            },
+          ];
 
-  const locationOptions = React.useMemo(() => getFilterOptions(allCollectives), [host.slug]);
+    return getTimeSeries(categoriesWithCollectives, filter.timePeriod);
+  }, [JSON.stringify(filter)]);
+
+  const stats = React.useMemo(() => getTotalStats(tagFilteredCollectives, filter.timePeriod), [JSON.stringify(filter)]);
+
+  const locationOptions = React.useMemo(() => getFilterOptions(collectives), [host.slug]);
 
   const [collectiveInModal, setCollectiveInModal] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openCollectiveModal = (slug: string) => {
-    const collective = allCollectives.find(c => c.slug === slug);
+    const collective = collectives.find(c => c.slug === slug);
     setCollectiveInModal(collective);
     setIsModalOpen(true);
   };
 
   const { ref: collectivesRef, inView: collectivesInView } = useInView({ initialInView: true });
-  const currentCategory = categories.find(category =>
-    filter.tag ? category.tag === filter.tag : category.tag === 'ALL',
-  );
 
   const setFilter = (filter: Filter) => pushFilterToRouter(filter, router);
 
   return (
     <div className="mx-auto flex max-w-[1440px] flex-col space-y-6 p-0 lg:mt-2 lg:space-y-10 lg:p-10">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:gap-10">
+      <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
         <Header
           hosts={hosts}
           categories={categories}
@@ -133,17 +145,12 @@ export default function Dashboard({
           <div className="space-y-5 rounded-lg bg-white py-4 lg:mx-0 lg:py-8" ref={collectivesRef}>
             <Stats stats={stats} locale={locale} currency={currency} />
             <div className="lg:px-4">
-              <Chart
-                startYear={startYear}
-                filter={filter}
-                timeSeriesArray={series.filter(s => filter.tag === 'ALL' || filter.tag === s.tag)}
-                currency={currency}
-              />
+              <Chart startYear={startYear} filter={filter} timeSeriesArray={timeSeries} currency={currency} />
             </div>
             <Table
               filter={filter}
               setFilter={setFilter}
-              collectives={currentCatWithCollectives.collectives}
+              collectives={tagFilteredCollectives}
               locale={locale}
               openCollectiveModal={openCollectiveModal}
               currency={currency}

@@ -104,7 +104,7 @@ export default function Stories({ stories, filter, openCollectiveModal }) {
   const swiperRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const currentStories = stories.filter(story => filter.tag === 'ALL' || !!story.tags.find(t => t.tag === filter.tag));
+  const currentStories = stories.filter(story => filter.tag === 'ALL' || !!story.tags.includes(filter.tag));
 
   if (!currentStories?.length) {
     return null;
