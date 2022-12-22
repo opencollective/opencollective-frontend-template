@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { gql, useQuery } from '@apollo/client';
-import { Flipped, Flipper } from 'react-flip-toolkit';
 import { FormattedDate } from 'react-intl';
 import sanitizeHtml from 'sanitize-html';
 
