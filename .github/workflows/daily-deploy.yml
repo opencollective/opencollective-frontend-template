@@ -1,0 +1,12 @@
+name: Daily deploy trigger
+on:
+  schedule:
+    - cron: '20 4 * * *' # will run every day at 04:20
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: curl
+        uses: wei/curl@v1
+        with:
+          args: -X POST ${{ secrets.VERCEL_DEPLOY_HOOK }}
