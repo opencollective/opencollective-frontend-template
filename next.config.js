@@ -45,7 +45,7 @@ const config = {
                 style-src 'self' 'unsafe-inline';
                 connect-src 'self' localhost:3060 opencollective.com api.opencollective.com api-staging.opencollective.com;
                 script-src 'self' 'unsafe-eval' 'unsafe-inline';
-                frame-src youtube-nocookie.com www.youtube-nocookie.com drive.google.com;
+                frame-src youtube-nocookie.com www.youtube-nocookie.com drive.google.com embed.podcasts.apple.com;
               `
               : `
                 block-all-mixed-content;
@@ -55,7 +55,7 @@ const config = {
                 style-src 'self' 'unsafe-inline';
                 connect-src 'self' opencollective.com api.opencollective.com api-staging.opencollective.com;
                 script-src 'self';
-                frame-src youtube-nocookie.com www.youtube-nocookie.com drive.google.com;
+                frame-src youtube-nocookie.com www.youtube-nocookie.com drive.google.com embed.podcasts.apple.com;
               `
             )
               .replace(/\s{2,}/g, ' ')

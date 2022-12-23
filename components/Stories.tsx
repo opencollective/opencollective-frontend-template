@@ -19,6 +19,11 @@ const Markdown = styled.div`
     margin: 16px 0;
   }
 
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+
   h1 {
     margin: 0 0 8px 0;
     line-height: 1.375;
@@ -56,11 +61,19 @@ export const Story = ({ story, openCollectiveModal }) => {
       <div className="flex flex-col gap-4">
         {story.youtube && (
           <div className=" overflow-hidden rounded-lg">
-            <LiteYouTubeEmbed
-              // iframeClass="rounded-lg overflow-hidden"
-              id={story.youtube.id}
-              title={story.youtube.title}
-            />
+            <LiteYouTubeEmbed id={story.youtube.id} title={story.youtube.title} />
+          </div>
+        )}
+        {story.podcast && (
+          <div className="">
+            <iframe
+              allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+              title={story.podcast.title}
+              height="175"
+              className="w-full max-w-[660px] overflow-hidden bg-transparent"
+              sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+              src={story.podcast.embedUrl}
+            ></iframe>
           </div>
         )}
         <div className="px-4">

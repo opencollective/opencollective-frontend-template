@@ -19,6 +19,10 @@ export function getPostBySlug(slug: string) {
 
   type Post = {
     content?: string;
+    podcast?: {
+      embedUrl: string;
+      title: string;
+    };
     slug?: string;
     video?: object;
     tags?: string[];
