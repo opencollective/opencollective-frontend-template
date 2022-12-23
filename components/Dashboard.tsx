@@ -141,8 +141,8 @@ export default function Dashboard({
             locale={locale}
           />
         </div>
-        <div className="space-y-12 lg:col-span-3">
-          <div className="space-y-5 rounded-lg bg-white py-4 lg:mx-0 lg:py-8" ref={collectivesRef}>
+        <div className="lg:col-span-3">
+          <div className="mb-12 space-y-5 rounded-lg bg-white py-4 lg:mx-0 lg:py-8" ref={collectivesRef}>
             <Stats stats={stats} locale={locale} currency={currency} />
             <div className="lg:px-4">
               <Chart startYear={startYear} filter={filter} timeSeriesArray={timeSeries} currency={currency} />

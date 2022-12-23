@@ -1,6 +1,4 @@
 import React from 'react';
-import { ChevronLeft } from '@styled-icons/fa-solid/ChevronLeft';
-import { ChevronRight } from '@styled-icons/fa-solid/ChevronRight';
 import { usePagination, useSortBy, useTable } from 'react-table';
 import styled from 'styled-components';
 
@@ -8,6 +6,7 @@ import { formatCurrency } from '@opencollective/frontend-components/lib/currency
 
 import { Filter } from './Dashboard';
 import LocationTag from './LocationTag';
+import { PaginationControls } from './PaginationControls';
 
 const StyledTable = styled.table`
   padding: 0;
@@ -259,41 +258,15 @@ export default function Table({ collectives, filter, locale, setFilter, openColl
           </tbody>
         </StyledTable>
       </div>
-      <div className="flex items-center gap-4 px-10 text-sm text-gray-700">
-        <span>
-          <label htmlFor="page-number">Page</label>{' '}
-          <input
-            type="number"
-            id="page-number"
-            className="inline-block w-10 rounded border text-center"
-            value={pageIndex + 1}
-            onChange={e => {
-              const page = e.target.value ? Number(e.target.value) - 1 : 0;
-              gotoPage(page);
-            }}
-          />{' '}
-          of {pageOptions.length}
-        </span>
-
-        <div>
-          <button
-            aria-label="Previous page"
-            onClick={() => previousPage()}
-            disabled={!canPreviousPage}
-            className="h-10 w-10 rounded-full p-2 hover:bg-gray-100 hover:text-black"
-          >
-            <ChevronLeft size="12" />
-          </button>{' '}
-          <button
-            aria-label="Next page"
-            onClick={() => nextPage()}
-            disabled={!canNextPage}
-            className="h-10 w-10 rounded-full p-2 hover:bg-gray-100 hover:text-black"
-          >
-            <ChevronRight size="12" />
-          </button>
-        </div>
-      </div>
+      <PaginationControls
+        pageIndex={pageIndex}
+        gotoPage={gotoPage}
+        pageLength={pageOptions.length}
+        nextPage={nextPage}
+        previousPage={previousPage}
+        canPreviousPage={canPreviousPage}
+        canNextPage={canNextPage}
+      />
     </React.Fragment>
   );
 }
