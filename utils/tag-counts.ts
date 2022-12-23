@@ -1,10 +1,10 @@
-import { transformToGroupTags } from './tag-transforms';
+import { getGroupTagKeys } from './tag-helpers';
 
 // Function that returns tag counts for a list of collectives. if a tag is the key of a group, it will return the count of the group
 export const getTagCounts = (collectives, groupTags?: { [key: string]: string[] }): { [key: string]: number } => {
   const { groupedCounts, ungroupedCounts } = collectives.reduce(
     (acc, collective) => {
-      const groupedTags = transformToGroupTags(collective.tags, groupTags);
+      const groupedTags = getGroupTagKeys(collective.tags, groupTags);
       const ungroupedTags = collective.tags;
 
       groupedTags?.forEach(tag => {

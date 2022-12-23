@@ -2,7 +2,7 @@ import React from 'react';
 
 import HostSwitcher from './HostSwitcher';
 
-export default function Header({ hosts, platformTotalCollectives, locale, host, categories, filter, setFilter }) {
+export default function Header({ hosts, locale, host, categories, filter, setFilter }) {
   return (
     <div
       className={`flex w-full flex-col justify-center bg-white p-6 lg:mx-0 lg:rounded-lg lg:p-10 ${
@@ -10,16 +10,11 @@ export default function Header({ hosts, platformTotalCollectives, locale, host, 
       }`}
     >
       <h1 className="text-[24px] font-bold leading-snug tracking-tight text-[#111827] lg:text-[40px]">
-        <span>Discover {host.count.toLocaleString(locale)}</span>
-        {host.root && <span className={`relative -top-2 -mx-0.5 -mr-1 select-none text-gray-400`}>*</span>}{' '}
-        <span>collectives {host.root ? 'on ' : 'hosted by '}</span>
-        <HostSwitcher
-          hosts={hosts}
-          platformTotalCollectives={platformTotalCollectives}
-          locale={locale}
-          host={host}
-        />{' '}
-        <span>making an impact in</span>{' '}
+        <span>
+          Discover {host.count.toLocaleString(locale)} collectives
+          {host.root ? ' on ' : ' hosted by '}
+        </span>
+        <HostSwitcher hosts={hosts} locale={locale} host={host} /> <span>making an impact in</span>{' '}
         <span>
           {categories
             .filter(c => !c.options && c.tag !== 'ALL')
@@ -44,12 +39,7 @@ export default function Header({ hosts, platformTotalCollectives, locale, host, 
         </span>
         <span>and more.</span>
       </h1>
-      {host.root && (
-        <p className="mt-4 text-sm text-gray-600">
-          * out of {platformTotalCollectives.toLocaleString(locale)} collectives on Open Collective. Displaying data
-          from selected Fiscal Hosts.
-        </p>
-      )}
+      {host.root && <p className="mt-4 text-sm text-gray-600">* Data from selected Fiscal Hosts.</p>}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { pickColorForCategory } from './colors';
 import { getTagCounts } from './tag-counts';
-import { transformToGroupTags } from './tag-transforms';
+import { getGroupTagKeys } from './tag-helpers';
 
 export const createCategories = ({
   collectives,
@@ -47,7 +47,7 @@ export const createCategories = ({
 
     // Filter away collectives that are part of the tag just added
     collectivesNotCategorized = collectivesNotCategorized.filter(
-      coll => !transformToGroupTags(coll.tags, groupTags)?.includes(tag),
+      coll => !getGroupTagKeys(coll.tags, groupTags)?.includes(tag),
     );
   }
 
@@ -78,6 +78,6 @@ export const createCategories = ({
 
   return categories.map((category, i, arr) => ({
     ...category,
-    color: pickColorForCategory('blue', i, arr.length),
+    color: pickColorForCategory(host.color.closestPaletteColor, i, arr.length),
   }));
 };

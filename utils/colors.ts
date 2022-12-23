@@ -20,6 +20,6 @@ const colors = [
 
 export const pickColorForCategory = (startColor: string, i: number, numOfCategories: number) => {
   const startColorIndex = colors.findIndex(c => c.name === startColor);
-  const step = Math.floor(colors.length / numOfCategories);
-  return colors[(startColorIndex + i * step) % colors.length];
+  const step = colors.length / numOfCategories;
+  return colors[(startColorIndex + Math.round(i * step)) % colors.length];
 };

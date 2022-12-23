@@ -12,8 +12,8 @@ const defaultExcludeCategoryTags = [
   'community',
   'association',
   'movement',
-  'USA',
-  'midwestern USA',
+  'usa',
+  'midwestern usa',
   'illinois',
   'europe',
   'chicago',
@@ -27,8 +27,15 @@ export const hosts: {
   currency: string;
   startYear: number;
   logoSrc: string;
-  color: string;
-  styles: { text: string; groupHoverText: string; button: string; brandBox: string; box: string; border: string };
+  color: { hex: string; closestPaletteColor: string };
+  styles: {
+    text: string;
+    groupHoverText: string;
+    button: string;
+    brandBox: string;
+    box: string;
+    border: string;
+  };
   website?: string;
   cta?: { text: string; textLonger: string; href: string; buttonLabel: string };
   groupTags: { [key: string]: string[] };
@@ -58,7 +65,7 @@ export const hosts: {
     currency: 'USD',
     startYear: 2016,
     logoSrc: '/oc-logo.svg',
-    color: 'blue',
+    color: { hex: '#0C2D66', closestPaletteColor: 'blue' },
     website: 'https://opencollective.com',
     styles: {
       text: 'text-[#0C2D66]',
@@ -70,8 +77,8 @@ export const hosts: {
     },
     groupTags: {
       ...defaultGroupTags,
-      education: ['education', 'meetup'],
       'mutual aid': ['mutual aid', 'covid'],
+      education: ['education', 'meetup'],
     },
     includeCategoryTags: [],
     excludeCategoryTags: [...defaultExcludeCategoryTags],
@@ -82,7 +89,7 @@ export const hosts: {
     currency: 'USD',
     startYear: 2018,
     logoSrc: '/ocf-logo.svg',
-    color: 'teal',
+    color: { hex: '#0C5559', closestPaletteColor: 'teal' },
     styles: {
       text: 'text-[#0C5559]',
       groupHoverText: 'group-hover:text-[#0C5559]',
@@ -110,7 +117,7 @@ export const hosts: {
     startYear: 2016,
     logoSrc: '/osc-logo.svg',
     website: 'https://opencollective.com/opensource',
-    color: 'purple',
+    color: { hex: '#4B3084', closestPaletteColor: 'purple' },
     styles: {
       text: 'text-[#4B3084]',
       groupHoverText: 'group-hover:text-[#4B3084]',
@@ -132,7 +139,7 @@ export const hosts: {
     startYear: 2019,
     logoSrc: '/oce-logo.svg',
     website: 'https://opencollective.com/europe',
-    color: 'blue',
+    color: { hex: '#0C2D66', closestPaletteColor: 'blue' },
     styles: {
       text: 'text-[#0C2D66]',
       groupHoverText: 'group-hover:text-[#0C2D66]',
@@ -145,6 +152,6 @@ export const hosts: {
       ...defaultGroupTags,
     },
     includeCategoryTags: [],
-    excludeCategoryTags: [...defaultExcludeCategoryTags, 'opencollectiveeu'],
+    excludeCategoryTags: [...defaultExcludeCategoryTags],
   },
 ];

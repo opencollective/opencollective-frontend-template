@@ -21,6 +21,8 @@ for (const env of ['local', process.env.NODE_ENV || 'development']) {
 import { initializeApollo } from '../lib/apollo-client';
 import { accountsQuery, totalCountQuery } from '../lib/graphql/queries';
 
+import { getAllCollectiveStats } from '../utils/stats';
+
 dayjs.extend(dayjsPluginUTC);
 dayjs.extend(dayjsPluginIsoWeek);
 
@@ -158,13 +160,25 @@ async function run() {
       };
     } else {
       data = await fetchDataForPage(host);
+
+      // add total stats to collectives, and filter away collectives with no stats data
+      data.accounts.nodes = data.accounts.nodes
+        .map(account => {
+          const stats = getAllCollectiveStats(account);
+          return {
+            ...account,
+            stats,
+          };
+        })
+        .filter(account => account.stats);
+
       if (host.root) {
         rootData = data;
       }
     }
 
     if (data) {
-      collectiveCounts[host.root ? 'ALL' : host.slug] = data.accounts.totalCount;
+      collectiveCounts[host.root ? 'ALL' : host.slug] = data.accounts.nodes.length;
 
       // write data to file
       const filename = path.join(directory, `${host.root ? 'ALL' : host.slug}.json`);

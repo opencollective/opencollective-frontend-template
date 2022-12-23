@@ -3,7 +3,7 @@ import { gql, useQuery } from '@apollo/client';
 import { FormattedDate } from 'react-intl';
 import sanitizeHtml from 'sanitize-html';
 
-import { getAllPossibleTagValues } from '../utils/tag-transforms';
+import { getAllPossibleTagValues } from '../utils/tag-helpers';
 
 import CollectiveButton from './CollectiveButton';
 import { PaginationControls } from './PaginationControls';

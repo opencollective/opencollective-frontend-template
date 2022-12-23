@@ -34,17 +34,7 @@ const getLocationFilterParams = query => {
   return location && locationType ? { type: locationType, value: location } : null;
 };
 
-export default function Dashboard({
-  host,
-  hosts,
-  categories,
-  collectives,
-  stories,
-  locale,
-  currency,
-  startYear,
-  platformTotalCollectives,
-}) {
+export default function Dashboard({ host, hosts, categories, collectives, stories, locale, currency, startYear }) {
   const router = useRouter();
   const filter: Filter = {
     slug: host.slug ?? '',
@@ -115,14 +105,13 @@ export default function Dashboard({
   const setFilter = (filter: Filter) => pushFilterToRouter(filter, router);
 
   return (
-    <div className="mx-auto flex max-w-[1440px] flex-col space-y-6 p-0 lg:mt-2 lg:space-y-10 lg:p-10">
+    <div className="mx-auto flex max-w-[1460px] flex-col space-y-6 p-0 lg:mt-2 lg:space-y-10 lg:p-10">
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
         <Header
           hosts={hosts}
           categories={categories}
           host={host}
           locale={locale}
-          platformTotalCollectives={platformTotalCollectives}
           filter={filter}
           setFilter={setFilter}
         />
