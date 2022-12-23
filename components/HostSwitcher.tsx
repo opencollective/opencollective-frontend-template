@@ -16,7 +16,6 @@ export default function HostSwitcher({ host, hosts, locale }) {
     setIsOpen(true);
   }
   const hostNameStyles = `relative underline tracking-tight decoration-3 underline-offset-3 transition-colors lg:decoration-4 lg:underline-offset-4 ${host.styles.text}`;
-
   return (
     <Fragment>
       <label htmlFor="host-switcher" className="group cursor-pointer">
@@ -24,23 +23,28 @@ export default function HostSwitcher({ host, hosts, locale }) {
         {host.name.split(' ').map((word: string, i, arr) => {
           const lastWord = i === arr.length - 1;
           return (
-            <Fragment key={word}>
-              <span className={`${hostNameStyles} whitespace-nowrap`}>{word}</span>
-
-              {lastWord && (
-                <React.Fragment>
-                  {host.root && <span className={`relative -top-2 -mx-0.5 -mr-1 select-none text-gray-400`}>*</span>}
-                  <button id="host-switcher" onClick={openModal}>
-                    <ChevronUpDown
-                      className={`-my-0.5 -ml-0.5 -mr-1 inline h-7 w-7 flex-shrink-0 opacity-75 transition-opacity group-hover:opacity-100 lg:-ml-1 lg:-mr-2 lg:h-12 lg:w-12 lg:opacity-50 ${
-                        host.styles.text
-                      } ${host.root ? 'xl:mr-3' : ''}`} // Hack to push the next word to the next line on xl screens on the root
-                    />
-                  </button>
-                </React.Fragment>
-              )}
+            <span key={word} className="">
+              <span className={`whitespace-nowrap`}>
+                <span className={`${hostNameStyles}`}>{word}</span>
+                {lastWord && (
+                  <React.Fragment>
+                    {host.root && (
+                      <span className={`relative -top-2 -mx-0.5 -mr-1 select-none whitespace-nowrap text-gray-400`}>
+                        *
+                      </span>
+                    )}
+                    <button id="host-switcher" onClick={openModal}>
+                      <ChevronUpDown
+                        className={`-my-0.5 -ml-0.5 -mr-1 inline h-7 w-7 flex-shrink-0 opacity-75 transition-opacity group-hover:opacity-100 lg:-ml-1 lg:-mr-2 lg:h-12 lg:w-12 lg:opacity-50 ${host.styles.text}`}
+                      />
+                    </button>
+                  </React.Fragment>
+                )}
+              </span>
               <span className={!lastWord ? hostNameStyles : ''}> </span>
-            </Fragment>
+              {/* Hack to break line after root selector "on Open Collective" on XL screens, since it is shorter */}
+              {host.root && lastWord && <br className="hidden xl:block" />}
+            </span>
           );
         })}
       </label>

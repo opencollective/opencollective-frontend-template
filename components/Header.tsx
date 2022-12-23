@@ -39,7 +39,7 @@ export default function Header({ hosts, locale, host, categories, filter, setFil
         </span>
         <span>and more.</span>
       </h1>
-      {host.root && <p className="mt-4 text-sm text-gray-600">* Data from selected Fiscal Hosts.</p>}
+      {host.root && <p className="mt-3 text-sm text-gray-600">* Data from selected Fiscal Hosts.</p>}
     </div>
   );
 }
