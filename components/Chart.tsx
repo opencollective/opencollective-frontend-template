@@ -130,7 +130,7 @@ const getSeriesDataFromNodes = (nodes, startYear, timePeriod) => {
 
   if (timePeriod === 'ALL') {
     const years = dayjs.utc().year() - startYear;
-    for (let year = years; year >= 0; year--) {
+    for (let year = years; year > 0; year--) {
       const date = dayjs.utc().subtract(year, 'year').startOf('year').toISOString();
       keyedData[date] = {
         x: date,
