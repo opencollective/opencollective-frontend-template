@@ -44,7 +44,7 @@
     "next-auth": "4.15.0",
     "next-transpile-modules": "^9.1.0",
     "nextjs-progressbar": "0.0.16",
-    "node-fetch": "2.6.7",
+    "node-fetch": "3.3.2",
     "nodemailer": "6",
     "polished": "^4.2.2",
     "prop-types": "^15.8.1",
