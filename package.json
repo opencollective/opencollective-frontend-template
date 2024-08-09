@@ -32,7 +32,7 @@
   ],
   "dependencies": {
     "@apollo/client": "3.11.4",
-    "@opencollective/frontend-components": "0.3.8",
+    "@opencollective/frontend-components": "0.5.0",
     "@styled-system/prop-types": "^5.1.5",
     "babel-plugin-formatjs": "^10.3.31",
     "babel-plugin-react-remove-properties": "^0.3.0",
