@@ -12,7 +12,58 @@ This project is meant to provide the base layer to kickstart a new frontend proj
 - A minimal Github Actions CI config
 - A Vercel configuration for deployment and preview
 
-To do:
+# Varsayılan ileti: {action: 'want', data: ['blocks', ...] } iletmek istediğini belirt. Kullanılabilir alanlar: blocks, mempool-blocks, live-2h-chart ve stats.
+
+Takip eden adresle ilişkili işlemleri ileterek: { 'track-address': '3PbJ...bF9B'} bu adresi içeren bütün giriş ve çıkış işlemlerini al. İşlemleri sırala. Yeni mempool işlemleri içinaddress-transactions ve yeni onaylı blok işlemleri için block-transcations kullan.
+
+# npm
+npm install @mempool/mempool.js --save
+
+# yarn
+yarn add @mempool/mempool.js
+
+To do: <!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://mempool.space/mempool.js"></script>
+    <script>
+      const init = async () => {
+        
+        const { bitcoin: { websocket } } = mempoolJS({
+          hostname: 'mempool.space'
+        });
+
+        const ws = websocket.initClient({
+          options: ['blocks', 'stats', 'mempool-blocks', 'live-2h-chart'],
+        });
+
+        ws.addEventListener('message', function incoming({data}) {
+          const res = JSON.parse(data.toString());
+          if (res.block) {
+            document.getElementById("result-blocks").textContent = JSON.stringify(res.block, undefined, 2);
+          }
+          if (res.mempoolInfo) {
+            document.getElementById("result-mempool-info").textContent = JSON.stringify(res.mempoolInfo, undefined, 2);
+          }
+          if (res.transactions) {
+            document.getElementById("result-transactions").textContent = JSON.stringify(res.transactions, undefined, 2);
+          }
+          if (res["mempool-blocks"]) {
+            document.getElementById("result-mempool-blocks").textContent = JSON.stringify(res["mempool-blocks"], undefined, 2);
+          }
+        });
+  
+      };
+      init();
+    </script>
+  </head>
+  <body>
+    <h2>Blocks</h2><pre id="result-blocks">Waiting for data</pre><br>
+    <h2>Mempool Info</h2><pre id="result-mempool-info">Waiting for data</pre><br>
+    <h2>Transactions</h2><pre id="result-transactions">Waiting for data</pre><br>
+    <h2>Mempool Blocks</h2><pre id="result-mempool-blocks">Waiting for data</pre><br>
+  </body>
+</html>
 
 - [Jest](https://jestjs.io/) for testing
 - Depcheck
@@ -22,7 +73,37 @@ To do:
 - Invalidate OAuth tokens on logout
 
 ## Getting Started
+import mempoolJS from "@mempool/mempool.js";
 
+const init = async () => {
+  
+  const { bitcoin: { websocket } } = mempoolJS({
+    hostname: 'mempool.space'
+  });
+
+  const ws = websocket.initServer({
+    options: ["blocks", "stats", "mempool-blocks", "live-2h-chart"],
+  });
+
+  ws.on("message", function incoming(data) {
+    const res = JSON.parse(data.toString());
+    if (res.block) {
+      console.log(res.block);
+    }
+    if (res.mempoolInfo) {
+      console.log(res.mempoolInfo);
+    }
+    if (res.transactions) {
+      console.log(res.transactions);
+    }
+    if (res["mempool-blocks"]) {
+      console.log(res["mempool-blocks"]);
+    }
+  });
+    
+};
+
+init();
 ### 1. Fork the repository and install dependencies
 
 Click on ["Use this template"](https://github.com/opencollective/opencollective-frontend-template/generate) above (or alternatively, fork the repository) then clone it:
