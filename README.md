@@ -50,13 +50,13 @@ Learn more about the environment variables in NextJS: https://nextjs.org/docs/ba
 To run your site locally (default: http://localhost:3004), use:
 
 ```
-npm run dev
+https://github.com/opencollective/opencollective-frontend-template/generatenpm run dev
 ```
 
 To run it in production mode, use:
 
 ```
-npm run build
+https://github.com/opencollective/opencollective-frontend-template.gitnpm run build
 npm run start
 ```
 
