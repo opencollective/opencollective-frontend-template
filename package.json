@@ -41,7 +41,7 @@
     "graphql": "16.6.0",
     "lodash": "4.17.21",
     "next": "12.3.3",
-    "next-auth": "4.15.0",
+    "next-auth": "4.24.10",
     "next-transpile-modules": "^9.1.0",
     "nextjs-progressbar": "0.0.16",
     "node-fetch": "2.6.7",
